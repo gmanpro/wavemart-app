@@ -23,7 +23,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.wavemartapp"
+    namespace "et.wavemart.app"
     compileSdk 34
     ndkVersion flutter.ndkVersion
 
@@ -41,8 +41,8 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.example.wavemartapp"
-        minSdk 21
+        applicationId "et.wavemart.app"
+        minSdkVersion flutter.minSdkVersion
         targetSdk 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
