@@ -38,20 +38,8 @@ jobs:
       - name: Get Flutter dependencies
         run: flutter pub get
 
-      - name: Verify asset directories exist
-        run: |
-          ls -la assets/
-          test -d assets/images || mkdir -p assets/images
-          test -d assets/icons || mkdir -p assets/icons
-          test -d assets/lottie || mkdir -p assets/lottie
-
       - name: Build Release APK
-        run: flutter build apk --release --verbose
-
-      - name: Verify APK was built
-        run: |
-          ls -lh build/app/outputs/flutter-apk/
-          test -f build/app/outputs/flutter-apk/app-release.apk
+        run: flutter build apk --release
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
