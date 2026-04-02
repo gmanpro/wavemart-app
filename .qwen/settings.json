@@ -8,7 +8,9 @@
       "Bash(git config *)",
       "Read(//initrd/mnt/dev_save/dev/projects/wavemartapp/WaveMart/**)",
       "Bash(touch *)",
-      "Bash(flutter *)"
+      "Bash(flutter *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   },
   "$version": 3

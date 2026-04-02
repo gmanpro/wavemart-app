@@ -33,7 +33,6 @@ class AppTheme {
         onErrorContainer: AppColors.error,
         surface: AppColors.surface,
         onSurface: AppColors.zinc900,
-        surfaceContainerHighest: AppColors.zinc100,
         onSurfaceVariant: AppColors.zinc700,
         outline: AppColors.zinc300,
         shadow: AppColors.navy950,
