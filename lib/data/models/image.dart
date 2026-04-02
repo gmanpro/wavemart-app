@@ -1,0 +1,95 @@
+/// Image Model for property images
+class ImageModel {
+  final int id;
+  final String imagePath;
+  final String? imageableType;
+  final int? imageableId;
+  final int? sortOrder;
+  final DateTime? createdAt;
+
+  ImageModel({
+    required this.id,
+    required this.imagePath,
+    this.imageableType,
+    this.imageableId,
+    this.sortOrder,
+    this.createdAt,
+  });
+
+  factory ImageModel.fromJson(Map<String, dynamic> json) {
+    return ImageModel(
+      id: json['id'] ?? 0,
+      imagePath: json['image_path'] ?? '',
+      imageableType: json['imageable_type'],
+      imageableId: json['imageable_id'],
+      sortOrder: json['sort_order'],
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'image_path': imagePath,
+      'imageable_type': imageableType,
+      'imageable_id': imageableId,
+      'sort_order': sortOrder,
+      'created_at': createdAt?.toIso8601String(),
+    };
+  }
+
+  String get imageUrl {
+    // For API responses, the path may already be complete
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+    // Otherwise, prepend the base URL or storage path
+    return 'storage/$imagePath';
+  }
+
+  String get thumbnailUrl {
+    // Return thumbnail version if available
+    return imageUrl; // TODO: Implement thumbnail URL generation
+  }
+
+  @override
+  String toString() => 'Image(id: $id, path: $imagePath)';
+}
+
+/// Site Plan Model
+class SitePlan {
+  final int id;
+  final String imagePath;
+  final String? sitePlanableType;
+  final int? sitePlanableId;
+  final DateTime? createdAt;
+
+  SitePlan({
+    required this.id,
+    required this.imagePath,
+    this.sitePlanableType,
+    this.sitePlanableId,
+    this.createdAt,
+  });
+
+  factory SitePlan.fromJson(Map<String, dynamic> json) {
+    return SitePlan(
+      id: json['id'] ?? 0,
+      imagePath: json['image_path'] ?? '',
+      sitePlanableType: json['site_planable_type'],
+      sitePlanableId: json['site_planable_id'],
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : null,
+    );
+  }
+
+  String get imageUrl {
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+    return 'storage/$imagePath';
+  }
+}

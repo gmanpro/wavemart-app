@@ -1,0 +1,214 @@
+import 'package:flutter/foundation.dart';
+import 'address.dart';
+import 'image.dart';
+
+/// Property types
+enum PropertyType { house, land }
+
+/// Listing types
+enum ListingType { sale, rental }
+
+/// Listing status
+enum ListingStatus { pending, active, rejected, sold, rented }
+
+/// Rental period units
+enum RentalPeriod { day, month, year }
+
+/// Listing Model
+class Listing extends ChangeNotifier {
+  final int id;
+  final int? userId;
+  final int? propertyId;
+  final PropertyType propertyType;
+  final ListingType listingType;
+  final double? priceFixed;
+  final double? priceMin;
+  final double? priceMax;
+  final RentalPeriod? rentalPeriodUnit;
+  final ListingStatus status;
+  final bool isFeatured;
+  final DateTime? featuredUntil;
+  final int? addressId;
+  final String? specificLocation;
+  final String? useType;
+  final String? facingDirection;
+  final double? totalSquareMeters;
+  final double? frontAreaSqm;
+  final double? sideAreaSqm;
+  final bool hasDebtOrEncumbrance;
+  final double? debtAmount;
+  final String? debtEncumbranceFileLink;
+  final bool priceRevisionPossible;
+  final String? videoLink;
+  final String? sitePlanImageLink;
+  final String? holdingType;
+  final String? description;
+  final List<ImageModel> images;
+  final Address? address;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+
+  Listing({
+    required this.id,
+    this.userId,
+    this.propertyId,
+    required this.propertyType,
+    required this.listingType,
+    this.priceFixed,
+    this.priceMin,
+    this.priceMax,
+    this.rentalPeriodUnit,
+    this.status = ListingStatus.pending,
+    this.isFeatured = false,
+    this.featuredUntil,
+    this.addressId,
+    this.specificLocation,
+    this.useType,
+    this.facingDirection,
+    this.totalSquareMeters,
+    this.frontAreaSqm,
+    this.sideAreaSqm,
+    this.hasDebtOrEncumbrance = false,
+    this.debtAmount,
+    this.debtEncumbranceFileLink,
+    this.priceRevisionPossible = false,
+    this.videoLink,
+    this.sitePlanImageLink,
+    this.holdingType,
+    this.description,
+    this.images = const [],
+    this.address,
+    required this.createdAt,
+    this.updatedAt,
+  });
+
+  factory Listing.fromJson(Map<String, dynamic> json) {
+    return Listing(
+      id: json['id'] ?? 0,
+      userId: json['user_id'],
+      propertyId: json['property_id'],
+      propertyType: PropertyType.values.firstWhere(
+        (e) => e.toString().split('.').last == (json['property_type'] ?? 'house'),
+        orElse: () => PropertyType.house,
+      ),
+      listingType: ListingType.values.firstWhere(
+        (e) => e.toString().split('.').last == (json['listing_type'] ?? 'sale'),
+        orElse: () => ListingType.sale,
+      ),
+      priceFixed: json['price_fixed']?.toDouble(),
+      priceMin: json['price_min']?.toDouble(),
+      priceMax: json['price_max']?.toDouble(),
+      rentalPeriodUnit: json['rental_period_unit'] != null
+          ? RentalPeriod.values.firstWhere(
+              (e) => e.toString().split('.').last == json['rental_period_unit'],
+            )
+          : null,
+      status: ListingStatus.values.firstWhere(
+        (e) => e.toString().split('.').last == (json['status'] ?? 'pending'),
+        orElse: () => ListingStatus.pending,
+      ),
+      isFeatured: json['is_featured'] ?? false,
+      featuredUntil: json['featured_until'] != null
+          ? DateTime.parse(json['featured_until'])
+          : null,
+      addressId: json['address_id'],
+      specificLocation: json['specific_location'],
+      useType: json['use_type'],
+      facingDirection: json['facing_direction'],
+      totalSquareMeters: json['total_square_meters']?.toDouble(),
+      frontAreaSqm: json['front_area_sqm']?.toDouble(),
+      sideAreaSqm: json['side_area_sqm']?.toDouble(),
+      hasDebtOrEncumbrance: json['has_debt_or_encumbrance'] ?? false,
+      debtAmount: json['debt_amount']?.toDouble(),
+      debtEncumbranceFileLink: json['debt_encumbrance_file_link'],
+      priceRevisionPossible: json['price_revision_possible'] ?? false,
+      videoLink: json['video_link'],
+      sitePlanImageLink: json['site_plan_image_link'],
+      holdingType: json['holding_type'],
+      description: json['description'],
+      images: (json['images'] as List<dynamic>?)
+              ?.map((e) => ImageModel.fromJson(e))
+              .toList() ??
+          [],
+      address: json['address'] != null ? Address.fromJson(json['address']) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'property_id': propertyId,
+      'property_type': propertyType.toString().split('.').last,
+      'listing_type': listingType.toString().split('.').last,
+      'price_fixed': priceFixed,
+      'price_min': priceMin,
+      'price_max': priceMax,
+      'rental_period_unit': rentalPeriodUnit?.toString().split('.').last,
+      'status': status.toString().split('.').last,
+      'is_featured': isFeatured,
+      'featured_until': featuredUntil?.toIso8601String(),
+      'address_id': addressId,
+      'specific_location': specificLocation,
+      'use_type': useType,
+      'facing_direction': facingDirection,
+      'total_square_meters': totalSquareMeters,
+      'front_area_sqm': frontAreaSqm,
+      'side_area_sqm': sideAreaSqm,
+      'has_debt_or_encumbrance': hasDebtOrEncumbrance,
+      'debt_amount': debtAmount,
+      'debt_encumbrance_file_link': debtEncumbranceFileLink,
+      'price_revision_possible': priceRevisionPossible,
+      'video_link': videoLink,
+      'site_plan_image_link': sitePlanImageLink,
+      'holding_type': holdingType,
+      'description': description,
+      'images': images.map((e) => e.toJson()).toList(),
+      'address': address?.toJson(),
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+    };
+  }
+
+  String get title {
+    final type = propertyType == PropertyType.house ? 'House' : 'Land';
+    final action = listingType == ListingType.sale ? 'for Sale' : 'for Rent';
+    final location = address?.region ?? 'Unknown Location';
+    return '$type $action in $location';
+  }
+
+  String get displayPrice {
+    if (priceFixed != null) {
+      return '${priceFixed!.toStringAsFixed(0)} ETB';
+    }
+    if (priceMin != null && priceMax != null) {
+      return '${priceMin!.toStringAsFixed(0)} - ${priceMax!.toStringAsFixed(0)} ETB';
+    }
+    return 'Price on Request';
+  }
+
+  String get mainImageUrl {
+    if (images.isNotEmpty) {
+      return images.first.imageUrl;
+    }
+    return '';
+  }
+
+  bool get isNew {
+    final daysOld = DateTime.now().difference(createdAt).inDays;
+    return daysOld <= 7;
+  }
+
+  bool get isFeaturedActive {
+    return isFeatured && (featuredUntil == null || featuredUntil!.isAfter(DateTime.now()));
+  }
+
+  @override
+  String toString() => 'Listing(id: $id, title: $title, price: $displayPrice)';
+}

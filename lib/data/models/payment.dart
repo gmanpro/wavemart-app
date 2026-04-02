@@ -1,0 +1,123 @@
+import 'user.dart';
+
+/// Payment status
+enum PaymentStatus { pending, success, failed, cancelled, refunded }
+
+/// Payment type
+enum PaymentType { subscription, featuredListing, directPayment }
+
+/// Payment Model
+class Payment {
+  final int id;
+  final int userId;
+  final String transactionReference;
+  final PaymentType paymentType;
+  final int? relatedId;
+  final double amount;
+  final String currency;
+  final PaymentStatus status;
+  final String? paymentMethod;
+  final String? chapaTransactionId;
+  final String? callbackUrl;
+  final String? returnUrl;
+  final Map<String, dynamic>? metadata;
+  final DateTime? paidAt;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  final User? user;
+
+  Payment({
+    required this.id,
+    required this.userId,
+    required this.transactionReference,
+    required this.paymentType,
+    this.relatedId,
+    required this.amount,
+    this.currency = 'ETB',
+    this.status = PaymentStatus.pending,
+    this.paymentMethod,
+    this.chapaTransactionId,
+    this.callbackUrl,
+    this.returnUrl,
+    this.metadata,
+    this.paidAt,
+    required this.createdAt,
+    this.updatedAt,
+    this.user,
+  });
+
+  factory Payment.fromJson(Map<String, dynamic> json) {
+    return Payment(
+      id: json['id'] ?? 0,
+      userId: json['user_id'] ?? 0,
+      transactionReference: json['transaction_reference'] ?? '',
+      paymentType: PaymentType.values.firstWhere(
+        (e) => e.toString().split('.').last == (json['payment_type'] ?? 'subscription'),
+        orElse: () => PaymentType.subscription,
+      ),
+      relatedId: json['related_id'],
+      amount: json['amount']?.toDouble() ?? 0.0,
+      currency: json['currency'] ?? 'ETB',
+      status: PaymentStatus.values.firstWhere(
+        (e) => e.toString().split('.').last == (json['status'] ?? 'pending'),
+        orElse: () => PaymentStatus.pending,
+      ),
+      paymentMethod: json['payment_method'],
+      chapaTransactionId: json['chapa_transaction_id'],
+      callbackUrl: json['callback_url'],
+      returnUrl: json['return_url'],
+      metadata: json['metadata'] != null ? Map<String, dynamic>.from(json['metadata']) : null,
+      paidAt: json['paid_at'] != null ? DateTime.parse(json['paid_at']) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : null,
+      user: json['user'] != null ? User.fromJson(json['user']) : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'transaction_reference': transactionReference,
+      'payment_type': paymentType.toString().split('.').last,
+      'related_id': relatedId,
+      'amount': amount,
+      'currency': currency,
+      'status': status.toString().split('.').last,
+      'payment_method': paymentMethod,
+      'chapa_transaction_id': chapaTransactionId,
+      'callback_url': callbackUrl,
+      'return_url': returnUrl,
+      'metadata': metadata,
+      'paid_at': paidAt?.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+    };
+  }
+
+  String get displayAmount => '${amount.toStringAsFixed(2)} $currency';
+
+  bool get isPending => status == PaymentStatus.pending;
+  bool get isSuccess => status == PaymentStatus.success;
+  bool get isFailed => status == PaymentStatus.failed;
+  bool get isCancelled => status == PaymentStatus.cancelled;
+
+  String get statusLabel {
+    switch (status) {
+      case PaymentStatus.pending:
+        return 'Pending';
+      case PaymentStatus.success:
+        return 'Success';
+      case PaymentStatus.failed:
+        return 'Failed';
+      case PaymentStatus.cancelled:
+        return 'Cancelled';
+      case PaymentStatus.refunded:
+        return 'Refunded';
+    }
+  }
+}

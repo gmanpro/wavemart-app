@@ -1,0 +1,138 @@
+import 'package:flutter/material.dart';
+
+/// WaveMart Brand Colors
+/// Based on the web application's Tailwind CSS color palette
+class AppColors {
+  AppColors._();
+
+  // Primary Brand - Navy (Deep Blue from logo)
+  static const Color navy50 = Color(0xFFf0f4f8);
+  static const Color navy100 = Color(0xFFd9e2ec);
+  static const Color navy200 = Color(0xFFbcccdc);
+  static const Color navy300 = Color(0xFF9fb3c8);
+  static const Color navy400 = Color(0xFF829ab1);
+  static const Color navy500 = Color(0xFF627d98);
+  static const Color navy600 = Color(0xFF486581);
+  static const Color navy700 = Color(0xFF334e68);
+  static const Color navy800 = Color(0xFF243b53);
+  static const Color navy900 = Color(0xFF1e3a5f);
+  static const Color navy950 = Color(0xFF102a43);
+
+  // Primary Accent - Wave (Green from logo)
+  static const Color wave50 = Color(0xFFedfcf2);
+  static const Color wave100 = Color(0xFFd3f9e0);
+  static const Color wave200 = Color(0xFFaaf0c4);
+  static const Color wave300 = Color(0xFF73e2a3);
+  static const Color wave400 = Color(0xFF3acd7e);
+  static const Color wave500 = Color(0xFF16b364);
+  static const Color wave600 = Color(0xFF0d9450);
+  static const Color wave700 = Color(0xFF0b7742);
+  static const Color wave800 = Color(0xFF0c5e37);
+  static const Color wave900 = Color(0xFF0a4d2e);
+  static const Color wave950 = Color(0xFF052b19);
+
+  // Success - Emerald
+  static const Color emerald50 = Color(0xFFecfdf5);
+  static const Color emerald100 = Color(0xFFd1fae5);
+  static const Color emerald200 = Color(0xFFa7f3d0);
+  static const Color emerald300 = Color(0xFF6ee7b7);
+  static const Color emerald400 = Color(0xFF34d399);
+  static const Color emerald500 = Color(0xFF10b981);
+  static const Color emerald600 = Color(0xFF059669);
+  static const Color emerald700 = Color(0xFF047857);
+  static const Color emerald800 = Color(0xFF065f46);
+  static const Color emerald900 = Color(0xFF064e3b);
+
+  // Neutrals - Zinc (Warm grays)
+  static const Color zinc50 = Color(0xFFfafaf9);
+  static const Color zinc100 = Color(0xFFf5f5f4);
+  static const Color zinc200 = Color(0xFFe7e5e4);
+  static const Color zinc300 = Color(0xFFd6d3d1);
+  static const Color zinc400 = Color(0xFFa8a29e);
+  static const Color zinc500 = Color(0xFF78716c);
+  static const Color zinc600 = Color(0xFF57534e);
+  static const Color zinc700 = Color(0xFF44403c);
+  static const Color zinc800 = Color(0xFF292524);
+  static const Color zinc900 = Color(0xFF1c1917);
+
+  // Semantic Colors
+  static const Color error = Color(0xFFdc2626);
+  static const Color errorLight = Color(0xFFfee2e2);
+  static const Color warning = Color(0xFFf59e0b);
+  static const Color warningLight = Color(0xFFfef3c7);
+  static const Color success = Color(0xFF10b981);
+  static const Color successLight = Color(0xFFd1fae5);
+  static const Color info = Color(0xFF3b82f6);
+  static const Color infoLight = Color(0xFFdbeafe);
+
+  // Background Colors
+  static const Color background = zinc50;
+  static const Color surface = Colors.white;
+  static const Color surfaceVariant = zinc100;
+
+  // Gradient Definitions
+  static const LinearGradient gradientNavy = LinearGradient(
+    colors: [navy900, navy950],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+
+  static const LinearGradient gradientWave = LinearGradient(
+    colors: [wave500, wave600],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+
+  static const LinearGradient gradientEmerald = LinearGradient(
+    colors: [emerald500, emerald600],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+
+  static const LinearGradient gradientHero = LinearGradient(
+    colors: [navy950, navy900],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  // Shadow Definitions
+  static List<BoxShadow> get shadowSm => [
+        BoxShadow(
+          color: navy950.withValues(alpha: 0.08),
+          blurRadius: 4,
+          offset: const Offset(0, 1),
+        ),
+      ];
+
+  static List<BoxShadow> get shadowMd => [
+        BoxShadow(
+          color: navy950.withValues(alpha: 0.12),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ];
+
+  static List<BoxShadow> get shadowLg => [
+        BoxShadow(
+          color: navy950.withValues(alpha: 0.16),
+          blurRadius: 16,
+          offset: const Offset(0, 4),
+        ),
+      ];
+
+  static List<BoxShadow> get shadowWave => [
+        BoxShadow(
+          color: wave600.withValues(alpha: 0.22),
+          blurRadius: 16,
+          offset: const Offset(0, 4),
+        ),
+      ];
+
+  static List<BoxShadow> get shadowGlow => [
+        BoxShadow(
+          color: wave600.withValues(alpha: 0.35),
+          blurRadius: 20,
+          spreadRadius: 0,
+        ),
+      ];
+}
