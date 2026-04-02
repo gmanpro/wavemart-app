@@ -1,3 +1,5 @@
+import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'core/theme/app_theme.dart';
@@ -6,6 +8,19 @@ import 'presentation/screens/navigation/main_navigation_shell.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Global error handlers for crash logging
+  FlutterError.onError = (details) {
+    log('Flutter Error: ${details.exceptionAsString()}', name: 'WaveMart');
+    if (kReleaseMode) {
+      FlutterError.presentError(details);
+    }
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    log('Platform Error: $error\nStack: $stack', name: 'WaveMart');
+    return true;
+  };
 
   // Set preferred orientations
   SystemChrome.setPreferredOrientations([
