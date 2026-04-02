@@ -98,7 +98,7 @@ class AppColors {
   // Shadow Definitions
   static List<BoxShadow> get shadowSm => [
         BoxShadow(
-          color: navy950.withValues(alpha: 0.08),
+          color: navy950.withOpacity(0.08),
           blurRadius: 4,
           offset: const Offset(0, 1),
         ),
@@ -106,7 +106,7 @@ class AppColors {
 
   static List<BoxShadow> get shadowMd => [
         BoxShadow(
-          color: navy950.withValues(alpha: 0.12),
+          color: navy950.withOpacity(0.12),
           blurRadius: 8,
           offset: const Offset(0, 2),
         ),
@@ -114,7 +114,7 @@ class AppColors {
 
   static List<BoxShadow> get shadowLg => [
         BoxShadow(
-          color: navy950.withValues(alpha: 0.16),
+          color: navy950.withOpacity(0.16),
           blurRadius: 16,
           offset: const Offset(0, 4),
         ),
@@ -122,7 +122,7 @@ class AppColors {
 
   static List<BoxShadow> get shadowWave => [
         BoxShadow(
-          color: wave600.withValues(alpha: 0.22),
+          color: wave600.withOpacity(0.22),
           blurRadius: 16,
           offset: const Offset(0, 4),
         ),
@@ -130,7 +130,7 @@ class AppColors {
 
   static List<BoxShadow> get shadowGlow => [
         BoxShadow(
-          color: wave600.withValues(alpha: 0.35),
+          color: wave600.withOpacity(0.35),
           blurRadius: 20,
           spreadRadius: 0,
         ),

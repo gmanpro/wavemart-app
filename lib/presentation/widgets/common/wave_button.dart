@@ -216,7 +216,7 @@ class _WaveButtonState extends State<WaveButton> {
   }
 
   Color _getHighlightColor() {
-    return AppColors.navy500.withValues(alpha: 0.05);
+    return AppColors.navy500.withOpacity(0.05);
   }
 }
 
@@ -273,7 +273,7 @@ class WaveTextField extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             color: enabled
-                ? AppColors.zinc50.withValues(alpha: 0.5)
+                ? AppColors.zinc50.withOpacity(0.5)
                 : AppColors.zinc100,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(

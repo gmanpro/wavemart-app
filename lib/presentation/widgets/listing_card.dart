@@ -127,8 +127,8 @@ class PropertyListingCard extends StatelessWidget {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: isFavorite
-                    ? Colors.red.withValues(alpha: 0.9)
-                    : Colors.black.withValues(alpha: 0.7),
+                    ? Colors.red.withOpacity(0.9)
+                    : Colors.black.withOpacity(0.7),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -147,7 +147,7 @@ class PropertyListingCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.7),
+              color: Colors.black.withOpacity(0.7),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Row(

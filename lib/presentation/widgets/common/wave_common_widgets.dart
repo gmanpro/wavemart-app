@@ -21,7 +21,7 @@ class WaveBottomNav extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy950.withValues(alpha: 0.1),
+            color: AppColors.navy950.withOpacity(0.1),
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),
@@ -88,7 +88,7 @@ class WaveBottomNav extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: isSelected
-                  ? AppColors.wave50.withValues(alpha: 0.5)
+                  ? AppColors.wave50.withOpacity(0.5)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
             ),

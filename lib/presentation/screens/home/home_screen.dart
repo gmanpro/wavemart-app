@@ -232,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: Colors.black.withOpacity(0.2),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -294,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _buildFilterChip(
           icon: Icons.key,
           label: 'Rent',
-          color: Colors.white.withValues(alpha: 0.15),
+          color: Colors.white.withOpacity(0.15),
           textColor: Colors.white,
           onTap: () {},
         ),
