@@ -1,14 +1,39 @@
+import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'core/theme/app_theme.dart';
+import 'presentation/screens/auth/otp_login_screen.dart';
+import 'presentation/screens/navigation/main_navigation_shell.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Global error handler for crash logging
+  FlutterError.onError = (details) {
+    log('Flutter Error: ${details.exceptionAsString()}', name: 'WaveMart');
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    log('Platform Error: $error\nStack: $stack', name: 'WaveMart');
+    return true;
+  };
 
   // Set preferred orientations
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  // Set system UI overlay style
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
 
   runApp(const WaveMartApp());
 }
@@ -21,122 +46,49 @@ class WaveMartApp extends StatelessWidget {
     return MaterialApp(
       title: 'WaveMart',
       debugShowCheckedModeBanner: false,
-      home: const TestHomeScreen(),
+
+      // Theme
+      theme: AppTheme.lightTheme,
+
+      // Routes
+      initialRoute: '/login',
+      onGenerateRoute: _generateRoute,
+
+      // Localizations will be added later
+      locale: const Locale('en'),
     );
   }
-}
 
-// Simple test screen to verify app runs
-class TestHomeScreen extends StatelessWidget {
-  const TestHomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              const Color(0xFF1e3a5f),
-              const Color(0xFF102a43),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Logo placeholder
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
-                      width: 2,
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.home_rounded,
-                    size: 60,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                
-                // App name
-                const Text(
-                  'WaveMart',
-                  style: TextStyle(
-                    fontSize: 42,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontFamily: 'Outfit',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                
-                // Tagline
-                Text(
-                  'Ethiopia\'s Real Estate Marketplace',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white.withOpacity(0.7),
-                    fontFamily: 'Inter',
-                  ),
-                ),
-                const SizedBox(height: 48),
-                
-                // Test button
-                ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('App is working! ✅'),
-                        backgroundColor: Color(0xFF16b364),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF16b364),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 48,
-                      vertical: 16,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Test App',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                
-                // Version info
-                Text(
-                  'Version: 1.0.0+1\nPackage: et.wavemart.app',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white.withOpacity(0.5),
-                  ),
-                ),
-              ],
+  Route<dynamic>? _generateRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case '/login':
+        return _buildRoute(const OtpLoginScreen(), settings);
+      case '/home':
+      case '/':
+        return _buildRoute(const MainNavigationShell(), settings);
+      default:
+        return _buildRoute(
+          Scaffold(
+            body: Center(
+              child: Text('Page not found: ${settings.name}'),
             ),
           ),
-        ),
-      ),
+          settings,
+        );
+    }
+  }
+
+  PageRouteBuilder<dynamic> _buildRoute(Widget page, RouteSettings settings) {
+    return PageRouteBuilder(
+      settings: settings,
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 200),
     );
   }
 }
