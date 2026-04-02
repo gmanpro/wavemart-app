@@ -6,6 +6,12 @@
 -keep class io.flutter.**  { *; }
 -keep class io.flutter.plugins.**  { *; }
 
+## Flutter Play Store Split - Ignore missing classes
+-dontwarn com.google.android.play.core.splitcompat.SplitCompatApplication
+-dontwarn com.google.android.play.core.splitinstall.**
+-dontwarn com.google.android.play.core.tasksupport.**
+-dontwarn com.google.android.play.core.tasks.**
+
 ## Google Fonts
 -keep class com.google.android.gms.** { *; }
 
