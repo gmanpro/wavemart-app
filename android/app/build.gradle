@@ -54,9 +54,9 @@ android {
         }
         release {
             signingConfig signingConfigs.debug
-            // Enable code shrinking, obfuscation, and optimization
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Disable minify temporarily to debug crash
+            minifyEnabled false
+            // proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
