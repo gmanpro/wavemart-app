@@ -5,7 +5,10 @@
       "Bash(cp *)",
       "Bash(find *)",
       "Bash(git add *)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "Read(//initrd/mnt/dev_save/dev/projects/wavemartapp/WaveMart/**)",
+      "Bash(touch *)",
+      "Bash(flutter *)"
     ]
   },
   "$version": 3
