@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/screens/auth/otp_login_screen.dart';
 import 'presentation/screens/navigation/main_navigation_shell.dart';
@@ -12,6 +13,9 @@ void main() {
   // Global error handler for crash logging
   FlutterError.onError = (details) {
     log('Flutter Error: ${details.exceptionAsString()}', name: 'WaveMart');
+    if (kReleaseMode) {
+      FlutterError.presentError(details);
+    }
   };
 
   PlatformDispatcher.instance.onError = (error, stack) {
@@ -35,14 +39,19 @@ void main() {
     ),
   );
 
-  runApp(const WaveMartApp());
+  // Wrap with ProviderScope for Riverpod
+  runApp(
+    const ProviderScope(
+      child: WaveMartApp(),
+    ),
+  );
 }
 
-class WaveMartApp extends StatelessWidget {
+class WaveMartApp extends ConsumerWidget {
   const WaveMartApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'WaveMart',
       debugShowCheckedModeBanner: false,
@@ -68,9 +77,9 @@ class WaveMartApp extends StatelessWidget {
         return _buildRoute(const MainNavigationShell(), settings);
       default:
         return _buildRoute(
-          Scaffold(
+          const Scaffold(
             body: Center(
-              child: Text('Page not found: ${settings.name}'),
+              child: Text('Page not found'),
             ),
           ),
           settings,

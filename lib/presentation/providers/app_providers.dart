@@ -1,0 +1,409 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/services/favorite_service.dart';
+import '../../data/services/profile_service.dart';
+import '../../data/services/notification_service.dart';
+import '../../data/services/message_service.dart';
+import '../../data/services/payment_service.dart';
+import '../../data/services/subscription_service.dart';
+import '../../data/services/kyc_service.dart';
+import '../../data/services/conference_service.dart';
+import '../../data/services/interest_service.dart';
+import '../../data/services/address_service.dart';
+import '../../core/network/connectivity_service.dart';
+
+/// Connectivity Provider
+final connectivityProvider = Provider<ConnectivityService>((ref) {
+  final service = ConnectivityService();
+  ref.onDispose(() => service.dispose());
+  return service;
+});
+
+/// Is connected stream
+final isConnectedProvider = StreamProvider<bool>((ref) {
+  return ref.watch(connectivityProvider).connectionStatus;
+});
+
+/// Favorite Provider
+final favoriteServiceProvider = Provider<FavoriteService>((ref) => FavoriteService());
+final favoritesProvider = StateNotifierProvider<FavoritesNotifier, FavoritesState>((ref) {
+  return FavoritesNotifier(ref.watch(favoriteServiceProvider));
+});
+
+class FavoritesNotifier extends StateNotifier<FavoritesState> {
+  final FavoriteService _favoriteService;
+  FavoritesNotifier(this._favoriteService) : super(const FavoritesState.initial());
+
+  Future<void> loadFavorites({int page = 1}) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final response = await _favoriteService.getFavorites(page: page);
+    if (response.success) {
+      state = FavoritesState.loaded(
+        favorites: response.listings,
+        total: response.total ?? 0,
+      );
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: response.message);
+    }
+  }
+
+  Future<bool> toggleFavorite(int listingId) async {
+    final response = await _favoriteService.toggleFavorite(listingId);
+    if (response.success) {
+      await loadFavorites();
+    }
+    return response.success;
+  }
+}
+
+class FavoritesState {
+  final bool isLoading;
+  final List<dynamic> favorites;
+  final int total;
+  final String? errorMessage;
+  const FavoritesState({required this.isLoading, this.favorites = const [], this.total = 0, this.errorMessage});
+  const FavoritesState.initial() : isLoading = true, favorites = const [], total = 0, errorMessage = null;
+  const FavoritesState.loaded({required this.favorites, this.total = 0}) : isLoading = false, errorMessage = null;
+  FavoritesState copyWith({bool? isLoading, List<dynamic>? favorites, int? total, String? errorMessage}) {
+    return FavoritesState(
+      isLoading: isLoading ?? this.isLoading,
+      favorites: favorites ?? this.favorites,
+      total: total ?? this.total,
+      errorMessage: errorMessage,
+    );
+  }
+}
+
+/// Profile Provider
+final profileServiceProvider = Provider<ProfileService>((ref) => ProfileService());
+final profileProvider = StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
+  return ProfileNotifier(ref.watch(profileServiceProvider));
+});
+
+class ProfileNotifier extends StateNotifier<ProfileState> {
+  final ProfileService _profileService;
+  ProfileNotifier(this._profileService) : super(const ProfileState.initial());
+
+  Future<void> loadProfile() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final response = await _profileService.getProfile();
+    if (response.success && response.user != null) {
+      state = ProfileState.loaded(response.user!, stats: response.stats);
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: response.message);
+    }
+  }
+
+  Future<bool> updateProfile(Map<String, dynamic> data) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final response = await _profileService.updateProfile(data);
+    if (response.success && response.user != null) {
+      state = ProfileState.loaded(response.user!, stats: state.stats);
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: response.message);
+    }
+    return response.success;
+  }
+}
+
+class ProfileState {
+  final bool isLoading;
+  final dynamic user;
+  final ProfileStats? stats;
+  final String? errorMessage;
+  const ProfileState({required this.isLoading, this.user, this.stats, this.errorMessage});
+  const ProfileState.initial() : isLoading = true, user = null, stats = null, errorMessage = null;
+  const ProfileState.loaded(this.user, {this.stats}) : isLoading = false, errorMessage = null;
+  ProfileState copyWith({bool? isLoading, dynamic user, ProfileStats? stats, String? errorMessage}) {
+    return ProfileState(isLoading: isLoading ?? this.isLoading, user: user ?? this.user, stats: stats ?? this.stats, errorMessage: errorMessage);
+  }
+}
+
+/// Notification Provider
+final notificationServiceProvider = Provider<NotificationService>((ref) => NotificationService());
+final notificationsProvider = StateNotifierProvider<NotificationNotifier, NotificationState>((ref) {
+  return NotificationNotifier(ref.watch(notificationServiceProvider));
+});
+final unreadCountProvider = StreamProvider<int>((ref) async* {
+  final service = ref.watch(notificationServiceProvider);
+  while (true) {
+    final response = await service.getUnreadCount();
+    yield response.success ? response.count : 0;
+    await Future.delayed(const Duration(seconds: 30));
+  }
+});
+
+class NotificationNotifier extends StateNotifier<NotificationState> {
+  final NotificationService _notificationService;
+  NotificationNotifier(this._notificationService) : super(const NotificationState.initial());
+
+  Future<void> loadNotifications({int page = 1}) async {
+    if (page == 1) state = state.copyWith(isLoading: true, errorMessage: null);
+    final response = await _notificationService.getNotifications(page: page);
+    if (response.success) {
+      final newListings = page == 1 ? response.notifications : [...state.notifications, ...response.notifications];
+      state = NotificationState.loaded(notifications: newListings, total: response.total ?? 0);
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: response.message);
+    }
+  }
+
+  Future<void> markAsRead(int id) async {
+    await _notificationService.markAsRead(id);
+    state = state.copyWith(notifications: state.notifications.map((n) => n.id == id ? n.copyWith(isRead: true) : n).toList());
+  }
+
+  Future<void> markAllAsRead() async {
+    await _notificationService.markAllAsRead();
+    state = state.copyWith(notifications: state.notifications.map((n) => n.copyWith(isRead: true)).toList());
+  }
+}
+
+class NotificationState {
+  final bool isLoading;
+  final List<dynamic> notifications;
+  final int total;
+  final String? errorMessage;
+  const NotificationState({required this.isLoading, this.notifications = const [], this.total = 0, this.errorMessage});
+  const NotificationState.initial() : isLoading = true, notifications = const [], total = 0, errorMessage = null;
+  const NotificationState.loaded({required this.notifications, this.total = 0}) : isLoading = false, errorMessage = null;
+  NotificationState copyWith({bool? isLoading, List<dynamic>? notifications, int? total, String? errorMessage}) {
+    return NotificationState(isLoading: isLoading ?? this.isLoading, notifications: notifications ?? this.notifications, total: total ?? this.total, errorMessage: errorMessage);
+  }
+}
+
+/// Message Provider
+final messageServiceProvider = Provider<MessageService>((ref) => MessageService());
+final conversationsProvider = StateNotifierProvider<ConversationsNotifier, ConversationsState>((ref) {
+  return ConversationsNotifier(ref.watch(messageServiceProvider));
+});
+
+class ConversationsNotifier extends StateNotifier<ConversationsState> {
+  final MessageService _messageService;
+  ConversationsNotifier(this._messageService) : super(const ConversationsState.initial());
+
+  Future<void> loadConversations({int page = 1}) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final response = await _messageService.getConversations(page: page);
+    if (response.success) {
+      state = ConversationsState.loaded(conversations: response.conversations, total: response.total ?? 0);
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: response.message);
+    }
+  }
+}
+
+class ConversationsState {
+  final bool isLoading;
+  final List<dynamic> conversations;
+  final int total;
+  final String? errorMessage;
+  const ConversationsState({required this.isLoading, this.conversations = const [], this.total = 0, this.errorMessage});
+  const ConversationsState.initial() : isLoading = true, conversations = const [], total = 0, errorMessage = null;
+  const ConversationsState.loaded({required this.conversations, this.total = 0}) : isLoading = false, errorMessage = null;
+  ConversationsState copyWith({bool? isLoading, List<dynamic>? conversations, int? total, String? errorMessage}) {
+    return ConversationsState(isLoading: isLoading ?? this.isLoading, conversations: conversations ?? this.conversations, total: total ?? this.total, errorMessage: errorMessage);
+  }
+}
+
+/// Payment Provider
+final paymentServiceProvider = Provider<PaymentService>((ref) => PaymentService());
+final paymentHistoryProvider = StateNotifierProvider<PaymentHistoryNotifier, PaymentHistoryState>((ref) {
+  return PaymentHistoryNotifier(ref.watch(paymentServiceProvider));
+});
+
+class PaymentHistoryNotifier extends StateNotifier<PaymentHistoryState> {
+  final PaymentService _paymentService;
+  PaymentHistoryNotifier(this._paymentService) : super(const PaymentHistoryState.initial());
+
+  Future<void> loadPayments({int page = 1}) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final response = await _paymentService.getPaymentHistory(page: page);
+    if (response.success) {
+      state = PaymentHistoryState.loaded(payments: response.payments, total: response.total ?? 0);
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: response.message);
+    }
+  }
+}
+
+class PaymentHistoryState {
+  final bool isLoading;
+  final List<dynamic> payments;
+  final int total;
+  final String? errorMessage;
+  const PaymentHistoryState({required this.isLoading, this.payments = const [], this.total = 0, this.errorMessage});
+  const PaymentHistoryState.initial() : isLoading = true, payments = const [], total = 0, errorMessage = null;
+  const PaymentHistoryState.loaded({required this.payments, this.total = 0}) : isLoading = false, errorMessage = null;
+  PaymentHistoryState copyWith({bool? isLoading, List<dynamic>? payments, int? total, String? errorMessage}) {
+    return PaymentHistoryState(isLoading: isLoading ?? this.isLoading, payments: payments ?? this.payments, total: total ?? this.total, errorMessage: errorMessage);
+  }
+}
+
+/// Subscription Provider
+final subscriptionServiceProvider = Provider<SubscriptionServiceApi>((ref) => SubscriptionServiceApi());
+final subscriptionPlansProvider = FutureProvider((ref) async {
+  return ref.watch(subscriptionServiceProvider).getPlans();
+});
+final currentSubscriptionProvider = StateNotifierProvider<CurrentSubscriptionNotifier, CurrentSubscriptionState>((ref) {
+  return CurrentSubscriptionNotifier(ref.watch(subscriptionServiceProvider));
+});
+
+class CurrentSubscriptionNotifier extends StateNotifier<CurrentSubscriptionState> {
+  final SubscriptionServiceApi _subscriptionService;
+  CurrentSubscriptionNotifier(this._subscriptionService) : super(const CurrentSubscriptionState.initial());
+
+  Future<void> loadCurrentSubscription() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final response = await _subscriptionService.getCurrentSubscription();
+    if (response.success) {
+      state = CurrentSubscriptionState.loaded(
+        subscription: response.subscription,
+        canCreateListing: response.canCreateListing,
+        canFeatureListing: response.canFeatureListing,
+      );
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: response.message);
+    }
+  }
+}
+
+class CurrentSubscriptionState {
+  final bool isLoading;
+  final dynamic subscription;
+  final bool canCreateListing;
+  final bool canFeatureListing;
+  final String? errorMessage;
+  const CurrentSubscriptionState({required this.isLoading, this.subscription, this.canCreateListing = true, this.canFeatureListing = true, this.errorMessage});
+  const CurrentSubscriptionState.initial() : isLoading = true, subscription = null, canCreateListing = true, canFeatureListing = true, errorMessage = null;
+  const CurrentSubscriptionState.loaded({this.subscription, this.canCreateListing = true, this.canFeatureListing = true}) : isLoading = false, errorMessage = null;
+  CurrentSubscriptionState copyWith({bool? isLoading, dynamic subscription, bool? canCreateListing, bool? canFeatureListing, String? errorMessage}) {
+    return CurrentSubscriptionState(isLoading: isLoading ?? this.isLoading, subscription: subscription ?? this.subscription, canCreateListing: canCreateListing ?? this.canCreateListing, canFeatureListing: canFeatureListing ?? this.canFeatureListing, errorMessage: errorMessage);
+  }
+}
+
+/// KYC Provider
+final kycServiceProvider = Provider<KycService>((ref) => KycService());
+final kycStatusProvider = StateNotifierProvider<KycStatusNotifier, KycStatusState>((ref) {
+  return KycStatusNotifier(ref.watch(kycServiceProvider));
+});
+
+class KycStatusNotifier extends StateNotifier<KycStatusState> {
+  final KycService _kycService;
+  KycStatusNotifier(this._kycService) : super(const KycStatusState.initial());
+
+  Future<void> loadKycStatus() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final response = await _kycService.getKycStatus();
+    if (response.success) {
+      state = KycStatusState.loaded(
+        status: response.status,
+        isVerified: response.isVerified,
+        rejectionReason: response.rejectionReason,
+      );
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: response.status);
+    }
+  }
+}
+
+class KycStatusState {
+  final bool isLoading;
+  final String status;
+  final bool isVerified;
+  final String? rejectionReason;
+  final String? errorMessage;
+  const KycStatusState({required this.isLoading, this.status = 'none', this.isVerified = false, this.rejectionReason, this.errorMessage});
+  const KycStatusState.initial() : isLoading = true, status = 'none', isVerified = false, rejectionReason = null, errorMessage = null;
+  const KycStatusState.loaded({this.status = 'none', this.isVerified = false, this.rejectionReason}) : isLoading = false, errorMessage = null;
+  KycStatusState copyWith({bool? isLoading, String? status, bool? isVerified, String? rejectionReason, String? errorMessage}) {
+    return KycStatusState(isLoading: isLoading ?? this.isLoading, status: status ?? this.status, isVerified: isVerified ?? this.isVerified, rejectionReason: rejectionReason ?? this.rejectionReason, errorMessage: errorMessage);
+  }
+}
+
+/// Conference Provider
+final conferenceServiceProvider = Provider<ConferenceService>((ref) => ConferenceService());
+final conferencesProvider = StateNotifierProvider<ConferencesNotifier, ConferencesState>((ref) {
+  return ConferencesNotifier(ref.watch(conferenceServiceProvider));
+});
+
+class ConferencesNotifier extends StateNotifier<ConferencesState> {
+  final ConferenceService _conferenceService;
+  ConferencesNotifier(this._conferenceService) : super(const ConferencesState.initial());
+
+  Future<void> loadConferences() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final response = await _conferenceService.getConferences();
+    if (response.success) {
+      state = ConferencesState.loaded(conferences: response.conferences);
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: response.message);
+    }
+  }
+}
+
+class ConferencesState {
+  final bool isLoading;
+  final List<dynamic> conferences;
+  final String? errorMessage;
+  const ConferencesState({required this.isLoading, this.conferences = const [], this.errorMessage});
+  const ConferencesState.initial() : isLoading = true, conferences = const [], errorMessage = null;
+  const ConferencesState.loaded({required this.conferences}) : isLoading = false, errorMessage = null;
+  ConferencesState copyWith({bool? isLoading, List<dynamic>? conferences, String? errorMessage}) {
+    return ConferencesState(isLoading: isLoading ?? this.isLoading, conferences: conferences ?? this.conferences, errorMessage: errorMessage);
+  }
+}
+
+/// Interest Provider
+final interestServiceProvider = Provider<InterestService>((ref) => InterestService());
+final myInterestsProvider = StateNotifierProvider<MyInterestsNotifier, MyInterestsState>((ref) {
+  return MyInterestsNotifier(ref.watch(interestServiceProvider));
+});
+
+class MyInterestsNotifier extends StateNotifier<MyInterestsState> {
+  final InterestService _interestService;
+  MyInterestsNotifier(this._interestService) : super(const MyInterestsState.initial());
+
+  Future<void> loadInterests({int page = 1}) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final response = await _interestService.getMyInterests(page: page);
+    if (response.success) {
+      state = MyInterestsState.loaded(interests: response.interests, total: response.total ?? 0);
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: response.message);
+    }
+  }
+
+  Future<bool> expressInterest(int listingId, {String? message}) async {
+    final response = await _interestService.expressInterest(listingId: listingId, message: message);
+    if (response.success) await loadInterests();
+    return response.success;
+  }
+}
+
+class MyInterestsState {
+  final bool isLoading;
+  final List<dynamic> interests;
+  final int total;
+  final String? errorMessage;
+  const MyInterestsState({required this.isLoading, this.interests = const [], this.total = 0, this.errorMessage});
+  const MyInterestsState.initial() : isLoading = true, interests = const [], total = 0, errorMessage = null;
+  const MyInterestsState.loaded({required this.interests, this.total = 0}) : isLoading = false, errorMessage = null;
+  MyInterestsState copyWith({bool? isLoading, List<dynamic>? interests, int? total, String? errorMessage}) {
+    return MyInterestsState(isLoading: isLoading ?? this.isLoading, interests: interests ?? this.interests, total: total ?? this.total, errorMessage: errorMessage);
+  }
+}
+
+/// Address Provider
+final addressServiceProvider = Provider<AddressService>((ref) => AddressService());
+final regionsProvider = FutureProvider((ref) async {
+  return ref.watch(addressServiceProvider).getRegions();
+});
+final zonesProvider = FutureProvider.family((ref, String region) async {
+  return ref.watch(addressServiceProvider).getZones(region: region);
+});
+final woredasProvider = FutureProvider.family((ref, Map<String, String> params) async {
+  return ref.watch(addressServiceProvider).getWoredas(region: params['region']!, zone: params['zone']!);
+});
+final kebelesProvider = FutureProvider.family((ref, Map<String, String> params) async {
+  return ref.watch(addressServiceProvider).getKebeles(region: params['region']!, zone: params['zone']!, woreda: params['woreda']!);
+});
