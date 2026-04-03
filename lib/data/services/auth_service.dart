@@ -167,6 +167,93 @@ class AuthService {
     }
   }
 
+  /// Register new account with phone, name, and gender
+  /// If otpCode is null, sends OTP for registration
+  /// If otpCode is provided, verifies and creates account
+  Future<AuthResponse> register({
+    required String firstName,
+    required String lastName,
+    required String phoneNumber,
+    required String gender,
+    String? otpCode,
+  }) async {
+    try {
+      if (otpCode == null) {
+        // Step 1: Send OTP for registration
+        final response = await _apiClient.dio.post(
+          ApiConstants.register,
+          data: {
+            'first_name': firstName,
+            'last_name': lastName,
+            'phone_number': phoneNumber,
+            'gender': gender,
+            'send_otp': true,
+          },
+        );
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          return AuthResponse(
+            success: true,
+            message: response.data['message'] ?? 'OTP sent successfully',
+          );
+        }
+
+        return AuthResponse(
+          success: false,
+          message: response.data['message'] ?? 'Failed to send OTP',
+        );
+      } else {
+        // Step 2: Verify OTP and create account
+        final response = await _apiClient.dio.post(
+          ApiConstants.register,
+          data: {
+            'first_name': firstName,
+            'last_name': lastName,
+            'phone_number': phoneNumber,
+            'gender': gender,
+            'otp_code': otpCode,
+          },
+        );
+
+        if (response.statusCode == 200) {
+          // Extract token from response
+          final token = response.data['token'] ?? response.data['access_token'];
+
+          // Store token if available
+          if (token != null) {
+            await _apiClient.setAuthToken(token);
+          }
+
+          // Parse user data
+          User? user;
+          if (response.data['user'] != null) {
+            user = User.fromJson(response.data['user']);
+          } else if (response.data['data'] != null) {
+            user = User.fromJson(response.data['data']);
+          }
+
+          return AuthResponse(
+            success: true,
+            message: 'Registration successful',
+            user: user,
+            token: token,
+          );
+        }
+
+        return AuthResponse(
+          success: false,
+          message: response.data['message'] ?? 'Registration failed',
+        );
+      }
+    } catch (e) {
+      final exception = ApiErrorHandler.handle(e);
+      return AuthResponse(
+        success: false,
+        message: exception.toString().replaceAll(RegExp(r'^\w+: '), ''),
+      );
+    }
+  }
+
   /// Get current authenticated user
   Future<User?> getCurrentUser() async {
     try {

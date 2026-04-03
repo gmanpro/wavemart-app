@@ -4,7 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/wave_button.dart';
-import '../../widgets/common/wave_common_widgets.dart';
+import 'registration_screen.dart';
 
 /// OTP Login Screen - Wired to Auth Provider
 class OtpLoginScreen extends ConsumerStatefulWidget {
@@ -63,16 +63,13 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
                 style: AppTextStyles.bodyMedium,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 48),
+              const SizedBox(height: 24),
 
-              // Error message
-              if (authState.errorMessage != null) ...[
-                WaveErrorBanner(
-                  message: authState.errorMessage!,
-                  onRetry: () {},
-                ),
-                const SizedBox(height: 16),
-              ],
+              // Inline Error Message (compact, friendly)
+              if (authState.errorMessage != null)
+                _buildInlineError(authState.errorMessage!),
+
+              const SizedBox(height: 16),
 
               // Step 1: Phone Input
               if (!authState.otpSent && !authState.isAuthenticated) ...[
@@ -90,6 +87,36 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
                   isLoading: authState.isLoading,
                   isFullWidth: true,
                   onPressed: authState.isLoading ? null : _sendOtp,
+                ),
+                const SizedBox(height: 24),
+
+                // Registration Link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Don\'t have an account? ',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.navy600,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const RegistrationScreen(),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        'Register',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.wave600,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
 
@@ -206,6 +233,49 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// Compact inline error message
+  Widget _buildInlineError(String message) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.error.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.error.withOpacity(0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 20,
+            color: AppColors.error,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.error.withOpacity(0.9),
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              // Clear error
+              ref.read(authStateProvider.notifier).clearError();
+            },
+            child: Icon(
+              Icons.close,
+              size: 18,
+              color: AppColors.error.withOpacity(0.6),
+            ),
+          ),
+        ],
       ),
     );
   }

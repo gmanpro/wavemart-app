@@ -18,6 +18,7 @@ class ApiConstants {
   static const String login = '$apiBase/auth/login';
   static const String verifyOtp = '$apiBase/auth/verify-otp';
   static const String resendOtp = '$apiBase/auth/resend-otp';
+  static const String register = '$apiBase/auth/register';
   static const String logout = '$apiBase/auth/logout';
   static const String currentUser = '$apiBase/user';
 

@@ -97,6 +97,47 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await _authService.logout();
     state = AuthState.unauthenticated();
   }
+
+  /// Clear error message
+  void clearError() {
+    state = state.copyWith(errorMessage: null);
+  }
+
+  /// Register new account
+  Future<AuthResponse> register({
+    required String firstName,
+    required String lastName,
+    required String phoneNumber,
+    required String gender,
+    String? otpCode,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final response = await _authService.register(
+      firstName: firstName,
+      lastName: lastName,
+      phoneNumber: phoneNumber,
+      gender: gender,
+      otpCode: otpCode,
+    );
+    if (response.success) {
+      if (otpCode == null) {
+        // OTP sent successfully
+        state = state.copyWith(
+          isLoading: false,
+          phoneNumber: phoneNumber,
+          otpSent: true,
+        );
+      } else {
+        // Registration complete, user authenticated
+        if (response.user != null) {
+          state = AuthState.authenticated(response.user!);
+        }
+      }
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: response.message);
+    }
+    return response;
+  }
 }
 
 /// Auth State
