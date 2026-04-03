@@ -176,17 +176,6 @@ class _WaveButtonState extends State<WaveButton> {
     }
   }
 
-  BorderSide _getBorder() {
-    switch (widget.variant) {
-      case ButtonVariant.outline:
-        return const BorderSide(color: AppColors.zinc300);
-      case ButtonVariant.ghost:
-        return const BorderSide(color: AppColors.zinc200);
-      default:
-        return BorderSide.none;
-    }
-  }
-
   List<BoxShadow>? _getShadow() {
     if (widget.variant == ButtonVariant.primary ||
         widget.variant == ButtonVariant.success) {

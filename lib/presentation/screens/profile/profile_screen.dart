@@ -1,20 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
+import '../../providers/app_providers.dart';
+import '../../providers/auth_provider.dart';
+import '../../widgets/common/wave_common_widgets.dart';
+import '../auth/otp_login_screen.dart';
 
-/// Profile Screen - User profile and settings
-class ProfileScreen extends StatelessWidget {
+/// Profile Screen - Wired to profileProvider + authStateProvider
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileState = ref.watch(profileProvider);
+    ref.watch(authStateProvider); // Watch auth state for future use
+
+    // Load profile on build
+    if (profileState.isLoading && profileState.user == null) {
+      ref.read(profileProvider.notifier).loadProfile();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Settings coming soon')),
+              );
+            },
           ),
         ],
       ),
@@ -22,11 +39,11 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // Profile Header
-          _buildProfileHeader(),
+          _buildProfileHeader(context, ref, profileState),
           const SizedBox(height: 24),
 
-          // Stats
-          _buildStatsRow(),
+          // Stats - Show real stats or placeholders
+          _buildStatsRow(profileState),
           const SizedBox(height: 24),
 
           // Menu Items
@@ -37,26 +54,44 @@ class ProfileScreen extends StatelessWidget {
                 icon: Icons.list_alt_outlined,
                 title: 'My Listings',
                 subtitle: 'Manage your properties',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('My Listings coming soon')),
+                  );
+                },
               ),
               _MenuItemData(
                 icon: Icons.payment_outlined,
                 title: 'Subscriptions',
                 subtitle: 'View your plans',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Subscriptions coming soon')),
+                  );
+                },
               ),
               _MenuItemData(
                 icon: Icons.receipt_long_outlined,
                 title: 'Payment History',
                 subtitle: 'Transaction history',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Payments coming soon')),
+                  );
+                },
               ),
               _MenuItemData(
                 icon: Icons.verified_user_outlined,
                 title: 'KYC Verification',
-                subtitle: 'Verify your identity',
-                badge: 'Required',
-                onTap: () {},
+                subtitle: profileState.user?.isKycVerified == true
+                    ? 'Verified'
+                    : 'Required',
+                badge: profileState.user?.isKycVerified == true ? null : 'Required',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('KYC coming soon')),
+                  );
+                },
               ),
             ],
           ),
@@ -69,14 +104,21 @@ class ProfileScreen extends StatelessWidget {
                 icon: Icons.message_outlined,
                 title: 'Messages',
                 subtitle: 'Your conversations',
-                badge: '3',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Messages coming soon')),
+                  );
+                },
               ),
               _MenuItemData(
                 icon: Icons.notifications_outlined,
                 title: 'Notifications',
                 subtitle: 'Stay updated',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Notifications coming soon')),
+                  );
+                },
               ),
             ],
           ),
@@ -89,13 +131,21 @@ class ProfileScreen extends StatelessWidget {
                 icon: Icons.help_outline,
                 title: 'Help Center',
                 subtitle: 'FAQs and guides',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Help Center coming soon')),
+                  );
+                },
               ),
               _MenuItemData(
                 icon: Icons.support_agent,
                 title: 'Contact Support',
                 subtitle: 'Get in touch',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Support coming soon')),
+                  );
+                },
               ),
             ],
           ),
@@ -108,17 +158,29 @@ class ProfileScreen extends StatelessWidget {
                 icon: Icons.language,
                 title: 'Language',
                 subtitle: 'English',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Language settings coming soon')),
+                  );
+                },
               ),
               _MenuItemData(
                 icon: Icons.privacy_tip_outlined,
                 title: 'Privacy Policy',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Privacy Policy coming soon')),
+                  );
+                },
               ),
               _MenuItemData(
                 icon: Icons.description_outlined,
                 title: 'Terms of Service',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Terms coming soon')),
+                  );
+                },
               ),
             ],
           ),
@@ -128,7 +190,7 @@ class ProfileScreen extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () {},
+              onPressed: () => _showLogoutDialog(context, ref),
               icon: const Icon(Icons.logout, size: 20),
               label: const Text('Logout'),
               style: OutlinedButton.styleFrom(
@@ -147,7 +209,39 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(
+      BuildContext context, WidgetRef ref, ProfileState state) {
+    if (state.isLoading) {
+      return const SizedBox(
+        height: 72,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (state.errorMessage != null) {
+      return WaveErrorBanner(
+        message: state.errorMessage!,
+        onRetry: () {
+          ref.read(profileProvider.notifier).loadProfile();
+        },
+      );
+    }
+
+    final user = state.user;
+    if (user == null) {
+      return const WaveEmptyState(
+        icon: Icons.person_outline,
+        title: 'Not Logged In',
+        subtitle: 'Please log in to view your profile',
+      );
+    }
+
+    final initials = user.initials.isNotEmpty ? user.initials : '?';
+    final displayName = user.fullName.isNotEmpty ? user.fullName : 'User';
+    final phoneOrEmail = user.phoneNumber.isNotEmpty
+        ? user.phoneNumber
+        : user.email ?? 'No contact info';
+
     return Row(
       children: [
         Container(
@@ -157,10 +251,10 @@ class ProfileScreen extends StatelessWidget {
             color: AppColors.wave500,
             borderRadius: BorderRadius.circular(18),
           ),
-          child: const Center(
+          child: Center(
             child: Text(
-              'JD',
-              style: TextStyle(
+              initials,
+              style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -175,63 +269,85 @@ class ProfileScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'John Doe',
+                displayName,
                 style: AppTextStyles.title,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
               Text(
-                '+251912345678',
+                phoneOrEmail,
                 style: AppTextStyles.bodyMedium,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.emerald50,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.check_circle,
-                      size: 12,
-                      color: AppColors.emerald600,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Verified',
-                      style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.emerald700,
+              if (user.isPhoneVerified)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.emerald50,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        size: 12,
+                        color: AppColors.emerald600,
                       ),
-                    ),
-                  ],
+                      SizedBox(width: 4),
+                      Text(
+                        'Verified',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.emerald700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ),
         IconButton(
           icon: const Icon(Icons.edit_outlined),
-          onPressed: () {},
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Edit profile coming soon')),
+            );
+          },
         ),
       ],
     );
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(ProfileState state) {
+    final stats = state.stats;
+
     return Row(
       children: [
-        _buildStatItem('3', 'Listings'),
+        _buildStatItem(
+          value: stats?.totalListings.toString() ?? '-',
+          label: 'Listings',
+        ),
         const SizedBox(width: 16),
-        _buildStatItem('1', 'Active Plan'),
+        _buildStatItem(
+          value: stats?.unreadMessages.toString() ?? '-',
+          label: 'Messages',
+        ),
         const SizedBox(width: 16),
-        _buildStatItem('5', 'Favorites'),
+        _buildStatItem(
+          value: stats?.totalFavorites.toString() ?? '-',
+          label: 'Favorites',
+        ),
       ],
     );
   }
 
-  Widget _buildStatItem(String value, String label) {
+  Widget _buildStatItem({required String value, required String label}) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -286,7 +402,8 @@ class ProfileScreen extends StatelessWidget {
             children: items.asMap().entries.map((entry) {
               final index = entry.key;
               final item = entry.value;
-              return _buildMenuItem(item, showDivider: index < items.length - 1);
+              return _buildMenuItem(item,
+                  showDivider: index < items.length - 1);
             }).toList(),
           ),
         ),
@@ -325,7 +442,8 @@ class ProfileScreen extends StatelessWidget {
             children: [
               if (item.badge != null) ...[
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: AppColors.wave100,
                     borderRadius: BorderRadius.circular(10),
@@ -349,6 +467,36 @@ class ProfileScreen extends StatelessWidget {
         ),
         if (showDivider) const Divider(height: 1),
       ],
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await ref.read(authStateProvider.notifier).logout();
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const OtpLoginScreen()),
+                  (route) => false,
+                );
+              }
+            },
+            child: const Text('Logout',
+                style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
     );
   }
 }

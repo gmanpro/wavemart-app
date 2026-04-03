@@ -223,6 +223,66 @@ class WaveEmptyState extends StatelessWidget {
   }
 }
 
+/// Error Banner Widget - Shows error message with retry button
+class WaveErrorBanner extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  final String? actionLabel;
+
+  const WaveErrorBanner({
+    super.key,
+    required this.message,
+    required this.onRetry,
+    this.actionLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.error.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.error.withOpacity(0.2)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 48,
+            color: AppColors.error,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Oops! Something went wrong',
+            style: AppTextStyles.title.copyWith(
+              color: AppColors.error,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            message,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.zinc600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          WaveButton(
+            text: actionLabel ?? 'Retry',
+            icon: Icons.refresh,
+            onPressed: onRetry,
+            variant: ButtonVariant.danger,
+            isFullWidth: true,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// WaveMart Toast/Snackbar
 class WaveToast {
   static void showSuccess(BuildContext context, String message) {

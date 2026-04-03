@@ -1,26 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
+import '../../providers/listing_provider.dart';
+import '../../../data/models/listing.dart';
 import '../../widgets/listing_card.dart';
 import '../../widgets/common/wave_common_widgets.dart';
+import '../search/search_screen.dart';
 
 /// Home Screen - Main landing page with hero section and featured listings
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
-  bool _isScrolled = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      _isScrolled = _scrollController.offset > 50;
+      // Scroll listener for future use (e.g., app bar hide/show)
+    });
+    // Load featured listings on mount
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(featuredListingsProvider.notifier).loadFeaturedListings();
     });
   }
 
@@ -32,6 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final featuredState = ref.watch(featuredListingsProvider);
+
     return Scaffold(
       body: CustomScrollView(
         controller: _scrollController,
@@ -42,8 +51,12 @@ class _HomeScreenState extends State<HomeScreen> {
           // Trust Badges
           SliverToBoxAdapter(child: _buildTrustBadges()),
 
-          // Statistics Section
-          SliverToBoxAdapter(child: _buildStatistics()),
+          // Statistics Section - Show real stats or loading
+          SliverToBoxAdapter(
+            child: featuredState.listings.isNotEmpty
+                ? _buildRealStatistics(featuredState)
+                : _buildPlaceholderStatistics(),
+          ),
 
           // Quick Filters
           SliverToBoxAdapter(child: _buildQuickFilters()),
@@ -51,16 +64,49 @@ class _HomeScreenState extends State<HomeScreen> {
           // Featured Listings Header
           SliverToBoxAdapter(child: _buildFeaturedHeader()),
 
-          // Featured Listings Grid
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => const PropertyListingCard(),
-                childCount: 6,
+          // Featured Listings - Loading, Error, or Data
+          if (featuredState.isLoading)
+            const SliverToBoxAdapter(child: _FeaturedLoadingSkeleton())
+          else if (featuredState.errorMessage != null)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: WaveErrorBanner(
+                  message: featuredState.errorMessage!,
+                  onRetry: () {
+                    ref
+                        .read(featuredListingsProvider.notifier)
+                        .loadFeaturedListings();
+                  },
+                ),
+              ),
+            )
+          else if (featuredState.listings.isEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: WaveEmptyState(
+                  icon: Icons.home_outlined,
+                  title: 'No Featured Listings Yet',
+                  subtitle: 'Browse all listings to find great properties',
+                ),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: PropertyListingCard(
+                      listing: featuredState.listings[index],
+                    ),
+                  ),
+                  childCount: featuredState.listings.length,
+                ),
               ),
             ),
-          ),
 
           // Bottom padding for nav
           const SliverToBoxAdapter(
@@ -114,11 +160,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   _buildSubheadline(),
                   const SizedBox(height: 32),
 
-                  // Search Bar
+                  // Search Bar - Now navigates to SearchScreen
                   _buildSearchBar(),
                   const SizedBox(height: 16),
 
-                  // Quick Filter Buttons
+                  // Quick Filter Buttons - Now navigate to SearchScreen with filters
                   _buildQuickFilterButtons(),
                 ],
               ),
@@ -226,48 +272,61 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSearchBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: 'Search by location...',
-          hintStyle: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.navy400,
-          ),
-          prefixIcon: const Icon(
-            Icons.location_on_outlined,
-            color: AppColors.wave500,
-          ),
-          suffixIcon: Container(
-            margin: const EdgeInsets.all(4),
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.navy950,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const SearchScreen()),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.95),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.location_on_outlined,
+                color: AppColors.wave500,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Search by location...',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.navy400,
+                  ),
                 ),
+              ),
+              Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 12,
                 ),
+                decoration: BoxDecoration(
+                  color: AppColors.navy950,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  'Search',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
               ),
-              child: const Text('Search'),
-            ),
+            ],
           ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
         ),
       ),
     );
@@ -283,22 +342,41 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Icons.home,
           label: 'Buy House',
           color: AppColors.wave500,
-          onTap: () {},
+          onTap: () => _navigateToSearchWithFilter(
+            type: 'house',
+            listingType: 'sale',
+          ),
         ),
         _buildFilterChip(
           icon: Icons.landscape,
           label: 'Buy Land',
           color: AppColors.emerald500,
-          onTap: () {},
+          onTap: () => _navigateToSearchWithFilter(
+            type: 'land',
+            listingType: 'sale',
+          ),
         ),
         _buildFilterChip(
           icon: Icons.key,
           label: 'Rent',
           color: Colors.white.withOpacity(0.15),
           textColor: Colors.white,
-          onTap: () {},
+          onTap: () => _navigateToSearchWithFilter(
+            listingType: 'rental',
+          ),
         ),
       ],
+    );
+  }
+
+  void _navigateToSearchWithFilter({String? type, String? listingType}) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SearchScreen(
+          initialType: type,
+          initialListingType: listingType,
+        ),
+      ),
     );
   }
 
@@ -369,7 +447,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildStatistics() {
+  /// Placeholder statistics (shown while loading)
+  Widget _buildPlaceholderStatistics() {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -385,7 +464,53 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: _buildStatItem(
                   icon: Icons.home_work,
                   iconBgColor: AppColors.wave500,
-                  value: '2,500+',
+                  value: '...',
+                  label: 'Active Listings',
+                  suffix: 'Loading...',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildStatItem(
+                  icon: Icons.apartment,
+                  iconBgColor: AppColors.wave500,
+                  value: '...',
+                  label: 'Houses',
+                  suffix: 'Loading...',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Real statistics from featured listings
+  Widget _buildRealStatistics(ListingsState state) {
+    final houseCount = state.listings
+        .where((l) => l.propertyType == PropertyType.house)
+        .length;
+    final landCount = state.listings
+        .where((l) => l.propertyType == PropertyType.land)
+        .length;
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.navy50, Colors.white],
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatItem(
+                  icon: Icons.home_work,
+                  iconBgColor: AppColors.wave500,
+                  value: '${state.total}+',
                   label: 'Active Listings',
                   suffix: 'Growing Daily',
                 ),
@@ -395,21 +520,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: _buildStatItem(
                   icon: Icons.apartment,
                   iconBgColor: AppColors.wave500,
-                  value: '1,800+',
+                  value: '$houseCount',
                   label: 'Houses',
-                  suffix: 'Starting from 2M ETB',
+                  suffix: landCount > 0 ? '$landCount Lands' : 'Loading...',
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 16),
-          _buildStatItem(
-            icon: Icons.people,
-            iconBgColor: AppColors.wave500,
-            value: '5,000+',
-            label: 'Happy Customers',
-            suffix: '4.8 ★ Average Rating',
-            isFullWidth: true,
           ),
         ],
       ),
@@ -422,7 +538,6 @@ class _HomeScreenState extends State<HomeScreen> {
     required String value,
     required String label,
     String? suffix,
-    bool isFullWidth = false,
   }) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -488,6 +603,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildFeaturedHeader() {
+    final state = ref.watch(featuredListingsProvider);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Row(
@@ -501,13 +617,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: AppTextStyles.title,
               ),
               Text(
-                'Handpicked properties just for you',
+                state.listings.isNotEmpty
+                    ? '${state.listings.length} properties'
+                    : 'Handpicked properties just for you',
                 style: AppTextStyles.caption,
               ),
             ],
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SearchScreen()),
+              );
+            },
             child: const Text('View All'),
           ),
         ],
@@ -550,6 +672,30 @@ class _TrustBadgeItem extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Skeleton loading for featured listings
+class _FeaturedLoadingSkeleton extends StatelessWidget {
+  const _FeaturedLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: List.generate(
+        3,
+        (index) => Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Container(
+            height: 280,
+            decoration: BoxDecoration(
+              color: AppColors.zinc100,
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
