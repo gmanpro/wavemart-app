@@ -7,6 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/common/wave_common_widgets.dart';
 import '../auth/otp_login_screen.dart';
 import '../notifications/notifications_screen.dart';
+import '../messages/messages_screen.dart';
 
 /// Profile Screen - Wired to profileProvider + authStateProvider
 class ProfileScreen extends ConsumerWidget {
@@ -106,8 +107,10 @@ class ProfileScreen extends ConsumerWidget {
                 title: 'Messages',
                 subtitle: 'Your conversations',
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Messages coming soon')),
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const MessagesScreen(),
+                    ),
                   );
                 },
               ),
