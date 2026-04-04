@@ -7,6 +7,7 @@ import '../../../data/models/listing.dart';
 import '../../widgets/listing_card.dart';
 import '../../widgets/common/wave_common_widgets.dart';
 import '../search/search_screen.dart';
+import '../listing/listing_detail_screen.dart';
 
 /// Home Screen - Main landing page with hero section and featured listings
 class HomeScreen extends ConsumerStatefulWidget {
@@ -101,6 +102,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     padding: const EdgeInsets.only(bottom: 16),
                     child: PropertyListingCard(
                       listing: featuredState.listings[index],
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ListingDetailScreen(
+                              listingId: featuredState.listings[index].id,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   childCount: featuredState.listings.length,

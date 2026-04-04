@@ -5,6 +5,7 @@ import '../../../../core/theme/text_styles.dart';
 import '../../providers/listing_provider.dart';
 import '../../widgets/listing_card.dart';
 import '../../widgets/common/wave_common_widgets.dart';
+import '../listing/listing_detail_screen.dart';
 
 /// Search Screen with filters - Wired to listingsProvider
 class SearchScreen extends ConsumerStatefulWidget {
@@ -414,6 +415,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   padding: const EdgeInsets.only(bottom: 16),
                   child: PropertyListingCard(
                     listing: state.listings[index],
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ListingDetailScreen(
+                            listingId: state.listings[index].id,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 );
               },
