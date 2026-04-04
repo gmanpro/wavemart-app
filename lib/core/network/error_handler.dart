@@ -60,6 +60,11 @@ class ApiErrorHandler {
           final statusCode = error.response?.statusCode;
           final message = _extractErrorMessage(error.response?.data);
 
+          // Handle redirect responses (3xx) as connection errors
+          if (statusCode != null && statusCode >= 300 && statusCode < 400) {
+            return const NetworkException('Server redirect issue. Check API configuration.');
+          }
+
           if (statusCode == 401) {
             return const UnauthorizedException();
           }
