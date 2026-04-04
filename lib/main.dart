@@ -96,62 +96,41 @@ class _WaveMartAppState extends ConsumerState<WaveMartApp> {
 
     final authState = ref.watch(authStateProvider);
 
-    // Determine initial route based on auth state
-    final initialRoute = authState.isAuthenticated ? '/home' : '/login';
-
     return MaterialApp(
       title: 'WaveMart',
       debugShowCheckedModeBanner: false,
-
-      // Theme
       theme: AppTheme.lightTheme,
-
-      // Routes - use initialRoute based on auth state
-      initialRoute: initialRoute,
+      home: authState.isAuthenticated
+          ? const MainNavigationShell()
+          : const OtpLoginScreen(),
       onGenerateRoute: _generateRoute,
       builder: (context, child) {
-        // Handle null child gracefully (can happen during transitions)
         if (child == null) {
           return const SizedBox.shrink();
         }
         return child;
       },
-
-      // Localizations will be added later
       locale: const Locale('en'),
     );
   }
 
   Route<dynamic>? _generateRoute(RouteSettings settings) {
+    final Widget page;
     switch (settings.name) {
       case '/login':
-        return _buildRoute(const OtpLoginScreen(), settings);
+        page = const OtpLoginScreen();
+        break;
       case '/home':
       case '/':
-        return _buildRoute(const MainNavigationShell(), settings);
+        page = const MainNavigationShell();
+        break;
       default:
-        return _buildRoute(
-          const Scaffold(
-            body: Center(
-              child: Text('Page not found'),
-            ),
+        page = const Scaffold(
+          body: Center(
+            child: Text('Page not found'),
           ),
-          settings,
         );
     }
-  }
-
-  PageRouteBuilder<dynamic> _buildRoute(Widget page, RouteSettings settings) {
-    return PageRouteBuilder(
-      settings: settings,
-      pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
-      },
-      transitionDuration: const Duration(milliseconds: 200),
-    );
+    return MaterialPageRoute<void>(builder: (_) => page, settings: settings);
   }
 }
