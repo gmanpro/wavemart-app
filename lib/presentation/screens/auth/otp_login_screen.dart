@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
@@ -37,8 +38,16 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
 
-    return Scaffold(
-      body: SafeArea(
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        // If this is the initial route, exit the app instead of navigating back
+        if (!didPop) {
+          SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
+        body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -233,6 +242,7 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
