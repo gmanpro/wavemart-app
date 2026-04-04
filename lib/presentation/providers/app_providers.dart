@@ -311,13 +311,19 @@ class KycStatusState {
   final String status;
   final bool isVerified;
   final String? rejectionReason;
+  final String? submittedAt;
   final String? errorMessage;
-  const KycStatusState({required this.isLoading, this.status = 'none', this.isVerified = false, this.rejectionReason, this.errorMessage});
-  const KycStatusState.initial() : isLoading = true, status = 'none', isVerified = false, rejectionReason = null, errorMessage = null;
-  const KycStatusState.loaded({this.status = 'none', this.isVerified = false, this.rejectionReason}) : isLoading = false, errorMessage = null;
-  KycStatusState copyWith({bool? isLoading, String? status, bool? isVerified, String? rejectionReason, String? errorMessage}) {
-    return KycStatusState(isLoading: isLoading ?? this.isLoading, status: status ?? this.status, isVerified: isVerified ?? this.isVerified, rejectionReason: rejectionReason ?? this.rejectionReason, errorMessage: errorMessage);
+  const KycStatusState({required this.isLoading, this.status = 'none', this.isVerified = false, this.rejectionReason, this.submittedAt, this.errorMessage});
+  const KycStatusState.initial() : isLoading = true, status = 'none', isVerified = false, rejectionReason = null, submittedAt = null, errorMessage = null;
+  const KycStatusState.loaded({this.status = 'none', this.isVerified = false, this.rejectionReason, this.submittedAt}) : isLoading = false, errorMessage = null;
+  KycStatusState copyWith({bool? isLoading, String? status, bool? isVerified, String? rejectionReason, String? submittedAt, String? errorMessage}) {
+    return KycStatusState(isLoading: isLoading ?? this.isLoading, status: status ?? this.status, isVerified: isVerified ?? this.isVerified, rejectionReason: rejectionReason ?? this.rejectionReason, submittedAt: submittedAt ?? this.submittedAt, errorMessage: errorMessage);
   }
+
+  bool get isPending => status == 'pending';
+  bool get isApproved => status == 'approved';
+  bool get isRejected => status == 'rejected';
+  bool get isNone => status == 'none' || status.isEmpty;
 }
 
 /// Conference Provider

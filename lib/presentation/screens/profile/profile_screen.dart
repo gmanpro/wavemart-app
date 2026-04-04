@@ -8,6 +8,7 @@ import '../../widgets/common/wave_common_widgets.dart';
 import '../auth/otp_login_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../messages/messages_screen.dart';
+import '../kyc/kyc_verification_screen.dart';
 
 /// Profile Screen - Wired to profileProvider + authStateProvider
 class ProfileScreen extends ConsumerWidget {
@@ -90,8 +91,10 @@ class ProfileScreen extends ConsumerWidget {
                     : 'Required',
                 badge: profileState.user?.isKycVerified == true ? null : 'Required',
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('KYC coming soon')),
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const KycVerificationScreen(),
+                    ),
                   );
                 },
               ),
