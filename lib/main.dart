@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/screens/auth/otp_login_screen.dart';
@@ -10,6 +11,9 @@ import 'presentation/screens/navigation/main_navigation_shell.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Disable google_fonts runtime fetching - fonts are bundled locally
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   // Global error handler for crash logging
   FlutterError.onError = (details) {
@@ -61,10 +65,12 @@ class _WaveMartAppState extends ConsumerState<WaveMartApp> {
   @override
   void initState() {
     super.initState();
-    // Check auth status on app start
+    // Check auth status on app start (non-blocking)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(authStateProvider.notifier).checkAuth().then((_) {
-        setState(() => _isCheckingAuth = false);
+        if (mounted) {
+          setState(() => _isCheckingAuth = false);
+        }
       });
     });
   }
@@ -89,7 +95,7 @@ class _WaveMartAppState extends ConsumerState<WaveMartApp> {
     }
 
     final authState = ref.watch(authStateProvider);
-    
+
     // Determine initial route based on auth state
     final initialRoute = authState.isAuthenticated ? '/home' : '/login';
 
@@ -100,18 +106,15 @@ class _WaveMartAppState extends ConsumerState<WaveMartApp> {
       // Theme
       theme: AppTheme.lightTheme,
 
-      // Routes - always start at root, navigation shell handles auth
-      initialRoute: '/',
+      // Routes - use initialRoute based on auth state
+      initialRoute: initialRoute,
       onGenerateRoute: _generateRoute,
       builder: (context, child) {
-        // Auth guard: redirect to login if not authenticated
-        if (!authState.isAuthenticated && 
-            ModalRoute.of(context)?.settings.name != '/login') {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.of(context).pushReplacementNamed('/login');
-          });
+        // Handle null child gracefully (can happen during transitions)
+        if (child == null) {
+          return const SizedBox.shrink();
         }
-        return child!;
+        return child;
       },
 
       // Localizations will be added later

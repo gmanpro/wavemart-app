@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
 import 'text_styles.dart';
 
@@ -318,23 +317,23 @@ class AppTheme {
         }),
       ),
 
-      // Text Theme
-      textTheme: GoogleFonts.interTextTheme().copyWith(
-        displayLarge: AppTextStyles.headline1,
-        displayMedium: AppTextStyles.headline2,
-        displaySmall: AppTextStyles.headline3,
-        headlineLarge: AppTextStyles.headline4,
-        headlineMedium: AppTextStyles.title,
-        headlineSmall: AppTextStyles.titleSmall,
-        titleLarge: AppTextStyles.bodyLarge,
-        titleMedium: AppTextStyles.bodyMedium,
-        titleSmall: AppTextStyles.bodySmall,
-        bodyLarge: AppTextStyles.bodyLarge,
-        bodyMedium: AppTextStyles.bodyMedium,
-        bodySmall: AppTextStyles.bodySmall,
-        labelLarge: AppTextStyles.labelLarge,
-        labelMedium: AppTextStyles.labelMedium,
-        labelSmall: AppTextStyles.labelSmall,
+      // Text Theme - using locally bundled fonts
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(fontFamily: 'Inter'),
+        displayMedium: TextStyle(fontFamily: 'Inter'),
+        displaySmall: TextStyle(fontFamily: 'Inter'),
+        headlineLarge: TextStyle(fontFamily: 'Inter'),
+        headlineMedium: TextStyle(fontFamily: 'Inter'),
+        headlineSmall: TextStyle(fontFamily: 'Inter'),
+        titleLarge: TextStyle(fontFamily: 'Inter'),
+        titleMedium: TextStyle(fontFamily: 'Inter'),
+        titleSmall: TextStyle(fontFamily: 'Inter'),
+        bodyLarge: TextStyle(fontFamily: 'Inter'),
+        bodyMedium: TextStyle(fontFamily: 'Inter'),
+        bodySmall: TextStyle(fontFamily: 'Inter'),
+        labelLarge: TextStyle(fontFamily: 'Inter'),
+        labelMedium: TextStyle(fontFamily: 'Inter'),
+        labelSmall: TextStyle(fontFamily: 'Inter'),
       ),
 
       // Icon Theme
