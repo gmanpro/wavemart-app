@@ -39,9 +39,9 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
     final authState = ref.watch(authStateProvider);
 
     return PopScope(
-      canPop: true,
+      canPop: false, // Prevent back navigation
       onPopInvokedWithResult: (didPop, result) {
-        // If this is the initial route, exit the app instead of navigating back
+        // Exit app instead of going back
         if (!didPop) {
           SystemNavigator.pop();
         }

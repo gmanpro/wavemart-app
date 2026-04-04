@@ -22,6 +22,7 @@ class ApiClient {
           ApiConstants.headerContentType: ApiConstants.contentTypeJson,
         },
         validateStatus: (status) => status! < 500,
+        followRedirects: false,
       ),
     );
 

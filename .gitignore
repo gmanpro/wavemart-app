@@ -1,52 +1,65 @@
-# Miscellaneous
-*.class
-*.log
+```
+# Build artifacts
 *.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
+__pycache__/
+*.class
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
+dist/
+build/
+target/
+
+# Dependencies
+node_modules/
+venv/
+.venv/
+.env
+.env.local
+*.env.*
+
+# IDE and editor files
 .vscode/
 .idea/
-*.iml
-*.hprof
+*.swp
+*.swo
+*.tmp
 
-# Flutter/Dart
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-.pub/
-/build/
-*.lock
+# System files
+.DS_Store
+Thumbs.db
 
-# Android
-android/app/debug.keystore
-android/.gradle/
-android/captures/
-android/gradlew
-android/gradlew.bat
-android/local.properties
-android/**/GeneratedPluginRegistrant.java
-android/**/GeneratedPluginRegistrant.kt
-
-# iOS
-**/ios/Pods/
-**/ios/.symlinks/
-**/ios/Flutter/Flutter.framework
-**/ios/Flutter/Flutter.podspec
-**/ios/Flutter/Generated.xcconfig
-**/ios/Flutter/ephemeral
-**/ios/Flutter/app.flx
-**/ios/Flutter/app.zip
-**/ios/Flutter/flutter_assets/
-**/ios/Flutter/flutter_export_environment.sh
-**/ios/ServiceDefinitions.json
-**/ios/Runner/GeneratedPluginRegistrant.*
-
-# Coverage
+# Logs and coverage
+*.log
 coverage/
+htmlcov/
+.coverage
 
-# Testing
-.dart_tool/
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+```
