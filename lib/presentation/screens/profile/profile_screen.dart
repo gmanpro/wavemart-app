@@ -9,6 +9,7 @@ import '../auth/otp_login_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../messages/messages_screen.dart';
 import '../kyc/kyc_verification_screen.dart';
+import '../subscriptions/subscription_plans_screen.dart';
 
 /// Profile Screen - Wired to profileProvider + authStateProvider
 class ProfileScreen extends ConsumerWidget {
@@ -68,8 +69,10 @@ class ProfileScreen extends ConsumerWidget {
                 title: 'Subscriptions',
                 subtitle: 'View your plans',
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Subscriptions coming soon')),
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const SubscriptionPlansScreen(),
+                    ),
                   );
                 },
               ),
