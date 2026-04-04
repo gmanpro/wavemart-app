@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/theme/text_styles.dart';
 import '../../widgets/common/wave_common_widgets.dart';
 import '../home/home_screen.dart';
 import '../search/search_screen.dart';
 import '../favorites/favorites_screen.dart';
 import '../profile/profile_screen.dart';
+import '../listing/create_listing_screen.dart';
 
 /// Main Navigation Shell with Bottom Navigation Bar
 class MainNavigationShell extends StatefulWidget {
@@ -53,56 +52,9 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
   }
 
   void _showCreateListingInfo() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.zinc300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Icon(
-              Icons.add_circle_outline,
-              size: 64,
-              color: AppColors.navy400,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Create Listing',
-              style: AppTextStyles.headline4,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'This feature will be available soon. You will be able to list your properties for sale or rent.',
-              style: AppTextStyles.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.navy950,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.all(16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text('Got It'),
-              ),
-            ),
-          ],
-        ),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const CreateListingScreen(),
       ),
     );
   }
