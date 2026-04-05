@@ -2,6 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'address.dart';
 import 'image.dart';
 
+// Helper to safely parse doubles from strings or numbers
+double? _parseDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
+}
+
 /// Property types
 enum PropertyType { house, land }
 
@@ -95,9 +104,9 @@ class Listing extends ChangeNotifier {
         (e) => e.toString().split('.').last == (json['listing_type'] ?? 'sale'),
         orElse: () => ListingType.sale,
       ),
-      priceFixed: json['price_fixed']?.toDouble(),
-      priceMin: json['price_min']?.toDouble(),
-      priceMax: json['price_max']?.toDouble(),
+      priceFixed: _parseDouble(json['price_fixed']),
+      priceMin: _parseDouble(json['price_min']),
+      priceMax: _parseDouble(json['price_max']),
       rentalPeriodUnit: json['rental_period_unit'] != null
           ? RentalPeriod.values.firstWhere(
               (e) => e.toString().split('.').last == json['rental_period_unit'],
@@ -115,11 +124,11 @@ class Listing extends ChangeNotifier {
       specificLocation: json['specific_location'],
       useType: json['use_type'],
       facingDirection: json['facing_direction'],
-      totalSquareMeters: json['total_square_meters']?.toDouble(),
-      frontAreaSqm: json['front_area_sqm']?.toDouble(),
-      sideAreaSqm: json['side_area_sqm']?.toDouble(),
+      totalSquareMeters: _parseDouble(json['total_square_meters']),
+      frontAreaSqm: _parseDouble(json['front_area_sqm']),
+      sideAreaSqm: _parseDouble(json['side_area_sqm']),
       hasDebtOrEncumbrance: json['has_debt_or_encumbrance'] ?? false,
-      debtAmount: json['debt_amount']?.toDouble(),
+      debtAmount: _parseDouble(json['debt_amount']),
       debtEncumbranceFileLink: json['debt_encumbrance_file_link'],
       priceRevisionPossible: json['price_revision_possible'] ?? false,
       videoLink: json['video_link'],
