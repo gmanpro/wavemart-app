@@ -12,7 +12,10 @@
       "Bash(git commit *)",
       "Bash(git push *)",
       "Bash(mv *)",
-      "Bash(rm *)"
+      "Bash(rm *)",
+      "Read(//root/Downloads/**)",
+      "Bash(curl *)",
+      "Bash(gh *)"
     ]
   },
   "$version": 3

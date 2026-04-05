@@ -42,7 +42,7 @@ android {
 
     defaultConfig {
         applicationId "et.wavemart.app"
-        minSdkVersion 21  // Required for multidex support
+        minSdkVersion flutter.minSdkVersion  // Required for multidex support
         targetSdk 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
