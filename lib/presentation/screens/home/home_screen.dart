@@ -181,7 +181,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  SliverList _buildListingsList(ListingsState state) {
+  Widget _buildListingsList(ListingsState state) {
     return SliverPadding(
       padding: const EdgeInsets.all(16),
       sliver: SliverList(
