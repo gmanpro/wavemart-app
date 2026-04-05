@@ -41,12 +41,10 @@ class ImageModel {
   }
 
   String get imageUrl {
-    // For API responses, the path may already be complete
     if (imagePath.startsWith('http')) {
       return imagePath;
     }
-    // Otherwise, prepend the base URL or storage path
-    return 'storage/$imagePath';
+    return 'https://wavemart.et/storage/$imagePath';
   }
 
   String get thumbnailUrl {

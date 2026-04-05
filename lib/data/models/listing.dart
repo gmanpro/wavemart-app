@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import 'address.dart';
 import 'image.dart';
 
@@ -92,6 +93,20 @@ class Listing extends ChangeNotifier {
   });
 
   factory Listing.fromJson(Map<String, dynamic> json) {
+    // Images may be directly on listing or nested under property
+    List<ImageModel> images = [];
+    if (json['images'] is List) {
+      images = (json['images'] as List)
+          .map((e) => ImageModel.fromJson(e))
+          .toList();
+    }
+    final property = json['property'];
+    if (property is Map && property['images'] is List) {
+      images = (property['images'] as List)
+          .map((e) => ImageModel.fromJson(e))
+          .toList();
+    }
+
     return Listing(
       id: json['id'] ?? 0,
       userId: json['user_id'],
@@ -134,11 +149,9 @@ class Listing extends ChangeNotifier {
       videoLink: json['video_link'],
       sitePlanImageLink: json['site_plan_image_link'],
       holdingType: json['holding_type'],
-      description: json['description'],
-      images: (json['images'] as List<dynamic>?)
-              ?.map((e) => ImageModel.fromJson(e))
-              .toList() ??
-          [],
+      description: json['description'] ??
+          (property is Map ? property['description'] : null),
+      images: images,
       address: json['address'] != null ? Address.fromJson(json['address']) : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
@@ -193,11 +206,12 @@ class Listing extends ChangeNotifier {
   }
 
   String get displayPrice {
+    final formatter = NumberFormat('#,###');
     if (priceFixed != null) {
-      return '${priceFixed!.toStringAsFixed(0)} ETB';
+      return '${formatter.format(priceFixed!.toInt())} ETB';
     }
     if (priceMin != null && priceMax != null) {
-      return '${priceMin!.toStringAsFixed(0)} - ${priceMax!.toStringAsFixed(0)} ETB';
+      return '${formatter.format(priceMin!.toInt())} - ${formatter.format(priceMax!.toInt())} ETB';
     }
     return 'Price on Request';
   }
