@@ -9,6 +9,9 @@ class ApiClient {
   late final Dio _dio;
   final FlutterSecureStorage _secureStorage;
 
+  // In-memory token cache shared across ALL ApiClient instances
+  static String? _cachedToken;
+
   // Android storage options for device compatibility
   static const _androidOptions = AndroidOptions(
     encryptedSharedPreferences: false,
@@ -42,21 +45,29 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          try {
-            final token = await _secureStorage.read(key: 'auth_token');
-            if (token != null && token.isNotEmpty) {
-              options.headers[ApiConstants.headerAuthorization] =
-                  '${ApiConstants.headerBearer} $token';
+          // Check in-memory cache first, then fall back to secure storage
+          String? token = _cachedToken;
+          if (token == null) {
+            try {
+              token = await _secureStorage.read(key: 'auth_token');
+              if (token != null && token.isNotEmpty) {
+                _cachedToken = token;
+              }
+            } catch (e) {
+              // Secure storage read failed — continue without token
             }
-          } catch (e) {
-            // Secure storage read failed - continue without token
-            // This prevents blocking requests on device key issues
+          }
+          if (token != null && token.isNotEmpty) {
+            options.headers[ApiConstants.headerAuthorization] =
+                '${ApiConstants.headerBearer} $token';
           }
           return handler.next(options);
         },
         onError: (error, handler) {
           if (error.response?.statusCode == 401) {
-            // Token expired - clear storage
+            // Clear in-memory cache immediately
+            _cachedToken = null;
+            // Clear storage asynchronously — don't block the error handler
             _secureStorage.deleteAll().catchError((_) {});
           }
           return handler.next(error);
@@ -90,13 +101,15 @@ class ApiClient {
     _dio.options.baseUrl = url;
   }
 
-  /// Store auth token
+  /// Store auth token — saves to disk AND in-memory cache
   Future<void> setAuthToken(String token) async {
+    _cachedToken = token;
     await _secureStorage.write(key: 'auth_token', value: token);
   }
 
-  /// Clear auth token
+  /// Clear auth token — clears both disk and memory
   Future<void> clearAuthToken() async {
+    _cachedToken = null;
     await _secureStorage.delete(key: 'auth_token');
   }
 

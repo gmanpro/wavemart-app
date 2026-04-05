@@ -328,10 +328,9 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
 
     final response = await ref.read(authStateProvider.notifier).login(otp);
 
-    if (response.success && mounted) {
-      // Navigate to home
-      Navigator.of(context).pushReplacementNamed('/home');
-    }
+    // Don't navigate manually — let the auth state change in main.dart
+    // automatically swap home: from OtpLoginScreen to MainNavigationShell.
+    // Manual navigation causes double-mount and freezes.
   }
 
   Future<void> _resendOtp() async {
