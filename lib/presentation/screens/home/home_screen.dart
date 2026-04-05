@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/listing_provider.dart';
-import '../../../data/models/listing.dart';
 import '../../widgets/listing_card.dart';
-import '../../widgets/common/wave_common_widgets.dart';
 import '../search/search_screen.dart';
 import '../listing/listing_detail_screen.dart';
 
