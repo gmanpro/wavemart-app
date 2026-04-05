@@ -9,8 +9,15 @@ class ApiClient {
   late final Dio _dio;
   final FlutterSecureStorage _secureStorage;
 
+  // Android storage options for device compatibility
+  static const _androidOptions = AndroidOptions(
+    encryptedSharedPreferences: false,
+    resetOnError: true,
+  );
+
   ApiClient({FlutterSecureStorage? secureStorage})
-      : _secureStorage = secureStorage ?? const FlutterSecureStorage() {
+      : _secureStorage = secureStorage ??
+            const FlutterSecureStorage(aOptions: _androidOptions) {
     _dio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,
@@ -35,17 +42,22 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          final token = await _secureStorage.read(key: 'auth_token');
-          if (token != null && token.isNotEmpty) {
-            options.headers[ApiConstants.headerAuthorization] =
-                '${ApiConstants.headerBearer} $token';
+          try {
+            final token = await _secureStorage.read(key: 'auth_token');
+            if (token != null && token.isNotEmpty) {
+              options.headers[ApiConstants.headerAuthorization] =
+                  '${ApiConstants.headerBearer} $token';
+            }
+          } catch (e) {
+            // Secure storage read failed - continue without token
+            // This prevents blocking requests on device key issues
           }
           return handler.next(options);
         },
         onError: (error, handler) {
           if (error.response?.statusCode == 401) {
             // Token expired - clear storage
-            _secureStorage.deleteAll();
+            _secureStorage.deleteAll().catchError((_) {});
           }
           return handler.next(error);
         },
