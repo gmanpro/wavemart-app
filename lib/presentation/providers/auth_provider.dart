@@ -78,7 +78,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       phoneNumber: state.phoneNumber ?? '',
       otpCode: otpCode,
     );
-    state = state.copyWith(isLoading: false);
+    if (response.success) {
+      state = state.copyWith(isLoading: false, errorMessage: null);
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: response.message);
+    }
     return response;
   }
 
@@ -88,7 +92,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final response = await _authService.resendOtp(
       phoneNumber: state.phoneNumber ?? '',
     );
-    state = state.copyWith(isLoading: false);
+    if (response.success) {
+      state = state.copyWith(isLoading: false, errorMessage: null);
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: response.message);
+    }
     return response;
   }
 

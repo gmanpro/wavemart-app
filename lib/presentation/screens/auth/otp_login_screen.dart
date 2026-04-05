@@ -335,14 +335,24 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
   }
 
   Future<void> _resendOtp() async {
-    await ref.read(authStateProvider.notifier).resendOtp();
+    final response =
+        await ref.read(authStateProvider.notifier).resendOtp();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('OTP resent successfully'),
-          backgroundColor: AppColors.success,
-        ),
-      );
+      if (response.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.message),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.message),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 
