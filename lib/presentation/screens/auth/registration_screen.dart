@@ -19,10 +19,19 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
-  
+
   String? _selectedGender;
   bool _isOtpSent = false;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Clear any stale error from previous screens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(authStateProvider.notifier).clearError();
+    });
+  }
 
   @override
   void dispose() {

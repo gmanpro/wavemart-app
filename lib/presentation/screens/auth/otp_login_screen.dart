@@ -23,6 +23,15 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
       List.generate(6, (_) => FocusNode());
 
   @override
+  void initState() {
+    super.initState();
+    // Clear any stale error from previous screens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(authStateProvider.notifier).clearError();
+    });
+  }
+
+  @override
   void dispose() {
     _phoneController.dispose();
     for (var controller in _otpControllers) {
