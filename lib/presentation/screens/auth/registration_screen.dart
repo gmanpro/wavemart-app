@@ -385,7 +385,10 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       );
 
       if (response.success && mounted) {
-        Navigator.of(context).pushReplacementNamed('/home');
+        // Don't navigate manually — let auth state change in main.dart
+        // automatically swap home: from login to MainNavigationShell.
+        // Manual navigation causes double-mount and freezes.
+        setState(() => _isLoading = false);
       } else if (mounted) {
         setState(() => _isLoading = false);
         _showErrorSnackBar(response.message);
