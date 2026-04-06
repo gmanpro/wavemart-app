@@ -17,7 +17,8 @@
       "Bash(curl *)",
       "Bash(gh *)",
       "Bash(adb *)",
-      "Bash(sleep *)"
+      "Bash(sleep *)",
+      "Bash(git log *)"
     ]
   },
   "$version": 3

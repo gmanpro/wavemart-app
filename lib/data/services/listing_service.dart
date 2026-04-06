@@ -106,14 +106,25 @@ class ListingService {
         '${ApiConstants.listingDetail}/$listingId',
       );
 
-      if (response.statusCode == 200) {
-        final listing = Listing.fromJson(response.data['data'] ?? response.data);
+      if (response.statusCode == 200 && response.data is Map) {
+        final data = response.data['data'] ?? response.data;
+        final listing = Listing.fromJson(data);
         return ListingDetailResponse(success: true, listing: listing);
       }
 
+      if (response.statusCode == 401) {
+        return ListingDetailResponse(
+          success: false,
+          message: 'Please log in to view property details.',
+        );
+      }
+
+      final message = response.data is Map
+          ? (response.data['message'] ?? 'Listing not found')
+          : 'Server returned an unexpected response.';
       return ListingDetailResponse(
         success: false,
-        message: response.data['message'] ?? 'Listing not found',
+        message: message,
       );
     } catch (e) {
       final exception = ApiErrorHandler.handle(e);
