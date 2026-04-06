@@ -43,52 +43,42 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
 
     return Scaffold(
       backgroundColor: AppColors.zinc50,
+      extendBody: true,
       body: IndexedStack(
         index: _selectedIndex,
         children: screens,
       ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const CreateListingScreen()),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.12),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.add, color: AppColors.navy900, size: 30),
+            const SizedBox(height: 2),
+            Text(
+              "List",
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppColors.navy900,
+              ),
             ),
           ],
-        ),
-        child: FloatingActionButton(
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const CreateListingScreen()),
-          ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.add, color: AppColors.navy900, size: 30),
-              const SizedBox(height: 2),
-              Text(
-                "List",
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.navy900,
-                ),
-              ),
-            ],
-          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         elevation: 8,
-        shadowColor: Colors.black.withOpacity(0.08),
         shape: const CircularNotchedRectangle(),
-        notchMargin: 4.0,
+        notchMargin: 8.0,
         child: SizedBox(
           height: 60,
           child: Row(
@@ -96,7 +86,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
             children: [
               _buildNavItem(Icons.home_rounded, "Home", 0),
               _buildNavItem(Icons.favorite_rounded, "Saved", 1),
-              const SizedBox(width: 40), // Space for FAB notch
+              const SizedBox(width: 48), // Space for FAB notch
               _buildMessagesNavItem(unreadCount),
               _buildNavItem(Icons.person_outline_rounded, "Profile", 4),
             ],
