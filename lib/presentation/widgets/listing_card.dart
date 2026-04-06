@@ -11,6 +11,7 @@ class PropertyListingCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onFavorite;
   final bool isFavorite;
+  final bool isLoading;
 
   const PropertyListingCard({
     super.key,
@@ -18,10 +19,13 @@ class PropertyListingCard extends StatelessWidget {
     this.onTap,
     this.onFavorite,
     this.isFavorite = false,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) return _buildSkeleton();
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -67,6 +71,97 @@ class PropertyListingCard extends StatelessWidget {
     );
   }
 
+  Widget _buildSkeleton() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.zinc200),
+        boxShadow: AppColors.shadowMd,
+      ),
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[200]!,
+        highlightColor: Colors.grey[100]!,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image skeleton
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              child: AspectRatio(
+                aspectRatio: 4 / 3,
+                child: Container(
+                  color: Colors.grey[300],
+                  child: Center(
+                    child: Icon(Icons.home_rounded, size: 40, color: Colors.grey[400]),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Price skeleton
+                  Container(
+                    height: 22,
+                    width: 130,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // Title skeleton
+                  Container(
+                    height: 16,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Location skeleton
+                  Container(
+                    height: 14,
+                    width: 180,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  // Features skeleton
+                  Row(
+                    children: [
+                      _skeletonChip(60),
+                      const SizedBox(width: 8),
+                      _skeletonChip(45),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _skeletonChip(double width) {
+    return Container(
+      height: 20,
+      width: width,
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+  }
+
   Widget _buildImageSection() {
     return Stack(
       children: [
@@ -79,16 +174,25 @@ class PropertyListingCard extends StatelessWidget {
               imageUrl: listing?.mainImageUrl ?? '',
               fit: BoxFit.cover,
               placeholder: (_, __) => Shimmer.fromColors(
-                baseColor: AppColors.zinc100,
-                highlightColor: AppColors.zinc50,
-                child: Container(color: AppColors.zinc100),
+                baseColor: Colors.grey[200]!,
+                highlightColor: Colors.grey[100]!,
+                child: Container(
+                  color: Colors.grey[300],
+                  child: Center(
+                    child: Icon(
+                      Icons.home_rounded,
+                      size: 40,
+                      color: Colors.grey[400],
+                    ),
+                  ),
+                ),
               ),
               errorWidget: (_, __, ___) => Container(
-                color: AppColors.zinc100,
+                color: AppColors.navy100,
                 child: const Icon(
                   Icons.home_outlined,
                   size: 64,
-                  color: AppColors.zinc300,
+                  color: AppColors.navy300,
                 ),
               ),
             ),
@@ -230,12 +334,12 @@ class PropertyListingCard extends StatelessWidget {
     return Row(
       children: [
         _buildFeatureChip(
-          Icons.bed_outlined,
+          Icons.square_foot_outlined,
           '${listing?.totalSquareMeters?.toInt() ?? 0} m²',
         ),
         const SizedBox(width: 8),
         _buildFeatureChip(
-          Icons.directions_car_outlined,
+          Icons.sell_outlined,
           listing?.listingType == ListingType.sale ? 'Sale' : 'Rent',
         ),
         const Spacer(),

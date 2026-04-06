@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/listing_provider.dart';
@@ -52,13 +51,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
-                      child: _CardSkeleton(),
-                    ),
-                    childCount: 3,
-                  ),
+                  delegate: SliverChildListDelegate([
+                    for (int i = 0; i < 3; i++)
+                      const PropertyListingCard(isLoading: true),
+                  ]),
                 ),
               )
             else if (featuredState.errorMessage != null)
@@ -250,23 +246,6 @@ class _EmptyState extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _CardSkeleton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.zinc200,
-      highlightColor: AppColors.zinc50,
-      child: Container(
-        height: 280,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
       ),
     );
   }

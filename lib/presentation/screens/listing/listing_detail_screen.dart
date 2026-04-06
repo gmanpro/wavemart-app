@@ -8,10 +8,9 @@ import '../../../../data/models/listing.dart';
 import '../../providers/listing_provider.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/auth_provider.dart';
-import '../../widgets/common/wave_common_widgets.dart';
 import '../auth/otp_login_screen.dart';
 
-/// Listing Detail Screen
+/// Listing Detail Screen with skeleton loaders
 class ListingDetailScreen extends ConsumerStatefulWidget {
   final int listingId;
 
@@ -43,115 +42,346 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(listingDetailProvider);
-    final authState = ref.watch(authStateProvider);
-    final favoritesState = ref.watch(favoritesProvider);
 
+    // Show skeleton while loading, error banner, or content
+    if (state.isLoading) {
+      return _buildSkeletonLoader();
+    }
+
+    if (state.errorMessage != null) {
+      return _buildErrorView(state.errorMessage!);
+    }
+
+    if (state.listing == null) {
+      return _buildNotFound();
+    }
+
+    return _buildContent(state.listing!);
+  }
+
+  Widget _buildSkeletonLoader() {
     return Scaffold(
-      body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : state.errorMessage != null
-              ? WaveErrorBanner(
-                  message: state.errorMessage!,
-                  onRetry: () {
-                    ref
-                        .read(listingDetailProvider.notifier)
-                        .loadListing(widget.listingId);
-                  },
-                )
-              : state.listing == null
-                  ? _buildNotFound()
-                  : _buildContent(state.listing!, favoritesState, authState),
+      body: CustomScrollView(
+        slivers: [
+          // Image skeleton
+          SliverToBoxAdapter(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[200]!,
+              highlightColor: Colors.grey[100]!,
+              child: Column(
+                children: [
+                  // App bar skeleton
+                  Container(
+                    height: 56,
+                    color: Colors.grey[300],
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[400],
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                  ),
+                  // Image skeleton
+                  AspectRatio(
+                    aspectRatio: 4 / 3,
+                    child: Container(color: Colors.grey[300]),
+                  ),
+                  // Page indicator skeleton
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        3,
+                        (i) => Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: 24,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Content skeleton
+          SliverPadding(
+            padding: const EdgeInsets.all(20),
+            sliver: SliverToBoxAdapter(
+              child: Shimmer.fromColors(
+                baseColor: Colors.grey[200]!,
+                highlightColor: Colors.grey[100]!,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Price + title
+                    Container(
+                      height: 28,
+                      width: 160,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      height: 18,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Badges skeleton
+                    Row(
+                      children: [
+                        _skeletonChip(50, 20),
+                        const SizedBox(width: 8),
+                        _skeletonChip(65, 20),
+                        const SizedBox(width: 8),
+                        _skeletonChip(55, 20),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    // Location skeleton
+                    Row(
+                      children: [
+                        Container(
+                          width: 16,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          height: 14,
+                          width: 200,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 40),
+                    // Key features skeleton
+                    Container(
+                      height: 16,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        _skeletonChip(80, 32),
+                        const SizedBox(width: 8),
+                        _skeletonChip(90, 32),
+                        const SizedBox(width: 8),
+                        _skeletonChip(70, 32),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    // Description skeleton
+                    Container(
+                      height: 16,
+                      width: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Column(
+                      children: List.generate(
+                        3,
+                        (i) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Container(
+                            height: 14,
+                            width: double.maxFinite,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _skeletonChip(double width, double height) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(height / 2),
+      ),
+    );
+  }
+
+  Widget _buildErrorView(String message) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Property Details')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.signal_wifi_off_rounded,
+                size: 64,
+                color: AppColors.navy300,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Could not load property',
+                style: AppTextStyles.title,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.navy500),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  ref.read(listingDetailProvider.notifier).loadListing(widget.listingId);
+                },
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('Try Again'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.navy950,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildNotFound() {
     return Scaffold(
       appBar: AppBar(title: const Text('Property Details')),
-      body: WaveEmptyState(
-        icon: Icons.home_outlined,
-        title: 'Listing Not Found',
-        subtitle: 'This property may have been removed',
-        actionLabel: 'Back to Home',
-        onAction: () => Navigator.of(context).pushReplacementNamed('/home'),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.home_outlined, size: 64, color: AppColors.navy300),
+              const SizedBox(height: 16),
+              Text('Listing Not Found', style: AppTextStyles.title),
+              const SizedBox(height: 8),
+              Text(
+                'This property may have been removed',
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.navy500),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Go Back'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildContent(
-    Listing listing,
-    FavoritesState favState,
-    dynamic authState,
-  ) {
+  Widget _buildContent(Listing listing) {
+    final favState = ref.watch(favoritesProvider);
     final isFavorited = favState.favorites.any((f) => f.id == listing.id);
 
-    return CustomScrollView(
-      slivers: [
-        // Image Gallery Sliver
-        SliverAppBar(
-          expandedHeight: 350,
-          pinned: true,
-          flexibleSpace: FlexibleSpaceBar(
-            background: _buildImageGallery(listing),
-          ),
-          actions: [
-            // Favorite button
-            IconButton(
-              icon: Icon(
-                isFavorited ? Icons.favorite : Icons.favorite_border,
-                color: isFavorited ? Colors.red : Colors.white,
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          // Image Gallery Sliver
+          SliverAppBar(
+            expandedHeight: 350,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              background: _buildImageGallery(listing),
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  isFavorited ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorited ? Colors.red : Colors.white,
+                ),
+                onPressed: () => _toggleFavorite(listing.id, isFavorited),
               ),
-              onPressed: () => _toggleFavorite(listing.id, isFavorited),
-            ),
-            IconButton(
-              icon: const Icon(Icons.share, color: Colors.white),
-              onPressed: () => _shareListing(listing),
-            ),
-          ],
-        ),
+              IconButton(
+                icon: const Icon(Icons.share, color: Colors.white),
+                onPressed: () => _shareListing(listing),
+              ),
+            ],
+          ),
 
-        // Content
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Price & Title
-                _buildPriceAndTitle(listing),
-                const SizedBox(height: 16),
-
-                // Badges
-                _buildBadges(listing),
-                const SizedBox(height: 8),
-
-                // Location
-                _buildLocation(listing),
-                const Divider(height: 32),
-
-                // Key Features
-                _buildKeyFeatures(listing),
-                const SizedBox(height: 24),
-
-                // Description
-                _buildDescription(listing),
-                const SizedBox(height: 24),
-
-                // Property Details
-                _buildPropertyDetails(listing),
-                const SizedBox(height: 24),
-
-                // Bottom padding for action buttons
-                const SizedBox(height: 100),
-              ],
+          // Content
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildPriceAndTitle(listing),
+                  const SizedBox(height: 16),
+                  _buildBadges(listing),
+                  const SizedBox(height: 8),
+                  _buildLocation(listing),
+                  const Divider(height: 32),
+                  _buildKeyFeatures(listing),
+                  const SizedBox(height: 24),
+                  _buildDescription(listing),
+                  const SizedBox(height: 24),
+                  _buildPropertyDetails(listing),
+                  const SizedBox(height: 100),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildImageGallery(Listing listing) {
-    if (listing.images.isEmpty) {
+    final images = listing.images;
+
+    if (images.isEmpty) {
       return Container(
         color: AppColors.navy100,
         child: const Center(
@@ -164,18 +394,21 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
       children: [
         PageView.builder(
           controller: _pageController,
-          itemCount: listing.images.length,
+          itemCount: images.length,
           onPageChanged: (index) {
             setState(() => _currentImageIndex = index);
           },
           itemBuilder: (context, index) {
             return CachedNetworkImage(
-              imageUrl: listing.images[index].imageUrl,
+              imageUrl: images[index].imageUrl,
               fit: BoxFit.cover,
-              placeholder: (_, __) => Shimmer.fromColors(
-                baseColor: AppColors.navy100,
-                highlightColor: AppColors.navy50,
-                child: Container(color: AppColors.navy100),
+              placeholder: (_, __) => Container(
+                color: AppColors.navy100,
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
               ),
               errorWidget: (_, __, ___) => Container(
                 color: AppColors.navy100,
@@ -195,7 +428,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '${_currentImageIndex + 1}/${listing.images.length}',
+              '${_currentImageIndex + 1}/${images.length}',
               style: const TextStyle(color: Colors.white, fontSize: 12),
             ),
           ),
@@ -204,26 +437,26 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
     );
   }
 
-  Widget _buildPriceAndTitle(dynamic listing) {
+  Widget _buildPriceAndTitle(Listing listing) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          listing.displayPrice ?? 'Price on request',
+          listing.displayPrice,
           style: AppTextStyles.headline2.copyWith(
             color: AppColors.emerald600,
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          listing.title ?? '${listing.propertyType.name} in ${listing.address?.region ?? 'Unknown'}',
+          listing.title,
           style: AppTextStyles.headline4,
         ),
       ],
     );
   }
 
-  Widget _buildBadges(dynamic listing) {
+  Widget _buildBadges(Listing listing) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -232,7 +465,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
           listing.propertyType.name.toUpperCase(),
           AppColors.navy900,
         ),
-        if (listing.listingType.name == 'sale')
+        if (listing.listingType == ListingType.sale)
           _buildBadge('FOR SALE', AppColors.emerald600)
         else
           _buildBadge('FOR RENT', AppColors.wave600),
@@ -264,8 +497,8 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
     );
   }
 
-  Widget _buildLocation(dynamic listing) {
-    final location = [
+  Widget _buildLocation(Listing listing) {
+    final parts = [
       listing.address?.zone,
       listing.address?.woreda,
       listing.address?.region,
@@ -277,7 +510,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
         const SizedBox(width: 4),
         Expanded(
           child: Text(
-            location.isNotEmpty ? location : 'Location not specified',
+            parts.isNotEmpty ? parts : 'Location not specified',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.navy600,
             ),
@@ -287,24 +520,21 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
     );
   }
 
-  Widget _buildKeyFeatures(dynamic listing) {
+  Widget _buildKeyFeatures(Listing listing) {
     final features = <Widget>[];
 
     if (listing.totalSquareMeters != null) {
       features.add(_buildFeatureChip(
         icon: Icons.square_foot,
-        label: '${listing.totalSquareMeters!.toStringAsFixed(0)} m²',
+        label: '${listing.totalSquareMeters!.toInt()} m²',
       ));
     }
-
-    // Add more feature chips as needed
     if (listing.facingDirection != null) {
       features.add(_buildFeatureChip(
         icon: Icons.compass_calibration,
         label: listing.facingDirection!,
       ));
     }
-
     if (listing.holdingType != null) {
       features.add(_buildFeatureChip(
         icon: Icons.folder_copy,
@@ -351,14 +581,16 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
     );
   }
 
-  Widget _buildDescription(dynamic listing) {
+  Widget _buildDescription(Listing listing) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Description', style: AppTextStyles.title),
         const SizedBox(height: 8),
         Text(
-          listing.description ?? 'No description provided.',
+          listing.description?.isNotEmpty == true
+              ? listing.description!
+              : 'No description provided.',
           style: AppTextStyles.bodyMedium.copyWith(
             color: AppColors.navy700,
             height: 1.6,
@@ -368,7 +600,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
     );
   }
 
-  Widget _buildPropertyDetails(dynamic listing) {
+  Widget _buildPropertyDetails(Listing listing) {
     final details = <Map<String, String>>[];
 
     if (listing.useType != null) {
@@ -457,7 +689,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
     }
   }
 
-  void _shareListing(dynamic listing) {
+  void _shareListing(Listing listing) {
     // TODO: Implement sharing
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Share feature coming soon')),
