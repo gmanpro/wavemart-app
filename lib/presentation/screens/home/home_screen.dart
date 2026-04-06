@@ -271,27 +271,3 @@ class _CardSkeleton extends StatelessWidget {
     );
   }
 }
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 100, 24, 24),
-      child: Column(
-        children: [
-          Icon(Icons.home_outlined, size: 64, color: AppColors.navy300),
-          const SizedBox(height: 16),
-          Text('No Listings Yet', style: AppTextStyles.title),
-          const SizedBox(height: 8),
-          Text(
-            'New listings will appear here soon',
-            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.navy500),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-}
