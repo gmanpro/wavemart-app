@@ -53,7 +53,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withOpacity(0.12),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -68,7 +68,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.add, color: AppColors.navy900, size: 28),
+              Icon(Icons.add, color: AppColors.navy900, size: 30),
               const SizedBox(height: 2),
               Text(
                 "List",
@@ -86,17 +86,17 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         elevation: 8,
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor: Colors.black.withOpacity(0.08),
         shape: const CircularNotchedRectangle(),
-        notchMargin: 6.0,
+        notchMargin: 4.0,
         child: SizedBox(
-          height: 64,
+          height: 60,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItem(Icons.home_rounded, "Home", 0),
               _buildNavItem(Icons.favorite_rounded, "Saved", 1),
-              const SizedBox(width: 48), // Space for FAB notch
+              const SizedBox(width: 40), // Space for FAB notch
               _buildMessagesNavItem(unreadCount),
               _buildNavItem(Icons.person_outline_rounded, "Profile", 4),
             ],
