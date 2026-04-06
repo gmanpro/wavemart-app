@@ -59,39 +59,27 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: BottomAppBar(
-          color: Colors.transparent,
-          elevation: 0,
-          shape: const CircularNotchedRectangle(),
-          notchMargin: 8.0,
-          child: SizedBox(
-            height: 64,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(Icons.home_rounded, "Home", 0),
-                _buildNavItem(Icons.favorite_rounded, "Saved", 1),
-                const SizedBox(width: 40), // Space for FAB
-                _buildNavItemWithBadge(
-                  Icons.chat_bubble_outline_rounded,
-                  "Messages",
-                  3,
-                  badgeCount: 2,
-                ),
-                _buildNavItem(Icons.person_outline_rounded, "Profile", 4),
-              ],
-            ),
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        elevation: 4,
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8.0,
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(Icons.home_rounded, "Home", 0),
+              _buildNavItem(Icons.favorite_rounded, "Saved", 1),
+              const SizedBox(width: 48), // Space for FAB notch
+              _buildNavItemWithBadge(
+                Icons.chat_bubble_outline_rounded,
+                "Messages",
+                3,
+                badgeCount: 2,
+              ),
+              _buildNavItem(Icons.person_outline_rounded, "Profile", 4),
+            ],
           ),
         ),
       ),
