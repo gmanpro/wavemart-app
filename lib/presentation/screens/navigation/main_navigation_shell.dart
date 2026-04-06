@@ -1,75 +1,100 @@
 import 'package:flutter/material.dart';
-import '../../widgets/common/wave_common_widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/app_colors.dart';
 import '../home/home_screen.dart';
-import '../search/search_screen.dart';
 import '../favorites/favorites_screen.dart';
+import '../messages/messages_screen.dart';
 import '../profile/profile_screen.dart';
 import '../listing/create_listing_screen.dart';
 
-/// Main Navigation Shell with Bottom Navigation Bar
-class MainNavigationShell extends StatefulWidget {
-  final int initialIndex;
-
-  const MainNavigationShell({
-    super.key,
-    this.initialIndex = 0,
-  });
+class MainNavigationShell extends ConsumerStatefulWidget {
+  const MainNavigationShell({super.key});
 
   @override
-  State<MainNavigationShell> createState() => _MainNavigationShellState();
+  ConsumerState<MainNavigationShell> createState() => _MainNavigationShellState();
 }
 
-class _MainNavigationShellState extends State<MainNavigationShell> {
-  int _currentIndex = 0;
+class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
+  int _selectedIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const SearchScreen(),
-    const CreateListingPlaceholder(),
-    const FavoritesScreen(),
-    const ProfileScreen(),
-  ];
+  void _onItemTapped(int index) {
+    if (index == 2) return; // FAB button
+    setState(() => _selectedIndex = index);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final screens = [
+      const HomeScreen(),
+      const FavoritesScreen(),
+      const Center(child: Text('')), // Placeholder for FAB
+      const MessagesScreen(),
+      const ProfileScreen(),
+    ];
+
     return Scaffold(
+      backgroundColor: AppColors.zinc50,
       body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
+        index: _selectedIndex,
+        children: screens,
       ),
-      bottomNavigationBar: WaveBottomNav(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          if (index == 2) {
-            // Create Listing - Show placeholder for now
-            _showCreateListingInfo();
-          } else {
-            setState(() => _currentIndex = index);
-          }
-        },
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const CreateListingScreen()),
+        ),
+        backgroundColor: AppColors.navy900,
+        elevation: 8,
+        child: const Icon(Icons.add, color: Colors.white, size: 30),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        elevation: 8,
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 6,
+        child: SizedBox(
+          height: 60,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(Icons.home_rounded, "Home", 0),
+              _buildNavItem(Icons.favorite_rounded, "Saved", 1),
+              const SizedBox(width: 36), // Space for FAB
+              _buildNavItem(Icons.chat_bubble_outline_rounded, "Messages", 3),
+              _buildNavItem(Icons.person_outline_rounded, "Profile", 4),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  void _showCreateListingInfo() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const CreateListingScreen(),
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    final isSelected = _selectedIndex == index;
+    return Expanded(
+      child: InkWell(
+        onTap: () => _onItemTapped(index),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? AppColors.navy900 : AppColors.zinc400,
+              size: 26,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? AppColors.navy900 : AppColors.zinc500,
+              ),
+            ),
+          ],
+        ),
       ),
-    );
-  }
-}
-
-/// Placeholder for Create Listing Screen
-class CreateListingPlaceholder extends StatelessWidget {
-  const CreateListingPlaceholder({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const WaveEmptyState(
-      icon: Icons.add_circle_outline,
-      title: 'Create Listing',
-      subtitle: 'This feature is coming soon',
     );
   }
 }
