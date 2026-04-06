@@ -177,6 +177,28 @@ final conversationsProvider = StateNotifierProvider<ConversationsNotifier, Conve
   return ConversationsNotifier(ref.watch(messageServiceProvider));
 });
 
+/// Unread messages count provider - sums unreadCount from all conversations
+final unreadMessagesCountProvider = StreamProvider<int>((ref) async* {
+  final service = ref.watch(messageServiceProvider);
+  while (true) {
+    try {
+      final response = await service.getConversations(page: 1, perPage: 100);
+      if (response.success) {
+        final totalUnread = response.conversations.fold<int>(
+          0,
+          (sum, conv) => sum + (conv.unreadCount ?? 0),
+        );
+        yield totalUnread;
+      } else {
+        yield 0;
+      }
+    } catch (e) {
+      yield 0;
+    }
+    await Future.delayed(const Duration(seconds: 30));
+  }
+});
+
 class ConversationsNotifier extends StateNotifier<ConversationsState> {
   final MessageService _messageService;
   ConversationsNotifier(this._messageService) : super(const ConversationsState.initial());

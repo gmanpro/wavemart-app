@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../providers/app_providers.dart';
 import '../home/home_screen.dart';
 import '../favorites/favorites_screen.dart';
 import '../messages/messages_screen.dart';
@@ -31,6 +32,14 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
       const MessagesScreen(),
       const ProfileScreen(),
     ];
+
+    // Watch unread messages count
+    final unreadMessagesAsync = ref.watch(unreadMessagesCountProvider);
+    final unreadCount = unreadMessagesAsync.when(
+      data: (count) => count,
+      loading: () => 0,
+      error: (_, __) => 0,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.zinc50,
@@ -72,12 +81,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
               _buildNavItem(Icons.home_rounded, "Home", 0),
               _buildNavItem(Icons.favorite_rounded, "Saved", 1),
               const SizedBox(width: 48), // Space for FAB notch
-              _buildNavItemWithBadge(
-                Icons.chat_bubble_outline_rounded,
-                "Messages",
-                3,
-                badgeCount: 2,
-              ),
+              _buildMessagesNavItem(unreadCount),
               _buildNavItem(Icons.person_outline_rounded, "Profile", 4),
             ],
           ),
@@ -115,36 +119,38 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
     );
   }
 
-  Widget _buildNavItemWithBadge(
-    IconData icon,
-    String label,
-    int index, {
-    required int badgeCount,
-  }) {
-    final isSelected = _selectedIndex == index;
+  Widget _buildMessagesNavItem(int unreadCount) {
+    final isSelected = _selectedIndex == 3;
     return Expanded(
       child: InkWell(
-        onTap: () => _onItemTapped(index),
+        onTap: () => _onItemTapped(3),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Badge(
-              label: Text(
-                '$badgeCount',
-                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-              ),
-              backgroundColor: AppColors.wave500,
-              textColor: Colors.white,
-              child: Icon(
-                icon,
+            if (unreadCount > 0)
+              Badge(
+                label: Text(
+                  '$unreadCount',
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                ),
+                backgroundColor: AppColors.wave500,
+                textColor: Colors.white,
+                child: Icon(
+                  Icons.chat_bubble_outline_rounded,
+                  color: isSelected ? AppColors.navy900 : AppColors.zinc400,
+                  size: 26,
+                ),
+              )
+            else
+              Icon(
+                Icons.chat_bubble_outline_rounded,
                 color: isSelected ? AppColors.navy900 : AppColors.zinc400,
                 size: 26,
               ),
-            ),
             const SizedBox(height: 4),
             Text(
-              label,
+              "Messages",
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
