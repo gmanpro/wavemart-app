@@ -49,10 +49,11 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
       ),
       floatingActionButton: Container(
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: AppColors.navy900.withOpacity(0.3),
+              color: Colors.black.withOpacity(0.1),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -62,17 +63,32 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const CreateListingScreen()),
           ),
-          backgroundColor: AppColors.navy900,
+          backgroundColor: Colors.transparent,
           elevation: 0,
-          child: const Icon(Icons.add, color: Colors.white, size: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.add, color: AppColors.navy900, size: 28),
+              const SizedBox(height: 2),
+              Text(
+                "List",
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.navy900,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
-        elevation: 4,
+        elevation: 8,
+        shadowColor: Colors.black.withOpacity(0.1),
         shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
+        notchMargin: 6.0,
         child: SizedBox(
           height: 64,
           child: Row(
