@@ -44,13 +44,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
-          // 1. Top Header with Profile and Greeting
+          // 1. Top Header with Profile, Greeting, and Search
           SliverToBoxAdapter(child: _buildTopHeader(userFirstName)),
 
-          // 2. Search Bar with Filter Button
-          SliverToBoxAdapter(child: _buildSearchBar()),
-
-          // 3. Section Header
+          // 2. Section Header
           SliverToBoxAdapter(child: _buildSectionHeader("Latest Listings")),
 
           // 4. Content
@@ -98,113 +95,119 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildTopHeader(String name) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-        child: Row(
-          children: [
-            // Avatar
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.navy100,
-              ),
-              child: const Icon(Icons.person, color: AppColors.navy600, size: 28),
-            ),
-            const SizedBox(width: 12),
-            // Greeting
-            Expanded(
-              child: Text(
-                "Hi, $name",
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ),
-            // Notification Bell
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.zinc200),
-              ),
-              child: const Icon(Icons.notifications_outlined,
-                  color: AppColors.navy600, size: 24),
-            ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.navy950,
+            AppColors.navy900,
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Row(
-        children: [
-          // Search Input
-          Expanded(
-            child: GestureDetector(
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const SearchScreen()),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Profile Row
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              child: Row(
+                children: [
+                  // Avatar
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.navy700,
+                      border: Border.all(color: AppColors.navy600, width: 2),
+                    ),
+                    child: const Icon(Icons.person, color: Colors.white, size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  // Greeting
+                  Expanded(
+                    child: Text(
+                      "Hi, $name",
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  // Notification Bell
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.navy800,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.navy700),
+                    ),
+                    child: const Icon(Icons.notifications_outlined,
+                        color: Colors.white, size: 22),
+                  ),
+                ],
               ),
+            ),
+
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
               child: Container(
-                height: 54,
+                height: 52,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.navy800.withOpacity(0.6),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.zinc200),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    )
-                  ],
+                  border: Border.all(color: AppColors.navy700),
                 ),
                 child: Row(
                   children: [
                     const SizedBox(width: 16),
-                    const Icon(Icons.search, color: AppColors.navy500, size: 22),
+                    const Icon(Icons.search, color: Colors.white70, size: 22),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        "Search City, Region, or Property...",
-                        style: TextStyle(
-                          color: AppColors.navy400,
-                          fontSize: 15,
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const SearchScreen()),
+                        ),
+                        child: Text(
+                          "Search City, Region, or Property...",
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                     ),
+                    const SizedBox(width: 12),
+                    Container(
+                      width: 1,
+                      height: 24,
+                      color: AppColors.navy700,
+                    ),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () {
+                        // TODO: Open filter modal
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.navy700,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.tune_rounded, color: Colors.white, size: 18),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                   ],
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          // Filter Button
-          Container(
-            height: 54,
-            width: 54,
-            decoration: BoxDecoration(
-              color: AppColors.navy900,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.navy900.withOpacity(0.25),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: const Icon(Icons.tune_rounded, color: Colors.white, size: 24),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

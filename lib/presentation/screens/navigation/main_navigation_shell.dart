@@ -38,31 +38,55 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
         index: _selectedIndex,
         children: screens,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const CreateListingScreen()),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.navy900.withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        backgroundColor: AppColors.navy900,
-        elevation: 8,
-        child: const Icon(Icons.add, color: Colors.white, size: 30),
+        child: FloatingActionButton(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const CreateListingScreen()),
+          ),
+          backgroundColor: AppColors.navy900,
+          elevation: 0,
+          child: const Icon(Icons.add, color: Colors.white, size: 32),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        elevation: 8,
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 6,
-        child: SizedBox(
-          height: 60,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(Icons.home_rounded, "Home", 0),
-              _buildNavItem(Icons.favorite_rounded, "Saved", 1),
-              const SizedBox(width: 36), // Space for FAB
-              _buildNavItem(Icons.chat_bubble_outline_rounded, "Messages", 3),
-              _buildNavItem(Icons.person_outline_rounded, "Profile", 4),
-            ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: BottomAppBar(
+          color: Colors.transparent,
+          elevation: 0,
+          shape: const CircularNotchedRectangle(),
+          notchMargin: 8,
+          child: SizedBox(
+            height: 64,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(Icons.home_rounded, "Home", 0),
+                _buildNavItem(Icons.favorite_rounded, "Saved", 1),
+                const SizedBox(width: 40), // Space for FAB
+                _buildNavItem(Icons.chat_bubble_outline_rounded, "Messages", 3),
+                _buildNavItem(Icons.person_outline_rounded, "Profile", 4),
+              ],
+            ),
           ),
         ),
       ),
