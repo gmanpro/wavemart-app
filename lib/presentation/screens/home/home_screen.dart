@@ -44,8 +44,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
-          // 1. Top Header with Profile, Greeting, and Search
-          SliverToBoxAdapter(child: _buildTopHeader(userFirstName)),
+          // 1. Sticky Top Header with Profile, Greeting, and Search
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _StickyHeaderDelegate(
+              child: _buildTopHeader(userFirstName),
+            ),
+          ),
 
           // 2. Section Header
           SliverToBoxAdapter(child: _buildSectionHeader("Latest Listings")),
@@ -173,7 +178,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           MaterialPageRoute(builder: (_) => const SearchScreen()),
                         ),
                         child: Text(
-                          "Search City, Region, or Property...",
+                          "Search City or Region...",
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.6),
                             fontSize: 15,
@@ -223,5 +228,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
     );
+  }
+}
+
+/// Sticky header delegate for persistent header
+class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+
+  _StickyHeaderDelegate({required this.child});
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return child;
+  }
+
+  @override
+  double get maxExtent => 160; // Approximate header height
+
+  @override
+  double get minExtent => 160;
+
+  @override
+  bool shouldRebuild(_StickyHeaderDelegate oldDelegate) {
+    return oldDelegate.child != child;
   }
 }

@@ -74,7 +74,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
           color: Colors.transparent,
           elevation: 0,
           shape: const CircularNotchedRectangle(),
-          notchMargin: 8,
+          notchMargin: 8.0,
           child: SizedBox(
             height: 64,
             child: Row(
@@ -83,7 +83,12 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
                 _buildNavItem(Icons.home_rounded, "Home", 0),
                 _buildNavItem(Icons.favorite_rounded, "Saved", 1),
                 const SizedBox(width: 40), // Space for FAB
-                _buildNavItem(Icons.chat_bubble_outline_rounded, "Messages", 3),
+                _buildNavItemWithBadge(
+                  Icons.chat_bubble_outline_rounded,
+                  "Messages",
+                  3,
+                  badgeCount: 2,
+                ),
                 _buildNavItem(Icons.person_outline_rounded, "Profile", 4),
               ],
             ),
@@ -106,6 +111,48 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
               icon,
               color: isSelected ? AppColors.navy900 : AppColors.zinc400,
               size: 26,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? AppColors.navy900 : AppColors.zinc500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItemWithBadge(
+    IconData icon,
+    String label,
+    int index, {
+    required int badgeCount,
+  }) {
+    final isSelected = _selectedIndex == index;
+    return Expanded(
+      child: InkWell(
+        onTap: () => _onItemTapped(index),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Badge(
+              label: Text(
+                '$badgeCount',
+                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+              ),
+              backgroundColor: AppColors.wave500,
+              textColor: Colors.white,
+              child: Icon(
+                icon,
+                color: isSelected ? AppColors.navy900 : AppColors.zinc400,
+                size: 26,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
