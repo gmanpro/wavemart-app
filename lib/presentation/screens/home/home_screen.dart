@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/listing_provider.dart';
@@ -48,10 +49,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             SliverToBoxAdapter(child: _buildAppBar()),
 
             if (featuredState.isLoading && featuredState.listings.isEmpty)
-              const SliverFillRemaining(
-                child: Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.wave500),
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: _CardSkeleton(),
+                    ),
+                    childCount: 3,
                   ),
                 ),
               )
@@ -223,6 +229,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _openListing(int id) => Navigator.of(
         context,
       ).push(MaterialPageRoute(builder: (_) => ListingDetailScreen(listingId: id)));
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 100, 24, 24),
+      child: Column(
+        children: [
+          Icon(Icons.home_outlined, size: 64, color: AppColors.navy300),
+          const SizedBox(height: 16),
+          Text('No Listings Yet', style: AppTextStyles.title),
+          const SizedBox(height: 8),
+          Text(
+            'New listings will appear here soon',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.navy500),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CardSkeleton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: AppColors.zinc200,
+      highlightColor: AppColors.zinc50,
+      child: Container(
+        height: 280,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+    );
+  }
 }
 
 class _EmptyState extends StatelessWidget {

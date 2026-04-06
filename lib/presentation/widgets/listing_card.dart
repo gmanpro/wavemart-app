@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/text_styles.dart';
 import '../../../data/models/listing.dart';
@@ -73,10 +75,15 @@ class PropertyListingCard extends StatelessWidget {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
           child: AspectRatio(
             aspectRatio: 4 / 3,
-            child: Image.network(
-              listing?.mainImageUrl ?? '',
+            child: CachedNetworkImage(
+              imageUrl: listing?.mainImageUrl ?? '',
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+              placeholder: (_, __) => Shimmer.fromColors(
+                baseColor: AppColors.zinc100,
+                highlightColor: AppColors.zinc50,
+                child: Container(color: AppColors.zinc100),
+              ),
+              errorWidget: (_, __, ___) => Container(
                 color: AppColors.zinc100,
                 child: const Icon(
                   Icons.home_outlined,
@@ -84,21 +91,6 @@ class PropertyListingCard extends StatelessWidget {
                   color: AppColors.zinc300,
                 ),
               ),
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Container(
-                  color: AppColors.zinc100,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                      color: AppColors.wave500,
-                    ),
-                  ),
-                );
-              },
             ),
           ),
         ),

@@ -15,7 +15,9 @@
       "Bash(rm *)",
       "Read(//root/Downloads/**)",
       "Bash(curl *)",
-      "Bash(gh *)"
+      "Bash(gh *)",
+      "Bash(adb *)",
+      "Bash(sleep *)"
     ]
   },
   "$version": 3

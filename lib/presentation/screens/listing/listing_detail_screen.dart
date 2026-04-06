@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/listing_provider.dart';
@@ -75,7 +77,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
   }
 
   Widget _buildContent(
-    dynamic listing,
+    Listing listing,
     FavoritesState favState,
     dynamic authState,
   ) {
@@ -147,7 +149,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
     );
   }
 
-  Widget _buildImageGallery(dynamic listing) {
+  Widget _buildImageGallery(Listing listing) {
     if (listing.images.isEmpty) {
       return Container(
         color: AppColors.navy100,
@@ -166,10 +168,15 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
             setState(() => _currentImageIndex = index);
           },
           itemBuilder: (context, index) {
-            return Image.network(
-              listing.images[index].imageUrl ?? '',
+            return CachedNetworkImage(
+              imageUrl: listing.images[index].imageUrl,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+              placeholder: (_, __) => Shimmer.fromColors(
+                baseColor: AppColors.navy100,
+                highlightColor: AppColors.navy50,
+                child: Container(color: AppColors.navy100),
+              ),
+              errorWidget: (_, __, ___) => Container(
                 color: AppColors.navy100,
                 child: const Icon(Icons.broken_image, size: 64),
               ),
