@@ -162,7 +162,9 @@ class Listing extends ChangeNotifier {
       description: json['description'] ??
           (property is Map ? property['description'] : null),
       images: images,
-      address: json['address'] != null ? Address.fromJson(json['address']) : null,
+      address: (json['address'] is Map)
+          ? Address.fromJson(json['address'] as Map<String, dynamic>)
+          : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : DateTime.now(),

@@ -31,16 +31,31 @@ class ListingService {
       );
 
       if (response.statusCode == 200) {
-        final listings = (response.data['data'] as List)
-            .map((json) => Listing.fromJson(json))
+        final data = response.data['data'] ?? response.data;
+
+        List<dynamic> dataList = [];
+        if (data is List) {
+          dataList = data;
+        } else if (data is Map) {
+          final listRaw = data['data'] ?? data['listings'] ?? data['items'];
+          if (listRaw is List) dataList = listRaw;
+        }
+
+        final listings = dataList
+            .whereType<Map>()
+            .map((json) => Listing.fromJson(json as Map<String, dynamic>))
             .toList();
+
+        int currentPage = _safeInt(data['current_page']) ?? page;
+        int totalPages = _safeInt(data['last_page']) ?? 1;
+        int total = _safeInt(data['total']) ?? 0;
 
         return ListingResponse(
           success: true,
           listings: listings,
-          currentPage: response.data['current_page'] ?? page,
-          totalPages: response.data['last_page'] ?? 1,
-          total: response.data['total'] ?? 0,
+          currentPage: currentPage,
+          totalPages: totalPages,
+          total: total,
         );
       }
 
@@ -55,6 +70,15 @@ class ListingService {
         message: exception.toString().replaceAll(RegExp(r'^\w+: '), ''),
       );
     }
+  }
+
+  /// Safely convert dynamic value to int
+  int? _safeInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
   /// Get featured listings only

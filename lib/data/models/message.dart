@@ -27,18 +27,51 @@ class Conversation {
   });
 
   factory Conversation.fromJson(Map<String, dynamic> json) {
+    // Extract sender/receiver info from nested relationships if available
+    String? senderName;
+    String? receiverName;
+    if (json['sender'] is Map) {
+      final sender = json['sender'] as Map<String, dynamic>;
+      senderName = '${sender['first_name'] ?? ''} ${sender['last_name'] ?? ''}'.trim();
+    }
+    if (json['receiver'] is Map) {
+      final receiver = json['receiver'] as Map<String, dynamic>;
+      receiverName = '${receiver['first_name'] ?? ''} ${receiver['last_name'] ?? ''}'.trim();
+    }
+
+    // Get last message from latestMessage relationship
+    String? lastMsg;
+    if (json['latest_message'] is Map) {
+      lastMsg = json['latest_message']['body'] ?? json['latest_message']['message'];
+    } else if (json['last_message'] != null) {
+      lastMsg = json['last_message'];
+    }
+
+    // Get subject from listing relationship
+    String? subj;
+    if (json['listing'] is Map) {
+      final listing = json['listing'] as Map<String, dynamic>;
+      subj = listing['title'] ?? (listing['property_type'] == 'house' ? 'House Listing' : 'Land Listing');
+    }
+
+    // Handle both unread_count and total_unread_count field names
+    int? unreadVal = _safeInt(json['unread_count']);
+    if (unreadVal == null) {
+      unreadVal = _safeInt(json['total_unread_count']);
+    }
+
     return Conversation(
       id: _safeInt(json['id']) ?? 0,
       senderId: _safeInt(json['sender_id']) ?? 0,
       receiverId: _safeInt(json['receiver_id']) ?? 0,
       listingId: _safeInt(json['listing_id']),
       type: json['type'],
-      subject: json['subject'],
-      lastMessage: json['last_message'],
+      subject: subj ?? json['subject'],
+      lastMessage: lastMsg,
       lastMessageAt: json['last_message_at'] != null
           ? DateTime.parse(json['last_message_at'])
           : null,
-      unreadCount: _safeInt(json['unread_count']),
+      unreadCount: unreadVal,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : DateTime.now(),
