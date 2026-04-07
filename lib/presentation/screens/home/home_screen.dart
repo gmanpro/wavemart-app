@@ -24,11 +24,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(featuredListingsProvider.notifier).loadFeaturedListings();
+      ref.read(listingsProvider.notifier).loadListings();
     });
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final state = ref.read(listingsProvider);
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !state.isLoading &&
+        !state.isLoadingMore &&
+        state.hasMore) {
+      ref.read(listingsProvider.notifier).loadListings(page: state.currentPage + 1);
+    }
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
@@ -37,6 +51,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
     final featuredState = ref.watch(featuredListingsProvider);
+    final listingsState = ref.watch(listingsProvider);
     final userFirstName = authState.user?.firstName ?? 'User';
 
     return Scaffold(
@@ -44,7 +59,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
-          // 1. Sticky Top Header with Profile, Greeting, and Search
+          // 1. Sticky Top Header
           SliverPersistentHeader(
             pinned: true,
             delegate: _StickyHeaderDelegate(
@@ -52,48 +67,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
 
-          // 2. Section Header
+          // 2. Featured Listings Header
+          SliverToBoxAdapter(child: _buildSectionHeader("Featured Listings")),
+
+          // 3. Featured Listings
+          SliverToBoxAdapter(child: _buildFeaturedListings(featuredState)),
+
+          // 4. Latest Listings Header
           SliverToBoxAdapter(child: _buildSectionHeader("Latest Listings")),
 
-          // 4. Content
-          if (featuredState.isLoading)
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  for (int i = 0; i < 3; i++)
-                    const PropertyListingCard(isLoading: true),
-                ]),
-              ),
-            )
-          else if (featuredState.listings.isEmpty)
-            const SliverFillRemaining(
-              child: Center(child: Text("No listings available")),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final listing = featuredState.listings[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: PropertyListingCard(
-                        listing: listing,
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                ListingDetailScreen(listingId: listing.id),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                  childCount: featuredState.listings.length,
-                ),
-              ),
-            ),
+          // 5. Latest Listings
+          _buildLatestListings(listingsState),
         ],
       ),
     );
@@ -101,117 +85,85 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildTopHeader(String name) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            AppColors.navy950,
-            AppColors.navy900,
-          ],
+          colors: [AppColors.navy950, AppColors.navy900],
         ),
       ),
       child: SafeArea(
-        child: Column(
-          children: [
-            // Profile Row
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-              child: Row(
-                children: [
-                  // Avatar
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.navy700,
-                      border: Border.all(color: AppColors.navy600, width: 2),
-                    ),
-                    child: const Icon(Icons.person, color: Colors.white, size: 24),
-                  ),
-                  const SizedBox(width: 12),
-                  // Greeting
-                  Expanded(
-                    child: Text(
-                      "Hi, $name",
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  // Notification Bell
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.navy800,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.navy700),
-                    ),
-                    child: const Icon(Icons.notifications_outlined,
-                        color: Colors.white, size: 22),
-                  ),
-                ],
-              ),
-            ),
-
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: Container(
-                height: 52,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+          child: Row(
+            children: [
+              // Avatar
+              Container(
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.navy800.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(14),
+                  shape: BoxShape.circle,
+                  color: AppColors.navy700,
+                  border: Border.all(color: AppColors.navy600, width: 2),
+                ),
+                child: const Icon(Icons.person, color: Colors.white, size: 24),
+              ),
+              const SizedBox(width: 12),
+              // Greeting
+              Expanded(
+                child: Text(
+                  "Hi, $name",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              // Search icon
+              GestureDetector(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SearchScreen()),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.navy800,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.navy700),
+                  ),
+                  child: const Icon(Icons.search, color: Colors.white, size: 22),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Filter icon
+              GestureDetector(
+                onTap: () {
+                  // TODO: Open filter modal
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.navy800,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.navy700),
+                  ),
+                  child: const Icon(Icons.tune_rounded, color: Colors.white, size: 22),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Notification Bell
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.navy800,
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.navy700),
                 ),
-                child: Row(
-                  children: [
-                    const SizedBox(width: 16),
-                    const Icon(Icons.search, color: Colors.white70, size: 22),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const SearchScreen()),
-                        ),
-                        child: Text(
-                          "Search City or Region...",
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      width: 1,
-                      height: 24,
-                      color: AppColors.navy700,
-                    ),
-                    const SizedBox(width: 12),
-                    GestureDetector(
-                      onTap: () {
-                        // TODO: Open filter modal
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.navy700,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.tune_rounded, color: Colors.white, size: 18),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                  ],
-                ),
+                child: const Icon(Icons.notifications_outlined, color: Colors.white, size: 22),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -225,6 +177,108 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         style: AppTextStyles.title.copyWith(
           fontSize: 20,
           fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeaturedListings(ListingsState state) {
+    if (state.isLoading) {
+      return SizedBox(
+        height: 310,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: 3,
+          itemBuilder: (context, index) => const Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: SizedBox(
+              width: 280,
+              child: PropertyListingCard(isLoading: true),
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (state.listings.isEmpty) {
+      return const SizedBox(
+        height: 100,
+        child: Center(child: Text("No featured listings available")),
+      );
+    }
+
+    return SizedBox(
+      height: 310,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: state.listings.length,
+        itemBuilder: (context, index) {
+          final listing = state.listings[index];
+          return Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: SizedBox(
+              width: 280,
+              child: PropertyListingCard(
+                listing: listing,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ListingDetailScreen(listingId: listing.id),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildLatestListings(ListingsState state) {
+    if (state.isLoading && state.listings.isEmpty) {
+      return SliverPadding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+        sliver: SliverList(
+          delegate: SliverChildListDelegate([
+            for (int i = 0; i < 3; i++)
+              const PropertyListingCard(isLoading: true),
+          ]),
+        ),
+      );
+    }
+
+    if (state.listings.isEmpty) {
+      return const SliverFillRemaining(
+        child: Center(child: Text("No latest listings available")),
+      );
+    }
+
+    return SliverPadding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            if (index == state.listings.length) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final listing = state.listings[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: PropertyListingCard(
+                listing: listing,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ListingDetailScreen(listingId: listing.id),
+                  ),
+                ),
+              ),
+            );
+          },
+          childCount: state.listings.length + (state.isLoadingMore ? 1 : 0),
         ),
       ),
     );
@@ -243,10 +297,10 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 160; // Approximate header height
+  double get maxExtent => 100; // Approximate header height
 
   @override
-  double get minExtent => 160;
+  double get minExtent => 100;
 
   @override
   bool shouldRebuild(_StickyHeaderDelegate oldDelegate) {

@@ -54,9 +54,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
         ),
         backgroundColor: Colors.white,
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: const CircleBorder(),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
