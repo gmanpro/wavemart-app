@@ -118,9 +118,9 @@ class Listing extends ChangeNotifier {
     }
 
     return Listing(
-      id: _safeInt(json['id'], defaultValue: 0),
-      userId: _safeInt(json['user_id'], defaultValue: 0),
-      propertyId: _safeInt(json['property_id'], defaultValue: 0),
+      id: _safeInt(json['id'], defaultValue: 0)!,
+      userId: _safeInt(json['user_id']),
+      propertyId: _safeInt(json['property_id']),
       propertyType: PropertyType.values.firstWhere(
         (e) => e.toString().split('.').last == (json['property_type'] ?? 'house'),
         orElse: () => PropertyType.house,
