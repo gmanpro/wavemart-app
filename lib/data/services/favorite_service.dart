@@ -26,16 +26,37 @@ class FavoriteService {
 
       if (response.statusCode == 200) {
         final data = response.data['data'] ?? response.data;
-        final listings = (data['data'] as List)
-            .map((json) => Listing.fromJson(json))
+
+        // Handle different response structures safely
+        List<dynamic> dataList = [];
+        if (data is Map) {
+          final dataListRaw = data['data'] ?? data['listings'] ?? data['items'];
+          if (dataListRaw is List) {
+            dataList = dataListRaw;
+          } else if (dataListRaw is Map) {
+            // Some APIs return data as a map with numeric keys
+            dataList = dataListRaw.values.toList();
+          }
+        } else if (data is List) {
+          dataList = data;
+        }
+
+        final listings = dataList
+            .whereType<Map>()
+            .map((json) => Listing.fromJson(json as Map<String, dynamic>))
             .toList();
+
+        // Safely parse pagination fields
+        int currentPage = _safeInt(data['current_page']) ?? page;
+        int totalPages = _safeInt(data['last_page']) ?? 1;
+        int total = _safeInt(data['total']) ?? 0;
 
         return FavoriteResponse(
           success: true,
           listings: listings,
-          currentPage: data['current_page'] ?? page,
-          totalPages: data['last_page'] ?? 1,
-          total: data['total'] ?? 0,
+          currentPage: currentPage,
+          totalPages: totalPages,
+          total: total,
         );
       }
 
@@ -50,6 +71,15 @@ class FavoriteService {
         message: exception.toString().replaceAll(RegExp(r'^\w+: '), ''),
       );
     }
+  }
+
+  /// Safely convert dynamic value to int
+  int? _safeInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
   /// Add listing to favorites

@@ -28,17 +28,17 @@ class Conversation {
 
   factory Conversation.fromJson(Map<String, dynamic> json) {
     return Conversation(
-      id: json['id'] ?? 0,
-      senderId: json['sender_id'] ?? 0,
-      receiverId: json['receiver_id'] ?? 0,
-      listingId: json['listing_id'],
+      id: _safeInt(json['id']) ?? 0,
+      senderId: _safeInt(json['sender_id']) ?? 0,
+      receiverId: _safeInt(json['receiver_id']) ?? 0,
+      listingId: _safeInt(json['listing_id']),
       type: json['type'],
       subject: json['subject'],
       lastMessage: json['last_message'],
       lastMessageAt: json['last_message_at'] != null
           ? DateTime.parse(json['last_message_at'])
           : null,
-      unreadCount: json['unread_count'],
+      unreadCount: _safeInt(json['unread_count']),
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : DateTime.now(),
@@ -46,6 +46,16 @@ class Conversation {
           ? DateTime.parse(json['updated_at'])
           : null,
     );
+  }
+
+  /// Safely convert dynamic value to int
+  static int? _safeInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    if (value is bool) return value ? 1 : 0;
+    return null;
   }
 
   String get displayTitle {

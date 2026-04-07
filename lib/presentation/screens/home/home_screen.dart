@@ -185,7 +185,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildFeaturedListings(ListingsState state) {
     if (state.isLoading) {
       return SizedBox(
-        height: 310,
+        height: 180,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -203,13 +203,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     if (state.listings.isEmpty) {
       return const SizedBox(
-        height: 100,
+        height: 80,
         child: Center(child: Text("No featured listings available")),
       );
     }
 
     return SizedBox(
-      height: 310,
+      height: 180,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -220,7 +220,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             padding: const EdgeInsets.only(right: 16),
             child: SizedBox(
               width: 280,
-              child: PropertyListingCard(
+              child: FeaturedListingCard(
                 listing: listing,
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(

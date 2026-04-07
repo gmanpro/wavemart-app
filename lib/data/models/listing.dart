@@ -12,6 +12,16 @@ double? _parseDouble(dynamic value) {
   return null;
 }
 
+// Helper to safely parse ints from strings or numbers
+int? _safeInt(dynamic value, {int defaultValue = 0}) {
+  if (value == null) return defaultValue;
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? defaultValue;
+  if (value is bool) return value ? 1 : 0;
+  return defaultValue;
+}
+
 /// Property types
 enum PropertyType { house, land }
 
@@ -108,9 +118,9 @@ class Listing extends ChangeNotifier {
     }
 
     return Listing(
-      id: json['id'] ?? 0,
-      userId: json['user_id'],
-      propertyId: json['property_id'],
+      id: _safeInt(json['id'], defaultValue: 0),
+      userId: _safeInt(json['user_id'], defaultValue: 0),
+      propertyId: _safeInt(json['property_id'], defaultValue: 0),
       propertyType: PropertyType.values.firstWhere(
         (e) => e.toString().split('.').last == (json['property_type'] ?? 'house'),
         orElse: () => PropertyType.house,
@@ -135,7 +145,7 @@ class Listing extends ChangeNotifier {
       featuredUntil: json['featured_until'] != null
           ? DateTime.parse(json['featured_until'])
           : null,
-      addressId: json['address_id'],
+      addressId: _safeInt(json['address_id']),
       specificLocation: json['specific_location'],
       useType: json['use_type'],
       facingDirection: json['facing_direction'],

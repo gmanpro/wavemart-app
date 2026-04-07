@@ -373,3 +373,269 @@ class PropertyListingCard extends StatelessWidget {
     );
   }
 }
+
+/// Featured Listing Card - Horizontal layout with image on the left
+/// Designed for the home screen featured section with modern elegant styling
+class FeaturedListingCard extends StatelessWidget {
+  final Listing listing;
+  final VoidCallback? onTap;
+
+  const FeaturedListingCard({
+    super.key,
+    required this.listing,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.zinc200),
+          boxShadow: AppColors.shadowMd,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image Section (Left)
+            _buildImageSection(),
+
+            // Content Section (Right)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Badges Row
+                    _buildBadgesRow(),
+                    const SizedBox(height: 8),
+
+                    // Price
+                    _buildPrice(),
+                    const SizedBox(height: 4),
+
+                    // Title
+                    _buildTitle(),
+                    const SizedBox(height: 4),
+
+                    // Location
+                    _buildLocation(),
+                    const Spacer(),
+
+                    // Features Row
+                    _buildFeatures(),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageSection() {
+    return ClipRRect(
+      borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+      child: SizedBox(
+        width: 130,
+        height: double.infinity,
+        child: Stack(
+          children: [
+            // Main Image
+            Positioned.fill(
+              child: CachedNetworkImage(
+                imageUrl: listing.mainImageUrl,
+                fit: BoxFit.cover,
+                placeholder: (_, __) => Shimmer.fromColors(
+                  baseColor: Colors.grey[200]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    color: Colors.grey[300],
+                    child: const Icon(
+                      Icons.home_rounded,
+                      size: 32,
+                      color: AppColors.navy300,
+                    ),
+                  ),
+                ),
+                errorWidget: (_, __, ___) => Container(
+                  color: AppColors.navy100,
+                  child: const Icon(
+                    Icons.home_outlined,
+                    size: 36,
+                    color: AppColors.navy300,
+                  ),
+                ),
+              ),
+            ),
+
+            // Favorite Button
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.favorite_border,
+                  size: 14,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBadgesRow() {
+    return Row(
+      children: [
+        // Property Type Badge
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: AppColors.navy950,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                listing.propertyType == PropertyType.house
+                    ? Icons.home
+                    : Icons.landscape,
+                size: 12,
+                color: Colors.white,
+              ),
+              const SizedBox(width: 3),
+              Text(
+                listing.propertyType == PropertyType.house ? 'House' : 'Land',
+                style: AppTextStyles.labelSmall.copyWith(
+                  color: Colors.white,
+                  fontSize: 9,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 6),
+        if (listing.isNew)
+          _buildBadge('NEW', AppColors.emerald500),
+        if (listing.isNew && listing.isFeatured)
+          const SizedBox(width: 4),
+        if (listing.isFeatured)
+          _buildBadge('FEATURED', AppColors.wave500),
+      ],
+    );
+  }
+
+  Widget _buildBadge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        text,
+        style: AppTextStyles.badge.copyWith(
+          color: Colors.white,
+          fontSize: 9,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrice() {
+    return Text(
+      listing.displayPrice,
+      style: AppTextStyles.priceMedium.copyWith(
+        fontSize: 17,
+        fontWeight: FontWeight.w700,
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget _buildTitle() {
+    return Text(
+      listing.title,
+      style: AppTextStyles.titleSmall.copyWith(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget _buildLocation() {
+    return Row(
+      children: [
+        const Icon(
+          Icons.location_on_outlined,
+          size: 12,
+          color: AppColors.wave500,
+        ),
+        const SizedBox(width: 3),
+        Expanded(
+          child: Text(
+            listing.address?.shortAddress ??
+                listing.address?.region ??
+                'Unknown Location',
+            style: AppTextStyles.bodySmall.copyWith(
+              fontSize: 11,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeatures() {
+    return Row(
+      children: [
+        _buildFeatureChip(
+          Icons.square_foot_outlined,
+          '${listing.totalSquareMeters?.toInt() ?? 0} m²',
+        ),
+        const SizedBox(width: 4),
+        _buildFeatureChip(
+          Icons.sell_outlined,
+          listing.listingType == ListingType.sale ? 'Sale' : 'Rent',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeatureChip(IconData icon, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 13, color: AppColors.navy400),
+        const SizedBox(width: 3),
+        Text(
+          label,
+          style: AppTextStyles.caption.copyWith(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+}
