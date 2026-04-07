@@ -5,7 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/common/wave_common_widgets.dart';
-import '../../data/models/message.dart' as msg;
+import '../../../data/models/message.dart' as msg;
 
 /// Messages Screen - Conversations list
 class MessagesScreen extends ConsumerStatefulWidget {

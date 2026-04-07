@@ -4,9 +4,11 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/text_styles.dart';
 import '../../providers/listing_provider.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/listing_card.dart';
 import '../search/search_screen.dart';
 import '../listing/listing_detail_screen.dart';
+import '../../../data/models/listing.dart';
 
 /// Home Screen - Redesigned with Header, Search, and Nav integration
 class HomeScreen extends ConsumerStatefulWidget {

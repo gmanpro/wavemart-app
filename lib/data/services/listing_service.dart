@@ -42,21 +42,21 @@ class ListingService {
           final dataField = raw['data'];
           if (dataField is Map && raw['success'] != null) {
             // Wrapped format (featured, favorites)
-            meta = dataField;
+            meta = Map<String, dynamic>.from(dataField);
             final listRaw = dataField['data'] ?? dataField['listings'] ?? dataField['items'];
             if (listRaw is List) dataList = listRaw;
           } else if (dataField is List) {
             // Raw array: { data: [...] }
             dataList = dataField;
-            meta = raw;
+            meta = Map<String, dynamic>.from(raw);
           } else if (dataField is Map) {
             // Direct paginator: { current_page, data: [...], last_page, total }
-            meta = dataField;
+            meta = Map<String, dynamic>.from(dataField);
             final listRaw = dataField['data'] ?? dataField['listings'] ?? dataField['items'];
             if (listRaw is List) dataList = listRaw;
           } else if (raw['current_page'] != null) {
             // Response IS the paginator itself
-            meta = raw;
+            meta = Map<String, dynamic>.from(raw);
             final listRaw = raw['data'] ?? raw['listings'] ?? raw['items'];
             if (listRaw is List) dataList = listRaw;
           }
