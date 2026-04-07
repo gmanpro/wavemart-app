@@ -31,14 +31,37 @@ class ListingService {
       );
 
       if (response.statusCode == 200) {
-        final data = response.data['data'] ?? response.data;
+        final raw = response.data;
 
+        // Determine response structure
         List<dynamic> dataList = [];
-        if (data is List) {
-          dataList = data;
-        } else if (data is Map) {
-          final listRaw = data['data'] ?? data['listings'] ?? data['items'];
-          if (listRaw is List) dataList = listRaw;
+        Map<String, dynamic> meta = {};
+
+        if (raw is Map) {
+          // Check if wrapped: { success: true, data: { paginator } }
+          final dataField = raw['data'];
+          if (dataField is Map && raw['success'] != null) {
+            // Wrapped format (featured, favorites)
+            meta = dataField;
+            final listRaw = dataField['data'] ?? dataField['listings'] ?? dataField['items'];
+            if (listRaw is List) dataList = listRaw;
+          } else if (dataField is List) {
+            // Raw array: { data: [...] }
+            dataList = dataField;
+            meta = raw;
+          } else if (dataField is Map) {
+            // Direct paginator: { current_page, data: [...], last_page, total }
+            meta = dataField;
+            final listRaw = dataField['data'] ?? dataField['listings'] ?? dataField['items'];
+            if (listRaw is List) dataList = listRaw;
+          } else if (raw['current_page'] != null) {
+            // Response IS the paginator itself
+            meta = raw;
+            final listRaw = raw['data'] ?? raw['listings'] ?? raw['items'];
+            if (listRaw is List) dataList = listRaw;
+          }
+        } else if (raw is List) {
+          dataList = raw;
         }
 
         final listings = dataList
@@ -46,9 +69,9 @@ class ListingService {
             .map((json) => Listing.fromJson(json as Map<String, dynamic>))
             .toList();
 
-        int currentPage = _safeInt(data['current_page']) ?? page;
-        int totalPages = _safeInt(data['last_page']) ?? 1;
-        int total = _safeInt(data['total']) ?? 0;
+        int currentPage = _safeInt(meta['current_page']) ?? page;
+        int totalPages = _safeInt(meta['last_page']) ?? 1;
+        int total = _safeInt(meta['total']) ?? 0;
 
         return ListingResponse(
           success: true,

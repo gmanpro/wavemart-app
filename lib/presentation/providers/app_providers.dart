@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/services/favorite_service.dart';
 import '../../data/services/profile_service.dart';
@@ -10,6 +11,7 @@ import '../../data/services/conference_service.dart';
 import '../../data/services/interest_service.dart';
 import '../../data/services/address_service.dart';
 import '../../core/network/connectivity_service.dart';
+import '../../data/models/message.dart' as msg;
 
 /// Connectivity Provider
 final connectivityProvider = Provider<ConnectivityService>((ref) {
@@ -224,6 +226,125 @@ class ConversationsState {
   const ConversationsState.loaded({required this.conversations, this.total = 0}) : isLoading = false, errorMessage = null;
   ConversationsState copyWith({bool? isLoading, List<dynamic>? conversations, int? total, String? errorMessage}) {
     return ConversationsState(isLoading: isLoading ?? this.isLoading, conversations: conversations ?? this.conversations, total: total ?? this.total, errorMessage: errorMessage);
+  }
+}
+
+/// Chat Messages Provider - manages messages within a single conversation
+final chatMessagesProvider = StateNotifierProvider.family<ChatMessagesNotifier, ChatMessagesState, int>((ref, conversationId) {
+  return ChatMessagesNotifier(ref.watch(messageServiceProvider), conversationId);
+});
+
+class ChatMessagesNotifier extends StateNotifier<ChatMessagesState> {
+  final MessageService _messageService;
+  final int conversationId;
+  Timer? _pollTimer;
+
+  ChatMessagesNotifier(this._messageService, this.conversationId)
+      : super(const ChatMessagesState.initial()) {
+    loadMessages();
+    _startPolling();
+  }
+
+  void _startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(seconds: 10), (_) => _pollNewMessages());
+  }
+
+  Future<void> loadMessages({int page = 1}) async {
+    if (page == 1) {
+      state = state.copyWith(isLoading: true, errorMessage: null);
+    }
+
+    final response = await _messageService.getConversationMessages(
+      conversationId: conversationId,
+      page: page,
+    );
+
+    if (response.success) {
+      final newMessages = page == 1
+          ? response.messages
+          : [...state.messages, ...response.messages];
+
+      state = ChatMessagesState.loaded(
+        messages: newMessages,
+        hasMore: response.messages.length >= 50,
+      );
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: response.message);
+    }
+  }
+
+  Future<void> _pollNewMessages() async {
+    if (state.messages.isEmpty) return;
+    try {
+      final lastMessage = state.messages.last;
+      final response = await _messageService.fetchNewMessages(
+        conversationId: conversationId,
+        after: lastMessage.createdAt,
+      );
+      if (response.success && response.messages.isNotEmpty) {
+        state = state.copyWith(messages: [...state.messages, ...response.messages]);
+      }
+    } catch (_) {
+      // Silently ignore polling errors
+    }
+  }
+
+  Future<bool> sendMessage(String body) async {
+    final response = await _messageService.sendMessage(
+      conversationId: conversationId,
+      body: body,
+    );
+    if (response.success) {
+      await loadMessages();
+    }
+    return response.success;
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+}
+
+class ChatMessagesState {
+  final bool isLoading;
+  final List<msg.Message> messages;
+  final bool hasMore;
+  final String? errorMessage;
+
+  const ChatMessagesState({
+    required this.isLoading,
+    this.messages = const [],
+    this.hasMore = false,
+    this.errorMessage,
+  });
+
+  const ChatMessagesState.initial()
+      : isLoading = true,
+        messages = const [],
+        hasMore = false,
+        errorMessage = null;
+
+  const ChatMessagesState.loaded({
+    required this.messages,
+    this.hasMore = false,
+  })  : isLoading = false,
+        errorMessage = null;
+
+  ChatMessagesState copyWith({
+    bool? isLoading,
+    List<msg.Message>? messages,
+    bool? hasMore,
+    String? errorMessage,
+  }) {
+    return ChatMessagesState(
+      isLoading: isLoading ?? this.isLoading,
+      messages: messages ?? this.messages,
+      hasMore: hasMore ?? this.hasMore,
+      errorMessage: errorMessage,
+    );
   }
 }
 

@@ -131,10 +131,10 @@ class Message {
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
-      id: json['id'] ?? 0,
-      conversationId: json['conversation_id'] ?? 0,
-      senderId: json['sender_id'] ?? 0,
-      body: json['body'] ?? '',
+      id: _safeInt(json['id']) ?? 0,
+      conversationId: _safeInt(json['conversation_id']) ?? 0,
+      senderId: _safeInt(json['sender_id']) ?? 0,
+      body: json['body'] ?? json['message'] ?? '',
       isRead: json['is_read'] ?? false,
       readAt: json['read_at'] != null ? DateTime.parse(json['read_at']) : null,
       attachmentUrl: json['attachment_url'],
@@ -143,6 +143,16 @@ class Message {
           ? DateTime.parse(json['created_at'])
           : DateTime.now(),
     );
+  }
+
+  /// Safely convert dynamic value to int
+  static int? _safeInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    if (value is bool) return value ? 1 : 0;
+    return null;
   }
 
   String get displayTime {

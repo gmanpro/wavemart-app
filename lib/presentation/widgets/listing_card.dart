@@ -379,11 +379,15 @@ class PropertyListingCard extends StatelessWidget {
 class FeaturedListingCard extends StatelessWidget {
   final Listing listing;
   final VoidCallback? onTap;
+  final bool isFavorite;
+  final VoidCallback? onFavorite;
 
   const FeaturedListingCard({
     super.key,
     required this.listing,
     this.onTap,
+    this.isFavorite = false,
+    this.onFavorite,
   });
 
   @override
@@ -479,16 +483,21 @@ class FeaturedListingCard extends StatelessWidget {
             Positioned(
               top: 8,
               right: 8,
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.favorite_border,
-                  size: 14,
-                  color: Colors.white,
+              child: GestureDetector(
+                onTap: onFavorite,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: isFavorite
+                        ? Colors.red.withOpacity(0.85)
+                        : Colors.black.withOpacity(0.6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    size: 14,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),

@@ -95,16 +95,30 @@ class MessageService {
 
       if (response.statusCode == 200) {
         final data = response.data['data'] ?? response.data;
-        final messages = (data['data'] as List)
-            .map((json) => msg.Message.fromJson(json))
+        List<dynamic> msgList = [];
+
+        if (data is Map) {
+          // Could be { conversation: {...}, messages: [...] } or paginator
+          final messagesRaw = data['messages'] ?? data['data'];
+          if (messagesRaw is List) msgList = messagesRaw;
+        } else if (data is List) {
+          msgList = data;
+        }
+
+        final messages = msgList
+            .whereType<Map>()
+            .map((json) => msg.Message.fromJson(json as Map<String, dynamic>))
             .toList();
+
+        msg.Conversation? conversation;
+        if (data is Map && data['conversation'] is Map) {
+          conversation = msg.Conversation.fromJson(data['conversation']);
+        }
 
         return MessageResponse(
           success: true,
           messages: messages,
-          conversation: data['conversation'] != null
-              ? msg.Conversation.fromJson(data['conversation'])
-              : null,
+          conversation: conversation,
         );
       }
 
@@ -273,8 +287,20 @@ class MessageService {
       );
 
       if (response.statusCode == 200) {
-        final messages = (response.data['data'] as List)
-            .map((json) => msg.Message.fromJson(json))
+        final raw = response.data;
+        List<dynamic> msgList = [];
+
+        // Backend returns { messages: [...] } directly
+        if (raw is Map) {
+          final messagesRaw = raw['messages'] ?? raw['data'];
+          if (messagesRaw is List) msgList = messagesRaw;
+        } else if (raw is List) {
+          msgList = raw;
+        }
+
+        final messages = msgList
+            .whereType<Map>()
+            .map((json) => msg.Message.fromJson(json as Map<String, dynamic>))
             .toList();
 
         return MessageResponse(

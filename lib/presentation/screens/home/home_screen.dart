@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/text_styles.dart';
 import '../../providers/listing_provider.dart';
-import '../../providers/auth_provider.dart';
+import '../../providers/app_providers.dart';
 import '../../widgets/listing_card.dart';
 import '../search/search_screen.dart';
 import '../listing/listing_detail_screen.dart';
@@ -47,12 +47,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
+  bool _isFavorite(int listingId) {
+    final favState = ref.read(favoritesProvider);
+    return favState.favorites.any(
+      (f) => f is Listing && f.id == listingId,
+    );
+  }
+
+  Future<void> _toggleFavorite(int listingId) async {
+    final success = await ref.read(favoritesProvider.notifier).toggleFavorite(listingId);
+    if (mounted && success) {
+      // Trigger rebuild of listings to update favorite states
+      ref.invalidate(listingsProvider);
+      ref.invalidate(featuredListingsProvider);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
     final featuredState = ref.watch(featuredListingsProvider);
     final listingsState = ref.watch(listingsProvider);
     final userFirstName = authState.user?.firstName ?? 'User';
+    // Watch favorites for reactive heart state
+    ref.watch(favoritesProvider);
 
     return Scaffold(
       backgroundColor: AppColors.zinc50,
@@ -216,12 +234,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         itemCount: state.listings.length,
         itemBuilder: (context, index) {
           final listing = state.listings[index];
+          final fav = _isFavorite(listing.id);
           return Padding(
             padding: const EdgeInsets.only(right: 16),
             child: SizedBox(
               width: 280,
               child: FeaturedListingCard(
                 listing: listing,
+                isFavorite: fav,
+                onFavorite: () => _toggleFavorite(listing.id),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => ListingDetailScreen(listingId: listing.id),
@@ -266,10 +287,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               );
             }
             final listing = state.listings[index];
+            final fav = _isFavorite(listing.id);
             return Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: PropertyListingCard(
                 listing: listing,
+                isFavorite: fav,
+                onFavorite: () => _toggleFavorite(listing.id),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => ListingDetailScreen(listingId: listing.id),
