@@ -46,7 +46,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       parent: _headerAnimationController,
       curve: Curves.easeOutCubic,
     ));
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(featuredListingsProvider.notifier).loadFeaturedListings();
       ref.read(listingsProvider.notifier).loadListings();
@@ -310,7 +310,7 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final shrinkPercent = (shrinkOffset / maxExtent).clamp(0.0, 1.0);
+    final shrinkPercent = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
     final user = authState.user;
     final userFirstName = user?.firstName ?? 'WaveMart';
     final userInitials = _getInitials(user?.firstName, user?.lastName);
@@ -355,50 +355,38 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
           child: SafeArea(
             bottom: false,
             child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                20, 
-                12 - (4 * shrinkPercent), 
-                20, 
-                12 - (4 * shrinkPercent)
-              ),
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Main header row
                   Row(
                     children: [
-                      // Profile section
                       Expanded(
                         child: GestureDetector(
                           onTap: onProfileTap,
                           behavior: HitTestBehavior.opaque,
                           child: Row(
                             children: [
-                              // Animated avatar with initials
-                              _buildAvatar(userInitials, shrinkPercent),
+                              _buildAvatar(userInitials),
                               const SizedBox(width: 12),
-                              // User greeting
                               Flexible(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    AnimatedDefaultTextStyle(
-                                      duration: const Duration(milliseconds: 200),
-                                      style: TextStyle(
-                                        fontSize: 18 - (2 * shrinkPercent),
+                                    Text(
+                                      'Hi, $userFirstName',
+                                      style: const TextStyle(
+                                        fontSize: 18,
                                         fontWeight: FontWeight.w700,
                                         color: Colors.white,
                                         letterSpacing: -0.2,
                                         height: 1.2,
                                       ),
-                                      child: Text(
-                                        'Hi, $userFirstName',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    if (shrinkPercent < 0.3)
+                                    if (shrinkPercent < 0.5)
                                       Text(
                                         'Discover your perfect property',
                                         style: TextStyle(
@@ -417,23 +405,17 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
                           ),
                         ),
                       ),
-                      
                       const SizedBox(width: 8),
-                      
-                      // Action buttons
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Notifications button
                           _buildActionButton(
                             icon: Icons.notifications_outlined,
                             onTap: onNotificationsTap,
-                            shrinkPercent: shrinkPercent,
                             badgeProvider: () => unreadCountAsync,
                           ),
                           const SizedBox(width: 8),
-                          // Search button
-                          _buildSearchButton(shrinkPercent),
+                          _buildSearchButton(),
                         ],
                       ),
                     ],
@@ -447,22 +429,16 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  Widget _buildAvatar(String initials, double shrinkPercent) {
-    final size = 48.0 - (4 * shrinkPercent);
-    
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      width: size,
-      height: size,
+  Widget _buildAvatar(String initials) {
+    return Container(
+      width: 48,
+      height: 48,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            AppColors.wave500,
-            AppColors.wave600,
-          ],
+          colors: [AppColors.wave500, AppColors.wave600],
         ),
         boxShadow: [
           BoxShadow(
@@ -483,8 +459,8 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
         child: Center(
           child: Text(
             initials,
-            style: TextStyle(
-              fontSize: 18 - (2 * shrinkPercent),
+            style: const TextStyle(
+              fontSize: 18,
               fontWeight: FontWeight.w700,
               color: Colors.white,
               letterSpacing: 0.5,
@@ -498,10 +474,8 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget _buildActionButton({
     required IconData icon,
     required VoidCallback onTap,
-    required double shrinkPercent,
     required AsyncValue<int> Function() badgeProvider,
   }) {
-    final size = 44.0 - (4 * shrinkPercent);
     final badgeValue = badgeProvider();
 
     return GestureDetector(
@@ -509,13 +483,12 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: size,
-            height: size,
+          Container(
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(14 - (2 * shrinkPercent)),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: Colors.white.withOpacity(0.15),
                 width: 1,
@@ -524,10 +497,9 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
             child: Icon(
               icon,
               color: Colors.white,
-              size: 22 - (2 * shrinkPercent),
+              size: 22,
             ),
           ),
-          // Badge
           if (badgeValue is AsyncData && badgeValue.value! > 0)
             Positioned(
               right: -4,
@@ -563,15 +535,12 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  Widget _buildSearchButton(double shrinkPercent) {
-    final size = 44.0 - (4 * shrinkPercent);
-
+  Widget _buildSearchButton() {
     return GestureDetector(
       onTap: onSearchTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: size,
-        height: size,
+      child: Container(
+        width: 44,
+        height: 44,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -581,7 +550,7 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
               AppColors.wave600,
             ],
           ),
-          borderRadius: BorderRadius.circular(14 - (2 * shrinkPercent)),
+          borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
               color: AppColors.wave500.withOpacity(0.3),
@@ -593,7 +562,7 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
         child: Icon(
           Icons.search_rounded,
           color: Colors.white,
-          size: 22 - (2 * shrinkPercent),
+          size: 22,
         ),
       ),
     );
@@ -607,9 +576,9 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 95;
+  double get maxExtent => 110;
   @override
-  double get minExtent => 68;
+  double get minExtent => 95;
 
   @override
   bool shouldRebuild(_HeaderDelegate oldDelegate) {

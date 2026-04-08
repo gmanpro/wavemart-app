@@ -5,7 +5,7 @@ import '../../providers/app_providers.dart';
 import '../home/home_screen.dart';
 import '../favorites/favorites_screen.dart';
 import '../messages/messages_screen.dart';
-import '../notifications/notifications_screen.dart';
+import '../settings/settings_screen.dart';
 import '../listing/create_listing_screen.dart';
 
 class MainNavigationShell extends ConsumerStatefulWidget {
@@ -30,20 +30,12 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
       const FavoritesScreen(),
       const Center(child: Text('')), // Placeholder for FAB
       const MessagesScreen(),
-      const NotificationsScreen(),
+      const SettingsScreen(),
     ];
 
     // Watch unread messages count
     final unreadMessagesAsync = ref.watch(unreadMessagesCountProvider);
     final unreadMsgCount = unreadMessagesAsync.when(
-      data: (count) => count,
-      loading: () => 0,
-      error: (_, __) => 0,
-    );
-
-    // Watch unread notifications count
-    final unreadNotifAsync = ref.watch(unreadCountProvider);
-    final unreadNotifCount = unreadNotifAsync.when(
       data: (count) => count,
       loading: () => 0,
       error: (_, __) => 0,
@@ -94,7 +86,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
               _buildNavItem(Icons.favorite_rounded, "Saved", 1),
               const SizedBox(width: 48), // Space for FAB notch
               _buildMessagesNavItem(unreadMsgCount),
-              _buildNotificationsNavItem(unreadNotifCount),
+              _buildSettingsNavItem(),
             ],
           ),
         ),
@@ -175,7 +167,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
     );
   }
 
-  Widget _buildNotificationsNavItem(int unreadCount) {
+  Widget _buildSettingsNavItem() {
     final isSelected = _selectedIndex == 4;
     return Expanded(
       child: InkWell(
@@ -184,29 +176,14 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (unreadCount > 0)
-              Badge(
-                label: Text(
-                  '$unreadCount',
-                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                ),
-                backgroundColor: Colors.redAccent,
-                textColor: Colors.white,
-                child: Icon(
-                  Icons.notifications_outlined,
-                  color: isSelected ? AppColors.navy900 : AppColors.zinc400,
-                  size: 26,
-                ),
-              )
-            else
-              Icon(
-                Icons.notifications_outlined,
-                color: isSelected ? AppColors.navy900 : AppColors.zinc400,
-                size: 26,
-              ),
+            Icon(
+              Icons.settings_outlined,
+              color: isSelected ? AppColors.navy900 : AppColors.zinc400,
+              size: 26,
+            ),
             const SizedBox(height: 4),
             Text(
-              "Alerts",
+              "Settings",
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
