@@ -30,7 +30,6 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
       const FavoritesScreen(),
       const Center(child: Text('')), // Placeholder for FAB
       const MessagesScreen(),
-      const SettingsScreen(),
     ];
 
     // Watch unread messages count
@@ -86,7 +85,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
               _buildNavItem(Icons.favorite_rounded, "Saved", 1),
               const SizedBox(width: 48), // Space for FAB notch
               _buildMessagesNavItem(unreadMsgCount),
-              _buildSettingsNavItem(),
+              _buildSettingsNavItem(context),
             ],
           ),
         ),
@@ -167,18 +166,19 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
     );
   }
 
-  Widget _buildSettingsNavItem() {
-    final isSelected = _selectedIndex == 4;
+  Widget _buildSettingsNavItem(BuildContext context) {
     return Expanded(
       child: InkWell(
-        onTap: () => _onItemTapped(4),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const SettingsScreen()),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.settings_outlined,
-              color: isSelected ? AppColors.navy900 : AppColors.zinc400,
+              color: AppColors.zinc400,
               size: 26,
             ),
             const SizedBox(height: 4),
@@ -186,8 +186,8 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
               "Settings",
               style: TextStyle(
                 fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? AppColors.navy900 : AppColors.zinc500,
+                fontWeight: FontWeight.w500,
+                color: AppColors.zinc500,
               ),
             ),
           ],

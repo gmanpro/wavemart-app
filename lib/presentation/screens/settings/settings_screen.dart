@@ -6,12 +6,10 @@ import '../../providers/app_providers.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/wave_common_widgets.dart';
 import '../auth/otp_login_screen.dart';
-import '../notifications/notifications_screen.dart';
-import '../messages/messages_screen.dart';
 import '../kyc/kyc_verification_screen.dart';
 import '../subscriptions/subscription_plans_screen.dart';
 
-/// Settings Screen - App settings, account management, and support
+/// Settings Screen - App settings and support (no profile/nav)
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -89,37 +87,6 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 16),
 
             _buildMenuSection(
-              title: 'Communication',
-              items: [
-                _MenuItemData(
-                  icon: Icons.message_outlined,
-                  title: 'Messages',
-                  subtitle: 'Your conversations',
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const MessagesScreen(),
-                      ),
-                    );
-                  },
-                ),
-                _MenuItemData(
-                  icon: Icons.notifications_outlined,
-                  title: 'Notifications',
-                  subtitle: 'Stay updated',
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const NotificationsScreen(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            _buildMenuSection(
               title: 'Support',
               items: [
                 _MenuItemData(
@@ -180,25 +147,6 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 24),
-
-            // Logout Button
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _showLogoutDialog(context, ref),
-                icon: const Icon(Icons.logout, size: 20),
-                label: const Text('Logout'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.error,
-                  side: const BorderSide(color: AppColors.error),
-                  padding: const EdgeInsets.all(16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
           ],
         ),
       ),
@@ -294,35 +242,6 @@ class SettingsScreen extends ConsumerWidget {
         ),
         if (showDivider) const Divider(height: 1),
       ],
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await ref.read(authStateProvider.notifier).logout();
-              if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const OtpLoginScreen()),
-                  (route) => false,
-                );
-              }
-            },
-            child: const Text('Logout', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
     );
   }
 }

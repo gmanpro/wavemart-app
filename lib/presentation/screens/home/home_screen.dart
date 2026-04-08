@@ -8,7 +8,6 @@ import '../../providers/app_providers.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/listing_card.dart';
 import '../search/search_screen.dart';
-import '../profile/profile_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../listing/listing_detail_screen.dart';
 import '../../../data/models/listing.dart';
@@ -117,9 +116,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                 onSearchTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const SearchScreen()),
                 ),
-                onProfileTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                ),
+                onProfileTap: () => _showProfileModal(context, ref, authState),
                 onNotificationsTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const NotificationsScreen()),
                 ),
@@ -141,6 +138,231 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
               ),
             ),
             _buildLatestListings(listingsState),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showProfileModal(BuildContext context, WidgetRef ref, AuthState authState) {
+    final user = authState.user;
+    final profileState = ref.read(profileProvider);
+    final stats = profileState.stats;
+    final initials = user?.initials.isNotEmpty == true ? user!.initials : (user?.firstName?.substring(0, 1).toUpperCase() ?? '?');
+    final fullName = user?.fullName.isNotEmpty == true ? user!.fullName : 'User';
+    final phone = user?.phoneNumber.isNotEmpty == true ? user!.phoneNumber : (user?.email ?? 'N/A');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.45,
+        minChildSize: 0.35,
+        maxChildSize: 0.55,
+        builder: (_, controller) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              // Drag handle
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.zinc300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  controller: controller,
+                  padding: const EdgeInsets.all(20),
+                  children: [
+                    // Avatar and name
+                    Row(
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [AppColors.wave500, AppColors.wave600],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.wave500.withOpacity(0.3),
+                                blurRadius: 12,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: Text(
+                              initials,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                fullName,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.navy950,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                phone,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.navy400,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Stats row
+                    Row(
+                      children: [
+                        _buildModalStatItem(
+                          value: stats?.totalListings.toString() ?? '0',
+                          label: 'Listings',
+                        ),
+                        const SizedBox(width: 12),
+                        _buildModalStatItem(
+                          value: stats?.totalFavorites.toString() ?? '0',
+                          label: 'Favorites',
+                        ),
+                        const SizedBox(width: 12),
+                        _buildModalStatItem(
+                          value: stats?.unreadMessages.toString() ?? '0',
+                          label: 'Messages',
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    const Divider(height: 1),
+                    const SizedBox(height: 8),
+
+                    // Action buttons
+                    _buildModalAction(
+                      icon: Icons.edit_outlined,
+                      title: 'Edit Profile',
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Edit profile coming soon')),
+                        );
+                      },
+                    ),
+                    const Divider(height: 1),
+                    _buildModalAction(
+                      icon: Icons.logout,
+                      title: 'Logout',
+                      textColor: AppColors.error,
+                      iconColor: AppColors.error,
+                      onTap: () async {
+                        Navigator.pop(ctx);
+                        await ref.read(authStateProvider.notifier).logout();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModalStatItem({required String value, required String label}) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.zinc50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.zinc200),
+        ),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.wave600,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                color: AppColors.navy400,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModalAction({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Color? textColor,
+    Color? iconColor,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: iconColor ?? AppColors.navy600,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: textColor ?? AppColors.navy950,
+              ),
+            ),
           ],
         ),
       ),
@@ -292,7 +514,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
   }
 }
 
-/// Modern Premium Header Delegate - Glassmorphism with notifications badge
+/// Modern Premium Header Delegate - Fixed height 100, no shrink
 class _HeaderDelegate extends SliverPersistentHeaderDelegate {
   final AuthState authState;
   final AsyncValue<int> unreadCountAsync;
@@ -310,7 +532,6 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final shrinkPercent = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
     final user = authState.user;
     final userFirstName = user?.firstName ?? 'WaveMart';
     final userInitials = _getInitials(user?.firstName, user?.lastName);
@@ -319,9 +540,7 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
+        child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -355,69 +574,61 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
           child: SafeArea(
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              child: Row(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: onProfileTap,
-                          behavior: HitTestBehavior.opaque,
-                          child: Row(
-                            children: [
-                              _buildAvatar(userInitials),
-                              const SizedBox(width: 12),
-                              Flexible(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Hi, $userFirstName',
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                        letterSpacing: -0.2,
-                                        height: 1.2,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    if (shrinkPercent < 0.5)
-                                      Text(
-                                        'Discover your perfect property',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.white.withOpacity(0.65),
-                                          fontWeight: FontWeight.w400,
-                                          height: 1.3,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: onProfileTap,
+                      behavior: HitTestBehavior.opaque,
+                      child: Row(
                         children: [
-                          _buildActionButton(
-                            icon: Icons.notifications_outlined,
-                            onTap: onNotificationsTap,
-                            badgeProvider: () => unreadCountAsync,
+                          _buildAvatar(userInitials),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Hi, $userFirstName',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    letterSpacing: -0.2,
+                                    height: 1.2,
+                                  ),
+                                ),
+                                Text(
+                                  'Discover your perfect property',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white.withOpacity(0.65),
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.3,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(width: 8),
-                          _buildSearchButton(),
                         ],
                       ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildActionButton(
+                        icon: Icons.notifications_outlined,
+                        onTap: onNotificationsTap,
+                        badgeProvider: () => unreadCountAsync,
+                      ),
+                      const SizedBox(width: 8),
+                      _buildSearchButton(),
                     ],
                   ),
                 ],
@@ -576,9 +787,9 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 110;
+  double get maxExtent => 100;
   @override
-  double get minExtent => 95;
+  double get minExtent => 100;
 
   @override
   bool shouldRebuild(_HeaderDelegate oldDelegate) {
