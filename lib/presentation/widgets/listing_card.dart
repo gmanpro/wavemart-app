@@ -13,6 +13,7 @@ class PropertyListingCard extends StatelessWidget {
   final bool isFavorite;
   final bool isTogglingFavorite;
   final bool isLoading;
+  final bool hideFavoriteButton;
 
   const PropertyListingCard({
     super.key,
@@ -22,6 +23,7 @@ class PropertyListingCard extends StatelessWidget {
     this.isFavorite = false,
     this.isTogglingFavorite = false,
     this.isLoading = false,
+    this.hideFavoriteButton = false,
   });
 
   @override
@@ -216,36 +218,37 @@ class PropertyListingCard extends StatelessWidget {
         ),
 
         // Favorite Button
-        Positioned(
-          top: 12,
-          right: 12,
-          child: GestureDetector(
-            onTap: isTogglingFavorite ? null : onFavorite,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isFavorite
-                    ? Colors.red.withOpacity(0.9)
-                    : Colors.black.withOpacity(0.7),
-                shape: BoxShape.circle,
-              ),
-              child: isTogglingFavorite
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        if (!hideFavoriteButton)
+          Positioned(
+            top: 12,
+            right: 12,
+            child: GestureDetector(
+              onTap: isTogglingFavorite ? null : onFavorite,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isFavorite
+                      ? Colors.red.withOpacity(0.9)
+                      : Colors.black.withOpacity(0.7),
+                  shape: BoxShape.circle,
+                ),
+                child: isTogglingFavorite
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        size: 18,
+                        color: Colors.white,
                       ),
-                    )
-                  : Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      size: 18,
-                      color: Colors.white,
-                    ),
+              ),
             ),
           ),
-        ),
 
         // Property Type Badge
         Positioned(

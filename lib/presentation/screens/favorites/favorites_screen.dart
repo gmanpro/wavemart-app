@@ -108,7 +108,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
           padding: const EdgeInsets.only(bottom: 16),
           child: Stack(
             children: [
-              PropertyListingCard(listing: listing),
+              PropertyListingCard(listing: listing, hideFavoriteButton: true),
               // X remove button on top-right of card
               Positioned(
                 top: 12,

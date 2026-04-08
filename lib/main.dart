@@ -99,19 +99,27 @@ class _WaveMartAppState extends ConsumerState<WaveMartApp> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
 
-    // API auth check completed and user is definitely logged out (token revoked server-side)
-    final isDefinitelyLoggedOut =
-        !authState.isLoading && !authState.isAuthenticated && _hasToken;
+    // When auth state changes to authenticated (e.g. after login), show home
+    if (authState.isAuthenticated && !_showHome) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() => _showHome = true);
+      });
+    }
+
+    // When auth state changes to unauthenticated and we had a token, show login
+    if (!authState.isAuthenticated && !authState.isLoading && _showHome) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() => _showHome = false);
+      });
+    }
 
     return MaterialApp(
       title: 'WaveMart',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: isDefinitelyLoggedOut
-          ? const OtpLoginScreen()
-          : _showHome
-              ? const MainNavigationShell()
-              : const OtpLoginScreen(),
+      home: _showHome
+          ? const MainNavigationShell()
+          : const OtpLoginScreen(),
       onGenerateRoute: _generateRoute,
       builder: (context, child) {
         if (child == null) {
