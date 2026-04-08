@@ -5,6 +5,7 @@ import '../../../../core/theme/text_styles.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/listing_card.dart';
 import '../../widgets/common/wave_common_widgets.dart';
+import '../listing/listing_detail_screen.dart';
 
 /// Favorites Screen - Wired to favoritesProvider
 class FavoritesScreen extends ConsumerStatefulWidget {
@@ -108,7 +109,17 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
           padding: const EdgeInsets.only(bottom: 16),
           child: Stack(
             children: [
-              PropertyListingCard(listing: listing, hideFavoriteButton: true),
+              PropertyListingCard(
+                listing: listing,
+                hideFavoriteButton: true,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ListingDetailScreen(listingId: listing.id),
+                    ),
+                  );
+                },
+              ),
               // X remove button on top-right of card
               Positioned(
                 top: 12,

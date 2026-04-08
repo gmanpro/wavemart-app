@@ -25,31 +25,36 @@ class MessageService {
       );
 
       if (response.statusCode == 200) {
-        final data = response.data['data'] ?? response.data;
-
-        // Handle different response structures safely
+        final responseData = response.data;
+        
+        // Backend returns: { success: true, data: { current_page, last_page, total, data: [...] } }
         List<dynamic> dataList = [];
-        if (data is Map) {
-          final dataListRaw = data['data'] ?? data['conversations'] ?? data['items'];
-          if (dataListRaw is List) {
-            dataList = dataListRaw;
-          } else if (dataListRaw is Map) {
-            // Some APIs return data as a map with numeric keys
-            dataList = dataListRaw.values.toList();
+        int currentPage = page;
+        int totalPages = 1;
+        int total = 0;
+
+        if (responseData is Map) {
+          final dataField = responseData['data'];
+          
+          if (dataField is Map) {
+            // Laravel paginator structure
+            final dataListRaw = dataField['data'];
+            if (dataListRaw is List) {
+              dataList = dataListRaw;
+            }
+            
+            currentPage = _safeInt(dataField['current_page']) ?? page;
+            totalPages = _safeInt(dataField['last_page']) ?? 1;
+            total = _safeInt(dataField['total']) ?? 0;
+          } else if (dataField is List) {
+            dataList = dataField;
           }
-        } else if (data is List) {
-          dataList = data;
         }
 
         final conversations = dataList
             .whereType<Map>()
             .map((json) => msg.Conversation.fromJson(json as Map<String, dynamic>))
             .toList();
-
-        // Safely parse pagination fields
-        int currentPage = _safeInt(data['current_page']) ?? page;
-        int totalPages = _safeInt(data['last_page']) ?? 1;
-        int total = _safeInt(data['total']) ?? 0;
 
         return ConversationResponse(
           success: true,

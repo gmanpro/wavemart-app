@@ -7,6 +7,7 @@ import '../../providers/app_providers.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/listing_card.dart';
 import '../search/search_screen.dart';
+import '../notifications/notifications_screen.dart';
 import '../listing/listing_detail_screen.dart';
 import '../../../data/models/listing.dart';
 
@@ -21,6 +22,11 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
   final Set<int> _togglingFavorites = {};
+  
+  // Filter state
+  String _selectedPropertyType = 'all'; // all, house, land
+  String _selectedListingType = 'all'; // all, sale, rent
+  String _selectedSort = 'newest'; // newest, price_low, price_high
 
   @override
   void initState() {
@@ -59,7 +65,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _toggleFavorite(int listingId) async {
     setState(() => _togglingFavorites.add(listingId));
-    final success = await ref.read(favoritesProvider.notifier).toggleFavorite(listingId);
+    await ref.read(favoritesProvider.notifier).toggleFavorite(listingId);
     if (mounted) {
       setState(() => _togglingFavorites.remove(listingId));
     }
@@ -73,6 +79,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final featuredState = ref.watch(featuredListingsProvider);
     final listingsState = ref.watch(listingsProvider);
     final userFirstName = authState.user?.firstName ?? 'User';
+    final unreadCountAsync = ref.watch(unreadCountProvider);
     // Watch favorites for reactive heart state
     ref.watch(favoritesProvider);
 
@@ -92,7 +99,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           SliverPersistentHeader(
             pinned: true,
             delegate: _StickyHeaderDelegate(
-              child: _buildTopHeader(userFirstName),
+              child: _buildTopHeader(userFirstName, unreadCountAsync),
             ),
           ),
 
@@ -113,7 +120,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildTopHeader(String name) {
+  Widget _buildTopHeader(String name, AsyncValue<int> unreadCountAsync) {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -168,9 +175,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(width: 8),
               // Filter icon
               GestureDetector(
-                onTap: () {
-                  // TODO: Open filter modal
-                },
+                onTap: () => _showFilterBottomSheet(),
                 child: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
@@ -183,14 +188,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const SizedBox(width: 8),
               // Notification Bell
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.navy800,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.navy700),
+              GestureDetector(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const NotificationsScreen()),
                 ),
-                child: const Icon(Icons.notifications_outlined, color: Colors.white, size: 22),
+                child: Stack(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.navy800,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.navy700),
+                      ),
+                      child: const Icon(Icons.notifications_outlined, color: Colors.white, size: 22),
+                    ),
+                    unreadCountAsync.when(
+                      data: (count) => count > 0
+                          ? Positioned(
+                              right: 6,
+                              top: 6,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                                child: Text(
+                                  count > 99 ? '99+' : '$count',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -319,6 +360,210 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           childCount: state.listings.length + (state.isLoadingMore ? 1 : 0),
         ),
       ),
+    );
+  }
+
+  void _showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Filter Listings',
+                        style: AppTextStyles.title.copyWith(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 16),
+
+                  // Property Type
+                  Text(
+                    'Property Type',
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      _filterChip('All', _selectedPropertyType == 'all', () {
+                        setModalState(() => _selectedPropertyType = 'all');
+                      }),
+                      _filterChip('House', _selectedPropertyType == 'house', () {
+                        setModalState(() => _selectedPropertyType = 'house');
+                      }),
+                      _filterChip('Land', _selectedPropertyType == 'land', () {
+                        setModalState(() => _selectedPropertyType = 'land');
+                      }),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Listing Type
+                  Text(
+                    'Listing Type',
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      _filterChip('All', _selectedListingType == 'all', () {
+                        setModalState(() => _selectedListingType = 'all');
+                      }),
+                      _filterChip('Sale', _selectedListingType == 'sale', () {
+                        setModalState(() => _selectedListingType = 'sale');
+                      }),
+                      _filterChip('Rent', _selectedListingType == 'rent', () {
+                        setModalState(() => _selectedListingType = 'rent');
+                      }),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Sort By
+                  Text(
+                    'Sort By',
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      _filterChip('Newest', _selectedSort == 'newest', () {
+                        setModalState(() => _selectedSort = 'newest');
+                      }),
+                      _filterChip('Price: Low to High', _selectedSort == 'price_low', () {
+                        setModalState(() => _selectedSort = 'price_low');
+                      }),
+                      _filterChip('Price: High to Low', _selectedSort == 'price_high', () {
+                        setModalState(() => _selectedSort = 'price_high');
+                      }),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setModalState(() {
+                              _selectedPropertyType = 'all';
+                              _selectedListingType = 'all';
+                              _selectedSort = 'newest';
+                            });
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text('Reset'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _applyFilters();
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.wave500,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text(
+                            'Apply Filters',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _filterChip(String label, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.wave500 : AppColors.zinc100,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.wave500 : AppColors.zinc300,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : AppColors.zinc700,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _applyFilters() {
+    // Build filters map
+    final filters = <String, dynamic>{};
+    
+    if (_selectedPropertyType != 'all') {
+      filters['type'] = _selectedPropertyType;
+    }
+    
+    if (_selectedListingType != 'all') {
+      filters['listing_type'] = _selectedListingType;
+    }
+    
+    if (_selectedSort != 'newest') {
+      filters['sort'] = _selectedSort;
+    }
+
+    // Reload listings with filters
+    ref.read(listingsProvider.notifier).loadListings(
+      page: 1,
+      filters: filters.isEmpty ? null : filters,
     );
   }
 }

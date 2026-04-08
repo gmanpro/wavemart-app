@@ -27,19 +27,7 @@ class Conversation {
   });
 
   factory Conversation.fromJson(Map<String, dynamic> json) {
-    // Extract sender/receiver info from nested relationships if available
-    String? senderName;
-    String? receiverName;
-    if (json['sender'] is Map) {
-      final sender = json['sender'] as Map<String, dynamic>;
-      senderName = '${sender['first_name'] ?? ''} ${sender['last_name'] ?? ''}'.trim();
-    }
-    if (json['receiver'] is Map) {
-      final receiver = json['receiver'] as Map<String, dynamic>;
-      receiverName = '${receiver['first_name'] ?? ''} ${receiver['last_name'] ?? ''}'.trim();
-    }
-
-    // Get last message from latestMessage relationship
+    // Extract last message from nested relationships if available
     String? lastMsg;
     if (json['latest_message'] is Map) {
       lastMsg = json['latest_message']['body'] ?? json['latest_message']['message'];
@@ -55,10 +43,7 @@ class Conversation {
     }
 
     // Handle both unread_count and total_unread_count field names
-    int? unreadVal = _safeInt(json['unread_count']);
-    if (unreadVal == null) {
-      unreadVal = _safeInt(json['total_unread_count']);
-    }
+    int? unreadVal = _safeInt(json['unread_count']) ?? _safeInt(json['total_unread_count']);
 
     return Conversation(
       id: _safeInt(json['id']) ?? 0,

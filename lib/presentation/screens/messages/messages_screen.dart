@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/app_providers.dart';
@@ -235,7 +234,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     if (mounted) {
       setState(() => _isSending = false);
-      if (!success) {
+      if (success) {
+        _scrollToBottom();
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to send message'), backgroundColor: AppColors.error),
         );
