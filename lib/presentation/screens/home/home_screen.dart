@@ -11,7 +11,7 @@ import '../notifications/notifications_screen.dart';
 import '../listing/listing_detail_screen.dart';
 import '../../../data/models/listing.dart';
 
-/// Home Screen - Redesigned with Header, Search, and Nav integration
+/// Home Screen - Redesigned with modern Header, Search, and Nav integration
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -34,6 +34,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(featuredListingsProvider.notifier).loadFeaturedListings();
       ref.read(listingsProvider.notifier).loadListings();
+      // Load user profile for greeting
+      ref.read(authStateProvider.notifier).loadUser();
     });
     _scrollController.addListener(_onScroll);
   }
@@ -78,7 +80,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final authState = ref.watch(authStateProvider);
     final featuredState = ref.watch(featuredListingsProvider);
     final listingsState = ref.watch(listingsProvider);
-    final userFirstName = authState.user?.firstName ?? 'User';
     final unreadCountAsync = ref.watch(unreadCountProvider);
     // Watch favorites for reactive heart state
     ref.watch(favoritesProvider);
@@ -90,151 +91,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           await Future.wait([
             ref.read(featuredListingsProvider.notifier).loadFeaturedListings(),
             ref.read(listingsProvider.notifier).loadListings(),
+            ref.read(authStateProvider.notifier).loadUser(),
           ]);
         },
         child: CustomScrollView(
           controller: _scrollController,
           slivers: [
-          // 1. Sticky Top Header
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _StickyHeaderDelegate(
-              child: _buildTopHeader(userFirstName, unreadCountAsync),
-            ),
-          ),
-
-          // 2. Featured Listings Header
-          SliverToBoxAdapter(child: _buildSectionHeader("Featured Listings")),
-
-          // 3. Featured Listings
-          SliverToBoxAdapter(child: _buildFeaturedListings(featuredState)),
-
-          // 4. Latest Listings Header
-          SliverToBoxAdapter(child: _buildSectionHeader("Latest Listings")),
-
-          // 5. Latest Listings
-          _buildLatestListings(listingsState),
-        ],
-      ),
-      ),
-    );
-  }
-
-  Widget _buildTopHeader(String name, AsyncValue<int> unreadCountAsync) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.navy950, AppColors.navy900],
-        ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-          child: Row(
-            children: [
-              // Avatar
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.navy700,
-                  border: Border.all(color: AppColors.navy600, width: 2),
-                ),
-                child: const Icon(Icons.person, color: Colors.white, size: 24),
-              ),
-              const SizedBox(width: 12),
-              // Greeting
-              Expanded(
-                child: Text(
-                  "Hi, $name",
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              // Search icon
-              GestureDetector(
-                onTap: () => Navigator.of(context).push(
+            // Modern Header
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _HeaderDelegate(
+                authState: authState,
+                unreadCountAsync: unreadCountAsync,
+                onSearchTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const SearchScreen()),
                 ),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.navy800,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.navy700),
-                  ),
-                  child: const Icon(Icons.search, color: Colors.white, size: 22),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Filter icon
-              GestureDetector(
-                onTap: () => _showFilterBottomSheet(),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.navy800,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.navy700),
-                  ),
-                  child: const Icon(Icons.tune_rounded, color: Colors.white, size: 22),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Notification Bell
-              GestureDetector(
-                onTap: () => Navigator.of(context).push(
+                onFilterTap: () => _showFilterBottomSheet(),
+                onNotificationTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const NotificationsScreen()),
                 ),
-                child: Stack(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.navy800,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.navy700),
-                      ),
-                      child: const Icon(Icons.notifications_outlined, color: Colors.white, size: 22),
-                    ),
-                    unreadCountAsync.when(
-                      data: (count) => count > 0
-                          ? Positioned(
-                              right: 6,
-                              top: 6,
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                                child: Text(
-                                  count > 99 ? '99+' : '$count',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                      loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
-                    ),
-                  ],
-                ),
               ),
-            ],
-          ),
+            ),
+
+            // Featured Listings Header
+            SliverToBoxAdapter(child: _buildSectionHeader("Featured Listings")),
+
+            // Featured Listings
+            SliverToBoxAdapter(child: _buildFeaturedListings(featuredState)),
+
+            // Latest Listings Header
+            SliverToBoxAdapter(child: _buildSectionHeader("Latest Listings")),
+
+            // Latest Listings
+            _buildLatestListings(listingsState),
+          ],
         ),
       ),
     );
@@ -568,25 +458,175 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-/// Sticky header delegate for persistent header
-class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
+/// Modern Header Delegate for SliverPersistentHeader
+class _HeaderDelegate extends SliverPersistentHeaderDelegate {
+  final AuthState authState;
+  final AsyncValue<int> unreadCountAsync;
+  final VoidCallback onSearchTap;
+  final VoidCallback onFilterTap;
+  final VoidCallback onNotificationTap;
 
-  _StickyHeaderDelegate({required this.child});
+  _HeaderDelegate({
+    required this.authState,
+    required this.unreadCountAsync,
+    required this.onSearchTap,
+    required this.onFilterTap,
+    required this.onNotificationTap,
+  });
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return child;
+    final shrinkPercent = (shrinkOffset / maxExtent).clamp(0.0, 1.0);
+    final userFirstName = authState.user?.firstName ?? 'User';
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.navy950,
+            Color.lerp(AppColors.navy950, AppColors.navy900, shrinkPercent)!,
+          ],
+        ),
+        boxShadow: overlapsContent
+            ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            12 + (4 * shrinkPercent),
+            20,
+            12 - (4 * shrinkPercent),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Top Row: Greeting + Icons
+              Row(
+                children: [
+                  // Avatar with greeting
+                  Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.navy700,
+                          border: Border.all(color: AppColors.wave500, width: 2),
+                        ),
+                        child: const Icon(Icons.person_rounded, color: Colors.white, size: 22),
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Hi, $userFirstName',
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 0.2,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            'Find your perfect property',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.white.withOpacity(0.6),
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  // Icons Row
+                  _buildHeaderIcon(Icons.search, onSearchTap),
+                  const SizedBox(width: 6),
+                  _buildHeaderIcon(Icons.tune_rounded, onFilterTap),
+                  const SizedBox(width: 6),
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      _buildHeaderIcon(Icons.notifications_outlined, onNotificationTap),
+                      unreadCountAsync.when(
+                        data: (count) => count > 0
+                            ? Positioned(
+                                right: 0,
+                                top: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(3),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.redAccent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                                  child: Text(
+                                    count > 99 ? '99+' : '$count',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 7,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderIcon(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(9),
+        decoration: BoxDecoration(
+          color: AppColors.navy800,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.navy700, width: 1),
+        ),
+        child: Icon(icon, color: Colors.white, size: 20),
+      ),
+    );
   }
 
   @override
-  double get maxExtent => 100; // Approximate header height
+  double get maxExtent => 88;
 
   @override
-  double get minExtent => 100;
+  double get minExtent => 68;
 
   @override
-  bool shouldRebuild(_StickyHeaderDelegate oldDelegate) {
-    return oldDelegate.child != child;
+  bool shouldRebuild(_HeaderDelegate oldDelegate) {
+    return oldDelegate.authState != authState ||
+        oldDelegate.unreadCountAsync != unreadCountAsync;
   }
 }

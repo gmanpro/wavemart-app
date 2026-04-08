@@ -70,9 +70,14 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
 
     if (state.conversations.isEmpty) {
       return WaveEmptyState(
-        icon: Icons.chat_bubble_outline,
+        icon: Icons.chat_bubble_outline_rounded,
         title: 'No Messages Yet',
-        subtitle: 'Start a conversation about a property',
+        subtitle: 'Start a conversation about a property by tapping the message icon on a listing',
+        actionLabel: 'Browse Properties',
+        onAction: () {
+          // Navigate to home tab (index 0)
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        },
       );
     }
 
