@@ -7,11 +7,11 @@ import '../../providers/app_providers.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/listing_card.dart';
 import '../search/search_screen.dart';
-import '../notifications/notifications_screen.dart';
+import '../profile/profile_screen.dart';
 import '../listing/listing_detail_screen.dart';
 import '../../../data/models/listing.dart';
 
-/// Home Screen - Redesigned with modern Header, Search, and Nav integration
+/// Home Screen - Modern clean header with search & profile
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -22,11 +22,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
   final Set<int> _togglingFavorites = {};
-  
-  // Filter state
-  String _selectedPropertyType = 'all'; // all, house, land
-  String _selectedListingType = 'all'; // all, sale, rent
-  String _selectedSort = 'newest'; // newest, price_low, price_high
 
   @override
   void initState() {
@@ -34,7 +29,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(featuredListingsProvider.notifier).loadFeaturedListings();
       ref.read(listingsProvider.notifier).loadListings();
-      // Load user profile for greeting
       ref.read(authStateProvider.notifier).loadUser();
     });
     _scrollController.addListener(_onScroll);
@@ -60,17 +54,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   bool _isFavorite(int listingId) {
     final favState = ref.read(favoritesProvider);
-    return favState.favorites.any(
-      (f) => f is Listing && f.id == listingId,
-    );
+    return favState.favorites.any((f) => f is Listing && f.id == listingId);
   }
 
   Future<void> _toggleFavorite(int listingId) async {
     setState(() => _togglingFavorites.add(listingId));
     await ref.read(favoritesProvider.notifier).toggleFavorite(listingId);
-    if (mounted) {
-      setState(() => _togglingFavorites.remove(listingId));
-    }
+    if (mounted) setState(() => _togglingFavorites.remove(listingId));
   }
 
   bool _isToggling(int listingId) => _togglingFavorites.contains(listingId);
@@ -80,8 +70,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final authState = ref.watch(authStateProvider);
     final featuredState = ref.watch(featuredListingsProvider);
     final listingsState = ref.watch(listingsProvider);
-    final unreadCountAsync = ref.watch(unreadCountProvider);
-    // Watch favorites for reactive heart state
     ref.watch(favoritesProvider);
 
     return Scaffold(
@@ -97,32 +85,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: CustomScrollView(
           controller: _scrollController,
           slivers: [
-            // Modern Header
             SliverPersistentHeader(
               pinned: true,
               delegate: _HeaderDelegate(
                 authState: authState,
-                unreadCountAsync: unreadCountAsync,
                 onSearchTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const SearchScreen()),
                 ),
-                onFilterTap: () => _showFilterBottomSheet(),
-                onNotificationTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                onProfileTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
                 ),
               ),
             ),
-
-            // Featured Listings Header
             SliverToBoxAdapter(child: _buildSectionHeader("Featured Listings")),
-
-            // Featured Listings
             SliverToBoxAdapter(child: _buildFeaturedListings(featuredState)),
-
-            // Latest Listings Header
             SliverToBoxAdapter(child: _buildSectionHeader("Latest Listings")),
-
-            // Latest Listings
             _buildLatestListings(listingsState),
           ],
         ),
@@ -153,22 +130,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           itemCount: 3,
           itemBuilder: (context, index) => const Padding(
             padding: EdgeInsets.only(right: 16),
-            child: SizedBox(
-              width: 280,
-              child: PropertyListingCard(isLoading: true),
-            ),
+            child: SizedBox(width: 280, child: PropertyListingCard(isLoading: true)),
           ),
         ),
       );
     }
-
     if (state.listings.isEmpty) {
-      return const SizedBox(
-        height: 80,
-        child: Center(child: Text("No featured listings available")),
-      );
+      return const SizedBox(height: 80, child: Center(child: Text("No featured listings available")));
     }
-
     return SizedBox(
       height: 180,
       child: ListView.builder(
@@ -188,9 +157,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 isTogglingFavorite: _isToggling(listing.id),
                 onFavorite: () => _toggleFavorite(listing.id),
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => ListingDetailScreen(listingId: listing.id),
-                  ),
+                  MaterialPageRoute(builder: (_) => ListingDetailScreen(listingId: listing.id)),
                 ),
               ),
             ),
@@ -206,19 +173,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
         sliver: SliverList(
           delegate: SliverChildListDelegate([
-            for (int i = 0; i < 3; i++)
-              const PropertyListingCard(isLoading: true),
+            for (int i = 0; i < 3; i++) const PropertyListingCard(isLoading: true),
           ]),
         ),
       );
     }
-
     if (state.listings.isEmpty) {
-      return const SliverFillRemaining(
-        child: Center(child: Text("No latest listings available")),
-      );
+      return const SliverFillRemaining(child: Center(child: Text("No latest listings available")));
     }
-
     return SliverPadding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
       sliver: SliverList(
@@ -240,9 +202,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 isTogglingFavorite: _isToggling(listing.id),
                 onFavorite: () => _toggleFavorite(listing.id),
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => ListingDetailScreen(listingId: listing.id),
-                  ),
+                  MaterialPageRoute(builder: (_) => ListingDetailScreen(listingId: listing.id)),
                 ),
               ),
             );
@@ -252,249 +212,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
-
-  void _showFilterBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Filter Listings',
-                        style: AppTextStyles.title.copyWith(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 16),
-
-                  // Property Type
-                  Text(
-                    'Property Type',
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      _filterChip('All', _selectedPropertyType == 'all', () {
-                        setModalState(() => _selectedPropertyType = 'all');
-                      }),
-                      _filterChip('House', _selectedPropertyType == 'house', () {
-                        setModalState(() => _selectedPropertyType = 'house');
-                      }),
-                      _filterChip('Land', _selectedPropertyType == 'land', () {
-                        setModalState(() => _selectedPropertyType = 'land');
-                      }),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Listing Type
-                  Text(
-                    'Listing Type',
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      _filterChip('All', _selectedListingType == 'all', () {
-                        setModalState(() => _selectedListingType = 'all');
-                      }),
-                      _filterChip('Sale', _selectedListingType == 'sale', () {
-                        setModalState(() => _selectedListingType = 'sale');
-                      }),
-                      _filterChip('Rent', _selectedListingType == 'rent', () {
-                        setModalState(() => _selectedListingType = 'rent');
-                      }),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Sort By
-                  Text(
-                    'Sort By',
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      _filterChip('Newest', _selectedSort == 'newest', () {
-                        setModalState(() => _selectedSort = 'newest');
-                      }),
-                      _filterChip('Price: Low to High', _selectedSort == 'price_low', () {
-                        setModalState(() => _selectedSort = 'price_low');
-                      }),
-                      _filterChip('Price: High to Low', _selectedSort == 'price_high', () {
-                        setModalState(() => _selectedSort = 'price_high');
-                      }),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            setModalState(() {
-                              _selectedPropertyType = 'all';
-                              _selectedListingType = 'all';
-                              _selectedSort = 'newest';
-                            });
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: const Text('Reset'),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 2,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            _applyFilters();
-                            Navigator.pop(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.wave500,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: const Text(
-                            'Apply Filters',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _filterChip(String label, bool isSelected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.wave500 : AppColors.zinc100,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.wave500 : AppColors.zinc300,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : AppColors.zinc700,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _applyFilters() {
-    // Build filters map
-    final filters = <String, dynamic>{};
-    
-    if (_selectedPropertyType != 'all') {
-      filters['type'] = _selectedPropertyType;
-    }
-    
-    if (_selectedListingType != 'all') {
-      filters['listing_type'] = _selectedListingType;
-    }
-    
-    if (_selectedSort != 'newest') {
-      filters['sort'] = _selectedSort;
-    }
-
-    // Reload listings with filters
-    ref.read(listingsProvider.notifier).loadListings(
-      page: 1,
-      filters: filters.isEmpty ? null : filters,
-    );
-  }
 }
 
-/// Modern Header Delegate for SliverPersistentHeader
+/// Modern Header Delegate - Clean design with profile & search only
 class _HeaderDelegate extends SliverPersistentHeaderDelegate {
   final AuthState authState;
-  final AsyncValue<int> unreadCountAsync;
   final VoidCallback onSearchTap;
-  final VoidCallback onFilterTap;
-  final VoidCallback onNotificationTap;
+  final VoidCallback onProfileTap;
 
   _HeaderDelegate({
     required this.authState,
-    required this.unreadCountAsync,
     required this.onSearchTap,
-    required this.onFilterTap,
-    required this.onNotificationTap,
+    required this.onProfileTap,
   });
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final shrinkPercent = (shrinkOffset / maxExtent).clamp(0.0, 1.0);
-    final userFirstName = authState.user?.firstName ?? 'User';
+    final userFirstName = authState.user?.firstName ?? 'WaveMart';
 
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            AppColors.navy950,
-            Color.lerp(AppColors.navy950, AppColors.navy900, shrinkPercent)!,
-          ],
+          colors: [AppColors.navy950, AppColors.navy900],
         ),
         boxShadow: overlapsContent
             ? [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
               ]
             : null,
@@ -502,99 +251,67 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            12 + (4 * shrinkPercent),
-            20,
-            12 - (4 * shrinkPercent),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          padding: EdgeInsets.fromLTRB(20, 16 - (4 * shrinkPercent), 20, 16 - (6 * shrinkPercent)),
+          child: Row(
             children: [
-              // Top Row: Greeting + Icons
-              Row(
-                children: [
-                  // Avatar with greeting
-                  Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.navy700,
-                          border: Border.all(color: AppColors.wave500, width: 2),
-                        ),
-                        child: const Icon(Icons.person_rounded, color: Colors.white, size: 22),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Hi, $userFirstName',
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: 0.2,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            'Find your perfect property',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.white.withOpacity(0.6),
-                              fontWeight: FontWeight.w400,
-                            ),
+              GestureDetector(
+                onTap: onProfileTap,
+                behavior: HitTestBehavior.opaque,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.navy700,
+                        border: Border.all(color: AppColors.wave500, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.wave500.withOpacity(0.3),
+                            blurRadius: 8,
+                            spreadRadius: 1,
                           ),
                         ],
                       ),
-                    ],
+                      child: const Icon(Icons.person_rounded, color: Colors.white, size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Hi, $userFirstName',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 0.3),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (shrinkPercent < 0.5)
+                          Text(
+                            'Discover your perfect property',
+                            style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.6), fontWeight: FontWeight.w400),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: onSearchTap,
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.navy800,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.navy700, width: 1),
                   ),
-                  const Spacer(),
-                  // Icons Row
-                  _buildHeaderIcon(Icons.search, onSearchTap),
-                  const SizedBox(width: 6),
-                  _buildHeaderIcon(Icons.tune_rounded, onFilterTap),
-                  const SizedBox(width: 6),
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      _buildHeaderIcon(Icons.notifications_outlined, onNotificationTap),
-                      unreadCountAsync.when(
-                        data: (count) => count > 0
-                            ? Positioned(
-                                right: 0,
-                                top: 0,
-                                child: Container(
-                                  padding: const EdgeInsets.all(3),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.redAccent,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
-                                  child: Text(
-                                    count > 99 ? '99+' : '$count',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 7,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              )
-                            : const SizedBox.shrink(),
-                        loading: () => const SizedBox.shrink(),
-                        error: (_, __) => const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-                ],
+                  child: const Icon(Icons.search, color: Colors.white, size: 22),
+                ),
               ),
             ],
           ),
@@ -603,30 +320,13 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  Widget _buildHeaderIcon(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(9),
-        decoration: BoxDecoration(
-          color: AppColors.navy800,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.navy700, width: 1),
-        ),
-        child: Icon(icon, color: Colors.white, size: 20),
-      ),
-    );
-  }
-
   @override
-  double get maxExtent => 88;
-
+  double get maxExtent => 90;
   @override
-  double get minExtent => 68;
+  double get minExtent => 64;
 
   @override
   bool shouldRebuild(_HeaderDelegate oldDelegate) {
-    return oldDelegate.authState != authState ||
-        oldDelegate.unreadCountAsync != unreadCountAsync;
+    return oldDelegate.authState != authState;
   }
 }

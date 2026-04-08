@@ -3,11 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/listing_provider.dart';
+import '../../providers/app_providers.dart';
 import '../../widgets/listing_card.dart';
 import '../../widgets/common/wave_common_widgets.dart';
 import '../listing/listing_detail_screen.dart';
 
-/// Search Screen with filters - Wired to listingsProvider
+/// Modern Search & Filter Screen - Elegant, professional design
 class SearchScreen extends ConsumerStatefulWidget {
   final String? initialType;
   final String? initialListingType;
@@ -22,23 +23,25 @@ class SearchScreen extends ConsumerStatefulWidget {
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends ConsumerState<SearchScreen> {
+class _SearchScreenState extends ConsumerState<SearchScreen>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   String? _selectedType;
   String? _selectedListingType;
-  String? _selectedSort;
+  String _selectedSort = 'newest';
   Map<String, dynamic> _activeFilters = {};
   bool _hasSearched = false;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
     _selectedType = widget.initialType;
     _selectedListingType = widget.initialListingType;
 
-    // If initial filters are provided, load listings
     if (widget.initialType != null || widget.initialListingType != null) {
       _activeFilters = {};
       if (_selectedType != null) _activeFilters['type'] = _selectedType;
@@ -46,9 +49,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         _activeFilters['listing_type'] = _selectedListingType;
       }
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref
-            .read(listingsProvider.notifier)
-            .loadListings(filters: _activeFilters);
+        ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
       });
       _hasSearched = true;
     }
@@ -62,9 +63,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             _scrollController.position.maxScrollExtent - 200 &&
         !state.isLoadingMore &&
         state.hasMore) {
-      ref
-          .read(listingsProvider.notifier)
-          .loadListings(page: state.currentPage + 1, filters: _activeFilters);
+      ref.read(listingsProvider.notifier).loadListings(
+            page: state.currentPage + 1,
+            filters: _activeFilters,
+          );
     }
   }
 
@@ -72,6 +74,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -83,155 +86,198 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     if (_selectedListingType != null) {
       _activeFilters['listing_type'] = _selectedListingType;
     }
-    if (_selectedSort != null) _activeFilters['sort'] = _selectedSort;
+    _activeFilters['sort'] = _selectedSort;
 
-    setState(() {
-      _hasSearched = true;
-    });
-
+    setState(() => _hasSearched = true);
     ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
   }
 
-  void _clearFilters() {
+  void _clearAllFilters() {
     setState(() {
       _selectedType = null;
       _selectedListingType = null;
-      _selectedSort = null;
+      _selectedSort = 'newest';
       _activeFilters = {};
+      _hasSearched = false;
+      _searchController.clear();
     });
   }
 
-  void _applyFilters(Map<String, dynamic> filters) {
-    setState(() {
-      _activeFilters = filters;
-      if (filters['type'] != null) _selectedType = filters['type'];
-      if (filters['listing_type'] != null) {
-        _selectedListingType = filters['listing_type'];
-      }
-      _hasSearched = true;
-    });
-    ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
-    Navigator.of(context).pop();
-  }
+  bool get _hasActiveFilters =>
+      _selectedType != null || _selectedListingType != null || _searchController.text.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(listingsProvider);
+    final listingsState = ref.watch(listingsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Search Properties'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.tune),
-            onPressed: () => _showFilterBottomSheet(),
-          ),
-        ],
-      ),
+      backgroundColor: AppColors.zinc50,
       body: Column(
         children: [
-          // Search Bar
-          _buildSearchBar(),
+          // Modern Search Header
+          _buildSearchHeader(),
 
-          // Active Filters
-          if (_activeFilters.isNotEmpty) _buildActiveFilters(),
+          // Filter Tabs
+          _buildFilterTabs(),
+
+          // Active Filters Chips
+          if (_hasActiveFilters) _buildActiveFilterChips(),
 
           // Results
           Expanded(
-            child: _buildResults(state),
+            child: _hasSearched
+                ? _buildResults(listingsState)
+                : _buildWelcomeState(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchHeader() {
     return Container(
-      padding: const EdgeInsets.all(16),
-      color: Colors.white,
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              onSubmitted: (_) => _performSearch(),
-              decoration: InputDecoration(
-                hintText: 'Search location, property type...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          child: Row(
+            children: [
+              // Back Button
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back_ios, size: 20),
+                padding: const EdgeInsets.all(8),
+              ),
+              // Search Input
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search by location...',
+                    prefixIcon: const Icon(Icons.search, color: AppColors.navy400),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: AppColors.zinc50,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    isDense: true,
+                  ),
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (_) => _performSearch(),
                 ),
-                contentPadding: const EdgeInsets.all(16),
               ),
-            ),
+              const SizedBox(width: 8),
+              // Search Button
+              ElevatedButton(
+                onPressed: _performSearch,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.wave500,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Search',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          ElevatedButton.icon(
-            onPressed: _performSearch,
-            icon: const Icon(Icons.filter_list),
-            label: const Text('Filters'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.navy950,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 16,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildActiveFilters() {
+  Widget _buildFilterTabs() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: Colors.white,
+      child: TabBar(
+        controller: _tabController,
+        labelColor: AppColors.wave500,
+        unselectedLabelColor: AppColors.zinc500,
+        indicatorColor: AppColors.wave500,
+        indicatorWeight: 3,
+        labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+        tabs: const [
+          Tab(text: 'All'),
+          Tab(text: 'Houses'),
+          Tab(text: 'Lands'),
+        ],
+        onTap: (index) {
+          setState(() {
+            _selectedType = index == 0 ? null : (index == 1 ? 'house' : 'land');
+          });
+          _performSearch();
+        },
+      ),
+    );
+  }
+
+  Widget _buildActiveFilterChips() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      color: Colors.white,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            if (_activeFilters['location'] != null)
-              _buildFilterChip(
-                _activeFilters['location']!,
-                Icons.location_on,
-                () => _removeFilter('location'),
+            if (_selectedListingType != null)
+              _filterChip(
+                _selectedListingType == 'sale' ? 'For Sale' : 'For Rent',
+                () => setState(() => _selectedListingType = null),
               ),
-            if (_activeFilters['type'] != null)
-              _buildFilterChip(
-                _activeFilters['type'] == 'house' ? 'House' : 'Land',
-                Icons.home,
-                () => _removeFilter('type'),
+            if (_selectedSort != 'newest')
+              _filterChip(
+                _selectedSort == 'price_low' ? 'Price: Low to High' : 'Price: High to Low',
+                () => setState(() => _selectedSort = 'newest'),
               ),
-            if (_activeFilters['listing_type'] != null)
-              _buildFilterChip(
-                _activeFilters['listing_type'] == 'sale' ? 'Sale' : 'Rent',
-                Icons.attach_money,
-                () => _removeFilter('listing_type'),
+            if (_searchController.text.isNotEmpty)
+              _filterChip(
+                'Location: ${_searchController.text}',
+                () {
+                  _searchController.clear();
+                  setState(() {});
+                },
               ),
+            const SizedBox(width: 8),
+            // Clear All
             GestureDetector(
-              onTap: _clearFilters,
+              onTap: _clearAllFilters,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.navy50,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.navy200),
+                  color: AppColors.zinc100,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.zinc300),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                child: const Row(
                   children: [
-                    const Icon(Icons.close, size: 14, color: AppColors.navy600),
-                    const SizedBox(width: 4),
+                    Icon(Icons.close, size: 14, color: AppColors.zinc600),
+                    SizedBox(width: 4),
                     Text(
                       'Clear All',
-                      style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.navy700,
+                      style: TextStyle(
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
+                        color: AppColors.zinc600,
                       ),
                     ),
                   ],
@@ -244,376 +290,315 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  void _removeFilter(String key) {
-    setState(() {
-      _activeFilters.remove(key);
-      if (key == 'type') _selectedType = null;
-      if (key == 'listing_type') _selectedListingType = null;
-    });
-    ref
-        .read(listingsProvider.notifier)
-        .loadListings(filters: _activeFilters);
+  Widget _filterChip(String label, VoidCallback onRemove) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.wave50,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.wave200),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.wave700,
+              ),
+            ),
+            const SizedBox(width: 6),
+            GestureDetector(
+              onTap: onRemove,
+              child: const Icon(Icons.close, size: 14, color: AppColors.wave600),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
-  Widget _buildFilterChip(
-      String label, IconData icon, VoidCallback onRemove) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.wave50,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.wave200),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+  Widget _buildWelcomeState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 14, color: AppColors.wave600),
-          const SizedBox(width: 4),
+          Icon(
+            Icons.search_rounded,
+            size: 80,
+            color: AppColors.navy200,
+          ),
+          const SizedBox(height: 24),
           Text(
-            label,
-            style: AppTextStyles.labelSmall.copyWith(
-              color: AppColors.wave700,
+            'Find Your Perfect Property',
+            style: AppTextStyles.title.copyWith(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: AppColors.navy800,
             ),
           ),
-          const SizedBox(width: 4),
-          GestureDetector(
-            onTap: onRemove,
-            child: Icon(
-              Icons.close,
-              size: 14,
-              color: AppColors.wave600,
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'Search by location, filter by type, and sort by price to discover amazing properties',
+              style: AppTextStyles.bodyLarge.copyWith(
+                color: AppColors.zinc500,
+              ),
+              textAlign: TextAlign.center,
             ),
+          ),
+          const SizedBox(height: 32),
+          // Quick Filters
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _quickFilterChip(Icons.home_rounded, 'Houses', 'house'),
+              _quickFilterChip(Icons.landscape, 'Lands', 'land'),
+              _quickFilterChip(Icons.sell_rounded, 'For Sale', 'sale'),
+              _quickFilterChip(Icons.key_rounded, 'For Rent', 'rent'),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _quickFilterChip(IconData icon, String label, String filterValue) {
+    final isSelected = (filterValue == 'house' || filterValue == 'land')
+        ? _selectedType == filterValue
+        : _selectedListingType == filterValue;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (filterValue == 'house' || filterValue == 'land') {
+            _selectedType = isSelected ? null : filterValue;
+          } else {
+            _selectedListingType = isSelected ? null : filterValue;
+          }
+        });
+        _performSearch();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.wave500 : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.wave500 : AppColors.zinc300,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.wave500.withOpacity(0.3),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isSelected ? Colors.white : AppColors.navy600,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? Colors.white : AppColors.navy700,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildResults(ListingsState state) {
-    // Loading state
-    if (state.isLoading) {
+    if (state.isLoading && state.listings.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Error state
-    if (state.errorMessage != null) {
+    if (state.errorMessage != null && state.listings.isEmpty) {
       return WaveErrorBanner(
         message: state.errorMessage!,
-        onRetry: () {
-          ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
-        },
+        onRetry: _performSearch,
       );
     }
 
-    // Empty state
-    if (state.listings.isEmpty && _hasSearched) {
+    if (state.listings.isEmpty) {
       return WaveEmptyState(
-        icon: Icons.search_off,
+        icon: Icons.search_off_rounded,
         title: 'No Properties Found',
-        subtitle: 'Try adjusting your search or filters',
+        subtitle: 'Try adjusting your search or filters to find more results',
         actionLabel: 'Clear Filters',
-        onAction: _clearFilters,
+        onAction: _clearAllFilters,
       );
     }
 
-    // Initial state (no search yet)
-    if (!_hasSearched) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search,
-              size: 64,
-              color: AppColors.navy300,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Start searching for properties',
-              style: AppTextStyles.bodyLarge.copyWith(
-                color: AppColors.navy500,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // Results list
-    return CustomScrollView(
-      controller: _scrollController,
-      slivers: [
-        // Results Count & Sort
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${state.total} Properties Found',
-                  style: AppTextStyles.bodyMedium,
+    return Column(
+      children: [
+        // Results count
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${state.total} properties found',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.zinc500,
                 ),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    setState(() => _selectedSort = value);
-                    _activeFilters['sort'] = value;
-                    ref
-                        .read(listingsProvider.notifier)
-                        .loadListings(filters: _activeFilters);
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'newest',
-                      child: Text('Newest First'),
-                    ),
-                    const PopupMenuItem(
-                      value: 'price_low',
-                      child: Text('Price: Low to High'),
-                    ),
-                    const PopupMenuItem(
-                      value: 'price_high',
-                      child: Text('Price: High to Low'),
-                    ),
-                  ],
+              ),
+              // Sort dropdown
+              GestureDetector(
+                onTap: () => _showSortBottomSheet(),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.zinc50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.zinc200),
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      Icon(Icons.sort_rounded, size: 16, color: AppColors.zinc600),
+                      const SizedBox(width: 4),
                       Text(
-                        _selectedSort == null
-                            ? 'Sort'
-                            : _selectedSort == 'newest'
-                                ? 'Newest'
-                                : _selectedSort == 'price_low'
-                                    ? 'Price ↑'
-                                    : 'Price ↓',
-                        style: AppTextStyles.labelMedium,
+                        _getSortLabel(_selectedSort),
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.zinc700,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      const Icon(Icons.arrow_drop_down),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-
-        // Listings
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (index >= state.listings.length) {
-                  // Loading more indicator
-                  return const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: PropertyListingCard(
-                    listing: state.listings[index],
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => ListingDetailScreen(
-                            listingId: state.listings[index].id,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+        const Divider(height: 1),
+        // Results list
+        Expanded(
+          child: ListView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+            itemCount: state.listings.length + (state.isLoadingMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index >= state.listings.length) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(child: CircularProgressIndicator()),
                 );
-              },
-              childCount: state.hasMore
-                  ? state.listings.length + 1
-                  : state.listings.length,
-            ),
+              }
+              final listing = state.listings[index];
+              final fav = _isFavorite(listing.id);
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: PropertyListingCard(
+                  listing: listing,
+                  isFavorite: fav,
+                  isTogglingFavorite: _isToggling(listing.id),
+                  onFavorite: () => _toggleFavorite(listing.id),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ListingDetailScreen(listingId: listing.id),
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-        ),
-
-        // Bottom padding
-        const SliverToBoxAdapter(
-          child: SizedBox(height: 100),
         ),
       ],
     );
   }
 
-  void _showFilterBottomSheet() {
+  String _getSortLabel(String sort) {
+    switch (sort) {
+      case 'price_low':
+        return 'Price: Low to High';
+      case 'price_high':
+        return 'Price: High to Low';
+      default:
+        return 'Newest';
+    }
+  }
+
+  void _showSortBottomSheet() {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => _FilterBottomSheet(
-        currentFilters: _activeFilters,
-        onApply: _applyFilters,
-      ),
-    );
-  }
-}
-
-/// Filter Bottom Sheet Widget
-class _FilterBottomSheet extends StatefulWidget {
-  final Map<String, dynamic> currentFilters;
-  final Function(Map<String, dynamic>) onApply;
-
-  const _FilterBottomSheet({
-    required this.currentFilters,
-    required this.onApply,
-  });
-
-  @override
-  State<_FilterBottomSheet> createState() => _FilterBottomSheetState();
-}
-
-class _FilterBottomSheetState extends State<_FilterBottomSheet> {
-  late Map<String, dynamic> _filters;
-
-  @override
-  void initState() {
-    super.initState();
-    _filters = Map.from(widget.currentFilters);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.7,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      builder: (context, scrollController) => Column(
-        children: [
-          // Handle
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.zinc300,
-                borderRadius: BorderRadius.circular(2),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Sort By',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
+              const SizedBox(height: 16),
+              _sortOption('newest', 'Newest First'),
+              _sortOption('price_low', 'Price: Low to High'),
+              _sortOption('price_high', 'Price: High to Low'),
+            ],
           ),
-
-          // Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Filters', style: AppTextStyles.title),
-                TextButton(
-                  onPressed: () {
-                    setState(() => _filters = {});
-                  },
-                  child: const Text('Reset'),
-                ),
-              ],
-            ),
-          ),
-
-          const Divider(),
-
-          // Filter Options
-          Expanded(
-            child: ListView(
-              controller: scrollController,
-              padding: const EdgeInsets.all(16),
-              children: [
-                _buildFilterSection(
-                  title: 'Property Type',
-                  children: [
-                    _buildRadioTile('type', 'All Types', null),
-                    _buildRadioTile('type', 'House', 'house'),
-                    _buildRadioTile('type', 'Land', 'land'),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                _buildFilterSection(
-                  title: 'Listing Type',
-                  children: [
-                    _buildRadioTile('listing_type', 'All', null),
-                    _buildRadioTile('listing_type', 'Sale', 'sale'),
-                    _buildRadioTile('listing_type', 'Rent', 'rental'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          // Apply Button
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => widget.onApply(_filters),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.navy950,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.all(16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text('Apply Filters'),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterSection({
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: AppTextStyles.labelLarge),
-        const SizedBox(height: 12),
-        ...children,
-      ],
-    );
-  }
-
-  Widget _buildRadioTile(String key, String label, String? value) {
-    final currentValue = _filters[key];
-
-    return ListTile(
-      title: Text(label),
-      leading: Radio<String?>(
-        value: value,
-        groupValue: currentValue,
-        onChanged: (v) {
-          setState(() {
-            if (v == null) {
-              _filters.remove(key);
-            } else {
-              _filters[key] = v;
-            }
-          });
-        },
-        activeColor: AppColors.wave500,
-      ),
-      contentPadding: EdgeInsets.zero,
-      onTap: () {
-        setState(() {
-          if (value == null) {
-            _filters.remove(key);
-          } else {
-            _filters[key] = value;
-          }
-        });
+        );
       },
     );
+  }
+
+  Widget _sortOption(String value, String label) {
+    final isSelected = _selectedSort == value;
+    return ListTile(
+      leading: Icon(
+        isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+        color: isSelected ? AppColors.wave500 : AppColors.zinc400,
+      ),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          color: isSelected ? AppColors.wave600 : AppColors.zinc700,
+        ),
+      ),
+      onTap: () {
+        setState(() => _selectedSort = value);
+        Navigator.pop(context);
+        _performSearch();
+      },
+    );
+  }
+
+  bool _isFavorite(int listingId) {
+    final favState = ref.read(favoritesProvider);
+    return favState.favorites.any((f) => f.id == listingId);
+  }
+
+  bool _isToggling(int listingId) => false;
+
+  Future<void> _toggleFavorite(int listingId) async {
+    await ref.read(favoritesProvider.notifier).toggleFavorite(listingId);
   }
 }

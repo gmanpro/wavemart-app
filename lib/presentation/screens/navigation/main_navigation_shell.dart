@@ -5,7 +5,7 @@ import '../../providers/app_providers.dart';
 import '../home/home_screen.dart';
 import '../favorites/favorites_screen.dart';
 import '../messages/messages_screen.dart';
-import '../profile/profile_screen.dart';
+import '../notifications/notifications_screen.dart';
 import '../listing/create_listing_screen.dart';
 
 class MainNavigationShell extends ConsumerStatefulWidget {
@@ -30,12 +30,20 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
       const FavoritesScreen(),
       const Center(child: Text('')), // Placeholder for FAB
       const MessagesScreen(),
-      const ProfileScreen(),
+      const NotificationsScreen(),
     ];
 
     // Watch unread messages count
     final unreadMessagesAsync = ref.watch(unreadMessagesCountProvider);
-    final unreadCount = unreadMessagesAsync.when(
+    final unreadMsgCount = unreadMessagesAsync.when(
+      data: (count) => count,
+      loading: () => 0,
+      error: (_, __) => 0,
+    );
+
+    // Watch unread notifications count
+    final unreadNotifAsync = ref.watch(unreadCountProvider);
+    final unreadNotifCount = unreadNotifAsync.when(
       data: (count) => count,
       loading: () => 0,
       error: (_, __) => 0,
@@ -85,8 +93,8 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
               _buildNavItem(Icons.home_rounded, "Home", 0),
               _buildNavItem(Icons.favorite_rounded, "Saved", 1),
               const SizedBox(width: 48), // Space for FAB notch
-              _buildMessagesNavItem(unreadCount),
-              _buildNavItem(Icons.person_outline_rounded, "Profile", 4),
+              _buildMessagesNavItem(unreadMsgCount),
+              _buildNotificationsNavItem(unreadNotifCount),
             ],
           ),
         ),
@@ -155,6 +163,50 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
             const SizedBox(height: 4),
             Text(
               "Messages",
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? AppColors.navy900 : AppColors.zinc500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationsNavItem(int unreadCount) {
+    final isSelected = _selectedIndex == 4;
+    return Expanded(
+      child: InkWell(
+        onTap: () => _onItemTapped(4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (unreadCount > 0)
+              Badge(
+                label: Text(
+                  '$unreadCount',
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                ),
+                backgroundColor: Colors.redAccent,
+                textColor: Colors.white,
+                child: Icon(
+                  Icons.notifications_outlined,
+                  color: isSelected ? AppColors.navy900 : AppColors.zinc400,
+                  size: 26,
+                ),
+              )
+            else
+              Icon(
+                Icons.notifications_outlined,
+                color: isSelected ? AppColors.navy900 : AppColors.zinc400,
+                size: 26,
+              ),
+            const SizedBox(height: 4),
+            Text(
+              "Alerts",
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,

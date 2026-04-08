@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import '../../core/network/api_client.dart';
 import '../../core/network/api_constants.dart';
 import '../../core/network/error_handler.dart';
@@ -26,23 +27,25 @@ class MessageService {
 
       if (response.statusCode == 200) {
         final responseData = response.data;
-        
+        dev.log('Conversations response: $responseData', name: 'Messages');
+
         // Backend returns: { success: true, data: { current_page, last_page, total, data: [...] } }
         List<dynamic> dataList = [];
         int currentPage = page;
         int totalPages = 1;
         int total = 0;
 
-        if (responseData is Map) {
+        if (responseData is Map && responseData['success'] == true) {
           final dataField = responseData['data'];
-          
+
           if (dataField is Map) {
             // Laravel paginator structure
             final dataListRaw = dataField['data'];
             if (dataListRaw is List) {
               dataList = dataListRaw;
+              dev.log('Found ${dataList.length} conversations', name: 'Messages');
             }
-            
+
             currentPage = _safeInt(dataField['current_page']) ?? page;
             totalPages = _safeInt(dataField['last_page']) ?? 1;
             total = _safeInt(dataField['total']) ?? 0;
@@ -69,7 +72,8 @@ class MessageService {
         success: false,
         message: response.data['message'] ?? 'Failed to fetch conversations',
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      dev.log('Error fetching conversations: $e\n$stackTrace', name: 'Messages');
       final exception = ApiErrorHandler.handle(e);
       return ConversationResponse(
         success: false,
