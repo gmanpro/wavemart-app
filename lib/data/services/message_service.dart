@@ -101,7 +101,7 @@ class MessageService {
         if (raw is Map) {
           final dataField = raw['data'];
           if (dataField is Map) {
-            innerData = dataField;
+            innerData = Map<String, dynamic>.from(dataField);
           }
         }
 
