@@ -394,7 +394,7 @@ class WaveDivider extends StatelessWidget {
   }
 }
 
-/// WaveMart Section Header
+/// WaveMart Section Header - Modern design with subtle gradient accent
 class WaveSectionHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -413,31 +413,79 @@ class WaveSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: padding ?? const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: AppTextStyles.titleSmall,
-              ),
-              if (subtitle != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  subtitle!,
-                  style: AppTextStyles.caption,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [AppColors.wave500, AppColors.wave600],
+                        ),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      title,
+                      style: AppTextStyles.titleSmall.copyWith(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ],
                 ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 14),
+                    child: Text(
+                      subtitle!,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.navy400,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
           if (actionLabel != null)
-            TextButton(
-              onPressed: onAction,
-              child: Text(actionLabel!),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.wave50,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.wave200),
+              ),
+              child: TextButton(
+                onPressed: onAction,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  actionLabel!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.wave700,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ),
         ],
       ),
