@@ -152,7 +152,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
       padding: const EdgeInsets.fromLTRB(20, 28, 20, 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        alignItems: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
