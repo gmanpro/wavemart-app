@@ -148,7 +148,12 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen> {
       ),
       body: kycState.isLoading && kycState.status == 'none'
           ? const Center(child: CircularProgressIndicator())
-          : _buildBody(kycState),
+          : RefreshIndicator(
+              onRefresh: () async {
+                await ref.read(kycStatusProvider.notifier).loadKycStatus();
+              },
+              child: _buildBody(kycState),
+            ),
     );
   }
 

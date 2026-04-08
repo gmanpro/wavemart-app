@@ -20,6 +20,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
+  final Set<int> _togglingFavorites = {};
 
   @override
   void initState() {
@@ -57,13 +58,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _toggleFavorite(int listingId) async {
+    setState(() => _togglingFavorites.add(listingId));
     final success = await ref.read(favoritesProvider.notifier).toggleFavorite(listingId);
-    if (mounted && success) {
-      // Trigger rebuild of listings to update favorite states
-      ref.invalidate(listingsProvider);
-      ref.invalidate(featuredListingsProvider);
+    if (mounted) {
+      setState(() => _togglingFavorites.remove(listingId));
     }
   }
+
+  bool _isToggling(int listingId) => _togglingFavorites.contains(listingId);
 
   @override
   Widget build(BuildContext context) {
@@ -76,9 +78,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.zinc50,
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await Future.wait([
+            ref.read(featuredListingsProvider.notifier).loadFeaturedListings(),
+            ref.read(listingsProvider.notifier).loadListings(),
+          ]);
+        },
+        child: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
           // 1. Sticky Top Header
           SliverPersistentHeader(
             pinned: true,
@@ -99,6 +108,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // 5. Latest Listings
           _buildLatestListings(listingsState),
         ],
+      ),
       ),
     );
   }
@@ -244,6 +254,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: FeaturedListingCard(
                 listing: listing,
                 isFavorite: fav,
+                isTogglingFavorite: _isToggling(listing.id),
                 onFavorite: () => _toggleFavorite(listing.id),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
@@ -295,6 +306,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: PropertyListingCard(
                 listing: listing,
                 isFavorite: fav,
+                isTogglingFavorite: _isToggling(listing.id),
                 onFavorite: () => _toggleFavorite(listing.id),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(

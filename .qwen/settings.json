@@ -18,7 +18,9 @@
       "Bash(gh *)",
       "Bash(adb *)",
       "Bash(sleep *)",
-      "Bash(git log *)"
+      "Bash(git log *)",
+      "Read(//sdcard/htdocs/WaveMart/routes/**)",
+      "Bash(git diff *)"
     ]
   },
   "$version": 3

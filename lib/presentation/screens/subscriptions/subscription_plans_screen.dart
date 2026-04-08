@@ -40,7 +40,13 @@ class _SubscriptionPlansScreenState
           message: error.toString(),
           onRetry: () => ref.invalidate(subscriptionPlansProvider),
         ),
-        data: (plans) => _buildBody(plans, currentSub),
+        data: (plans) => RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(subscriptionPlansProvider);
+            await ref.read(currentSubscriptionProvider.notifier).loadCurrentSubscription();
+          },
+          child: _buildBody(plans, currentSub),
+        ),
       ),
     );
   }

@@ -94,15 +94,26 @@ class MessageService {
       );
 
       if (response.statusCode == 200) {
-        final data = response.data['data'] ?? response.data;
-        List<dynamic> msgList = [];
+        final raw = response.data;
 
-        if (data is Map) {
-          // Could be { conversation: {...}, messages: [...] } or paginator
-          final messagesRaw = data['messages'] ?? data['data'];
-          if (messagesRaw is List) msgList = messagesRaw;
-        } else if (data is List) {
-          msgList = data;
+        // Backend returns: { success: true, data: { conversation, messages: { paginator }, other_user } }
+        Map<String, dynamic> innerData = {};
+        if (raw is Map) {
+          final dataField = raw['data'];
+          if (dataField is Map) {
+            innerData = dataField;
+          }
+        }
+
+        // Extract messages from paginator
+        List<dynamic> msgList = [];
+        final messagesRaw = innerData['messages'];
+        if (messagesRaw is Map) {
+          // Laravel paginator: { data: [...], current_page, ... }
+          final listRaw = messagesRaw['data'] ?? messagesRaw['listings'] ?? messagesRaw['items'];
+          if (listRaw is List) msgList = listRaw;
+        } else if (messagesRaw is List) {
+          msgList = messagesRaw;
         }
 
         final messages = msgList
@@ -111,8 +122,8 @@ class MessageService {
             .toList();
 
         msg.Conversation? conversation;
-        if (data is Map && data['conversation'] is Map) {
-          conversation = msg.Conversation.fromJson(data['conversation']);
+        if (innerData['conversation'] is Map) {
+          conversation = msg.Conversation.fromJson(innerData['conversation']);
         }
 
         return MessageResponse(

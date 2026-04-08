@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'core/network/api_client.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/screens/auth/otp_login_screen.dart';
@@ -60,49 +61,57 @@ class WaveMartApp extends ConsumerStatefulWidget {
 }
 
 class _WaveMartAppState extends ConsumerState<WaveMartApp> {
-  bool _isCheckingAuth = true;
+  bool _showHome = false;
+  bool _hasToken = false;
 
   @override
   void initState() {
     super.initState();
-    // Check auth status on app start (non-blocking)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(authStateProvider.notifier).checkAuth().then((_) {
-        if (mounted) {
-          setState(() => _isCheckingAuth = false);
-        }
-      });
-    });
+    _checkLocalAuth();
+  }
+
+  /// Check local token to decide initial screen.
+  /// If token exists locally, show home immediately (works offline with cached data).
+  /// API auth check runs in background — only redirects to login on explicit 401.
+  Future<void> _checkLocalAuth() async {
+    final client = ApiClient();
+    _hasToken = await client.isAuthenticated();
+
+    if (mounted) {
+      setState(() => _showHome = _hasToken);
+
+      // Background API auth check — don't block UI
+      if (_hasToken) {
+        ref.read(authStateProvider.notifier).checkAuth().then((_) {
+          if (mounted) {
+            final authState = ref.read(authStateProvider);
+            // Only switch to login if API explicitly rejected (401 cleared token)
+            if (!authState.isAuthenticated && !authState.isLoading) {
+              setState(() => _showHome = false);
+            }
+          }
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Show loading screen while checking auth
-    if (_isCheckingAuth) {
-      return MaterialApp(
-        title: 'WaveMart',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        home: const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF16B364)),
-            ),
-          ),
-        ),
-        locale: const Locale('en'),
-      );
-    }
-
     final authState = ref.watch(authStateProvider);
+
+    // API auth check completed and user is definitely logged out (token revoked server-side)
+    final isDefinitelyLoggedOut =
+        !authState.isLoading && !authState.isAuthenticated && _hasToken;
 
     return MaterialApp(
       title: 'WaveMart',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: authState.isAuthenticated
-          ? const MainNavigationShell()
-          : const OtpLoginScreen(),
+      home: isDefinitelyLoggedOut
+          ? const OtpLoginScreen()
+          : _showHome
+              ? const MainNavigationShell()
+              : const OtpLoginScreen(),
       onGenerateRoute: _generateRoute,
       builder: (context, child) {
         if (child == null) {

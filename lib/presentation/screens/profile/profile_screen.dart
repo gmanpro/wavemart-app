@@ -39,9 +39,13 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(profileProvider.notifier).loadProfile();
+        },
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
           // Profile Header
           _buildProfileHeader(context, ref, profileState),
           const SizedBox(height: 24),
@@ -217,6 +221,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 100),
         ],
+      ),
       ),
     );
   }

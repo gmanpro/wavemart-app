@@ -15,6 +15,8 @@ class FavoritesScreen extends ConsumerStatefulWidget {
 }
 
 class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
+  final Set<int> _togglingFavorites = {};
+
   @override
   void initState() {
     super.initState();
@@ -23,6 +25,24 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
       ref.read(favoritesProvider.notifier).loadFavorites();
     });
   }
+
+  Future<void> _removeFavorite(int listingId) async {
+    setState(() => _togglingFavorites.add(listingId));
+    final success = await ref.read(favoritesProvider.notifier).toggleFavorite(listingId);
+    if (mounted) {
+      setState(() => _togglingFavorites.remove(listingId));
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Property removed from saved'),
+            backgroundColor: AppColors.wave500,
+          ),
+        );
+      }
+    }
+  }
+
+  bool _isToggling(int listingId) => _togglingFavorites.contains(listingId);
 
   @override
   Widget build(BuildContext context) {
@@ -86,51 +106,35 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
         final listing = state.favorites[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
-          child: Dismissible(
-            key: Key('favorite_${listing.id}'),
-            direction: DismissDirection.endToStart,
-            background: Container(
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.only(right: 20),
-              decoration: BoxDecoration(
-                color: Colors.red[500],
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Icon(Icons.delete, color: Colors.white, size: 28),
-            ),
-            confirmDismiss: (direction) async {
-              return await showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Remove Favorite'),
-                  content: const Text('Remove this property from saved list?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel'),
+          child: Stack(
+            children: [
+              PropertyListingCard(listing: listing),
+              // X remove button on top-right of card
+              Positioned(
+                top: 12,
+                right: 12,
+                child: GestureDetector(
+                  onTap: _isToggling(listing.id) ? null : () => _removeFavorite(listing.id),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      shape: BoxShape.circle,
                     ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Remove'),
-                    ),
-                  ],
-                ),
-              );
-            },
-            onDismissed: (direction) async {
-              final success = await ref
-                  .read(favoritesProvider.notifier)
-                  .toggleFavorite(listing.id);
-              if (mounted && success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Property removed from favorites'),
-                    backgroundColor: AppColors.wave500,
+                    child: _isToggling(listing.id)
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Icon(Icons.close, size: 18, color: Colors.white),
                   ),
-                );
-              }
-            },
-            child: PropertyListingCard(listing: listing),
+                ),
+              ),
+            ],
           ),
         );
       },
