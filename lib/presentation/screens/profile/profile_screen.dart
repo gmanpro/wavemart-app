@@ -7,6 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/common/wave_common_widgets.dart';
 import '../auth/otp_login_screen.dart';
 import '../kyc/kyc_verification_screen.dart';
+import 'edit_profile_screen.dart';
 
 /// Profile Screen - Only profile-related content (personal info, KYC, stats)
 class ProfileScreen extends ConsumerWidget {
@@ -63,10 +64,15 @@ class ProfileScreen extends ConsumerWidget {
                   icon: Icons.edit_outlined,
                   title: 'Edit Profile',
                   subtitle: 'Update your information',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Edit profile coming soon')),
+                  onTap: () async {
+                    final result = await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const EditProfileScreen(),
+                      ),
                     );
+                    if (result == true && context.mounted) {
+                      ref.read(profileProvider.notifier).loadProfile();
+                    }
                   },
                 ),
               ],
@@ -202,10 +208,15 @@ class ProfileScreen extends ConsumerWidget {
         ),
         IconButton(
           icon: const Icon(Icons.edit_outlined),
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Edit profile coming soon')),
+          onPressed: () async {
+            final result = await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const EditProfileScreen(),
+              ),
             );
+            if (result == true && context.mounted) {
+              ref.read(profileProvider.notifier).loadProfile();
+            }
           },
         ),
       ],

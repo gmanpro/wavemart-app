@@ -10,6 +10,7 @@ import '../../widgets/listing_card.dart';
 import '../search/search_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../listing/listing_detail_screen.dart';
+import '../profile/edit_profile_screen.dart';
 import '../../../data/models/listing.dart';
 
 /// Home Screen - Modern premium header with glassmorphism & animations
@@ -273,11 +274,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                     _buildModalAction(
                       icon: Icons.edit_outlined,
                       title: 'Edit Profile',
-                      onTap: () {
+                      onTap: () async {
                         Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Edit profile coming soon')),
+                        final result = await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const EditProfileScreen(),
+                          ),
                         );
+                        if (result == true && mounted) {
+                          ref.read(profileProvider.notifier).loadProfile();
+                        }
                       },
                     ),
                     const Divider(height: 1),

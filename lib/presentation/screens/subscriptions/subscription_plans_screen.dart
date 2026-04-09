@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
+import '../../../../data/services/subscription_service.dart';
+import '../../../../data/services/payment_service.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/common/wave_button.dart';
 import '../../widgets/common/wave_common_widgets.dart';
@@ -17,6 +20,9 @@ class SubscriptionPlansScreen extends ConsumerStatefulWidget {
 
 class _SubscriptionPlansScreenState
     extends ConsumerState<SubscriptionPlansScreen> {
+  final SubscriptionServiceApi _subscriptionService = SubscriptionServiceApi();
+  final PaymentService _paymentService = PaymentService();
+  bool _isProcessingPayment = false;
   @override
   void initState() {
     super.initState();
@@ -84,6 +90,7 @@ class _SubscriptionPlansScreenState
                 plan: plan,
                 isCurrentPlan: currentSub.subscription?.planId == plan.id &&
                     currentSub.subscription.isActive,
+                isLoading: _isProcessingPayment,
                 onSelect: () => _selectPlan(plan),
               )),
         ],
@@ -170,14 +177,123 @@ class _SubscriptionPlansScreenState
   }
 
   Future<void> _selectPlan(dynamic plan) async {
-    // TODO: Navigate to payment screen
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Proceeding to payment for ${plan.name} - ${plan.displayPrice}'),
-          backgroundColor: AppColors.wave500,
-        ),
-      );
+    if (_isProcessingPayment) return;
+
+    // For free plans, activate directly
+    if (plan.isFree) {
+      setState(() => _isProcessingPayment = true);
+      try {
+        final response = await _subscriptionService.activateSubscription();
+        if (mounted) {
+          if (response.success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Free plan activated successfully!'),
+                backgroundColor: AppColors.success,
+              ),
+            );
+            ref.read(currentSubscriptionProvider.notifier).loadCurrentSubscription();
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(response.message),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: $e'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isProcessingPayment = false);
+        }
+      }
+      return;
+    }
+
+    setState(() => _isProcessingPayment = true);
+
+    try {
+      // First, try to subscribe via subscription service (which returns checkout URL)
+      final response = await _subscriptionService.subscribe(plan.id);
+
+      if (!mounted) return;
+
+      if (response.success && response.checkoutUrl != null) {
+        // Open checkout URL in browser
+        final uri = Uri.parse(response.checkoutUrl!);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Complete payment in your browser. Return here after payment.'),
+                backgroundColor: AppColors.wave500,
+              ),
+            );
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Could not open browser for payment'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        }
+      } else if (response.success) {
+        // Fallback: initialize payment via payment service
+        final paymentResponse = await _paymentService.initializePayment(
+          paymentType: 'subscription',
+          amount: plan.price ?? 0.0,
+          relatedId: plan.id,
+        );
+
+        if (mounted && paymentResponse.success && paymentResponse.checkoutUrl != null) {
+          final uri = Uri.parse(paymentResponse.checkoutUrl!);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(paymentResponse.message),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.message),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment error: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessingPayment = false);
+      }
     }
   }
 }
@@ -186,11 +302,13 @@ class _SubscriptionPlansScreenState
 class _PlanCard extends StatelessWidget {
   final dynamic plan;
   final bool isCurrentPlan;
+  final bool isLoading;
   final VoidCallback onSelect;
 
   const _PlanCard({
     required this.plan,
     required this.isCurrentPlan,
+    this.isLoading = false,
     required this.onSelect,
   });
 
@@ -361,6 +479,7 @@ class _PlanCard extends StatelessWidget {
                         : isFree
                             ? Icons.check
                             : Icons.arrow_forward,
+                    isLoading: isLoading && !isCurrentPlan,
                     onPressed: isCurrentPlan ? null : onSelect,
                     variant: isCurrentPlan
                         ? ButtonVariant.outline

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../../../data/models/listing.dart';
@@ -689,10 +690,18 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
     }
   }
 
-  void _shareListing(Listing listing) {
-    // TODO: Implement sharing
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Share feature coming soon')),
+  Future<void> _shareListing(Listing listing) async {
+    final shareText = '''
+${listing.title}
+${listing.displayPrice}
+${listing.description?.isNotEmpty == true ? '\n${listing.description}' : ''}
+
+Shared from WaveMart - Ethiopia's Premier Real Estate Marketplace
+''';
+
+    await Share.share(
+      shareText,
+      subject: 'Check out this property on WaveMart: ${listing.title}',
     );
   }
 }

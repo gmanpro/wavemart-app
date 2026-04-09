@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/app_providers.dart';
-import '../../providers/auth_provider.dart';
-import '../../widgets/common/wave_common_widgets.dart';
-import '../auth/otp_login_screen.dart';
 import '../kyc/kyc_verification_screen.dart';
 import '../subscriptions/subscription_plans_screen.dart';
+import '../listing/my_listings_screen.dart';
+import '../payments/payment_history_screen.dart';
+import '../help/help_center_screen.dart';
 
 /// Settings Screen - App settings and support (no profile/nav)
 class SettingsScreen extends ConsumerWidget {
@@ -40,8 +40,10 @@ class SettingsScreen extends ConsumerWidget {
                   title: 'My Listings',
                   subtitle: 'Manage your properties',
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('My Listings coming soon')),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const MyListingsScreen(),
+                      ),
                     );
                   },
                 ),
@@ -62,8 +64,10 @@ class SettingsScreen extends ConsumerWidget {
                   title: 'Payment History',
                   subtitle: 'Transaction history',
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Payments coming soon')),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const PaymentHistoryScreen(),
+                      ),
                     );
                   },
                 ),
@@ -94,8 +98,10 @@ class SettingsScreen extends ConsumerWidget {
                   title: 'Help Center',
                   subtitle: 'FAQs and guides',
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Help Center coming soon')),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const HelpCenterScreen(),
+                      ),
                     );
                   },
                 ),
@@ -104,8 +110,10 @@ class SettingsScreen extends ConsumerWidget {
                   title: 'Contact Support',
                   subtitle: 'Get in touch',
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Support coming soon')),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const HelpCenterScreen(),
+                      ),
                     );
                   },
                 ),

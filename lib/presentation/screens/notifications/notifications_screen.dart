@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
+import '../../../../data/models/notification.dart' as app;
+import '../../../../data/services/notification_service.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/common/wave_common_widgets.dart';
+import '../listing/listing_detail_screen.dart';
+import '../messages/messages_screen.dart';
 
 /// Notifications Screen - Wired to notificationsProvider
 class NotificationsScreen extends ConsumerStatefulWidget {
@@ -16,6 +20,7 @@ class NotificationsScreen extends ConsumerStatefulWidget {
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   final ScrollController _scrollController = ScrollController();
+  final NotificationService _notificationService = NotificationService();
 
   @override
   void initState() {
@@ -129,24 +134,63 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     );
   }
 
-  Future<void> _handleNotificationTap(dynamic notification) async {
+  Future<void> _handleNotificationTap(app.Notification notification) async {
     // Mark as read
     if (!notification.isRead) {
       ref.read(notificationsProvider.notifier).markAsRead(notification.id);
     }
 
     // Navigate based on notification type
-    // TODO: Add navigation based on relatedType
+    switch (notification.type) {
+      case app.NotificationType.listingApproved:
+      case app.NotificationType.listingRejected:
+      case app.NotificationType.featuredListingExpired:
+        // Navigate to listing detail
+        if (notification.relatedId != null) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ListingDetailScreen(listingId: notification.relatedId!),
+            ),
+          );
+        }
+        break;
+      case app.NotificationType.newMessage:
+        // Navigate to messages
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const MessagesScreen()),
+        );
+        break;
+      case app.NotificationType.newInterest:
+        if (notification.relatedId != null) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ListingDetailScreen(listingId: notification.relatedId!),
+            ),
+          );
+        }
+        break;
+      case app.NotificationType.paymentSuccess:
+      case app.NotificationType.subscriptionActivated:
+        // Could navigate to payment history or subscriptions
+        break;
+      case app.NotificationType.systemAnnouncement:
+        // Just show the notification content
+        break;
+    }
   }
 
   Future<void> _deleteNotification(int id) async {
-    // TODO: Add delete notification API call
+    final response = await _notificationService.deleteNotification(id);
+    if (response.success) {
+      // Reload notifications to reflect deletion
+      ref.read(notificationsProvider.notifier).loadNotifications();
+    }
   }
 }
 
 /// Notification Tile Widget
 class _NotificationTile extends StatelessWidget {
-  final dynamic notification;
+  final app.Notification notification;
   final VoidCallback onTap;
   final VoidCallback onDismissed;
 

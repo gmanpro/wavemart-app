@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
+import '../../../../data/services/kyc_service.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/common/wave_button.dart';
 
@@ -23,6 +24,7 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen> {
   File? _selfieImage;
   bool _isSubmitting = false;
   final ImagePicker _picker = ImagePicker();
+  final KycService _kycService = KycService();
 
   @override
   void initState() {
@@ -120,21 +122,32 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen> {
 
     setState(() => _isSubmitting = true);
 
-    // TODO: Call KYC service to submit
-    // For now, simulate submission
-    await Future.delayed(const Duration(seconds: 2));
+    final response = await _kycService.submitKyc(
+      documentType: _documentType!,
+      frontImage: _frontImage!,
+      backImage: _backImage,
+      selfieImage: _selfieImage,
+    );
 
     setState(() => _isSubmitting = false);
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('KYC submitted successfully! Awaiting approval.'),
-          backgroundColor: AppColors.success,
-        ),
-      );
-      // Reload status
-      ref.read(kycStatusProvider.notifier).loadKycStatus();
+      if (response.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('KYC submitted successfully! Awaiting approval.'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        ref.read(kycStatusProvider.notifier).loadKycStatus();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.message),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 

@@ -104,6 +104,80 @@ class ListingService {
     return null;
   }
 
+  /// Get user's own listings
+  Future<ListingResponse> getMyListings({
+    int page = 1,
+    int perPage = 15,
+  }) async {
+    try {
+      final queryParams = {
+        'page': page,
+        'per_page': perPage,
+      };
+
+      final response = await _apiClient.dio.get(
+        ApiConstants.listings,
+        queryParameters: {...queryParams, 'my_listings': true},
+      );
+
+      if (response.statusCode == 200) {
+        final raw = response.data;
+        List<dynamic> dataList = [];
+        Map<String, dynamic> meta = {};
+
+        if (raw is Map) {
+          final dataField = raw['data'];
+          if (dataField is Map && raw['success'] != null) {
+            meta = Map<String, dynamic>.from(dataField);
+            final listRaw = dataField['data'] ?? dataField['listings'] ?? dataField['items'];
+            if (listRaw is List) dataList = listRaw;
+          } else if (dataField is List) {
+            dataList = dataField;
+            meta = Map<String, dynamic>.from(raw);
+          } else if (dataField is Map) {
+            meta = Map<String, dynamic>.from(dataField);
+            final listRaw = dataField['data'] ?? dataField['listings'] ?? dataField['items'];
+            if (listRaw is List) dataList = listRaw;
+          } else if (raw['current_page'] != null) {
+            meta = Map<String, dynamic>.from(raw);
+            final listRaw = raw['data'] ?? raw['listings'] ?? raw['items'];
+            if (listRaw is List) dataList = listRaw;
+          }
+        } else if (raw is List) {
+          dataList = raw;
+        }
+
+        final listings = dataList
+            .whereType<Map>()
+            .map((json) => Listing.fromJson(json as Map<String, dynamic>))
+            .toList();
+
+        int currentPage = _safeInt(meta['current_page']) ?? page;
+        int totalPages = _safeInt(meta['last_page']) ?? 1;
+        int total = _safeInt(meta['total']) ?? 0;
+
+        return ListingResponse(
+          success: true,
+          listings: listings,
+          currentPage: currentPage,
+          totalPages: totalPages,
+          total: total,
+        );
+      }
+
+      return ListingResponse(
+        success: false,
+        message: response.data['message'] ?? 'Failed to fetch your listings',
+      );
+    } catch (e) {
+      final exception = ApiErrorHandler.handle(e);
+      return ListingResponse(
+        success: false,
+        message: exception.toString().replaceAll(RegExp(r'^\w+: '), ''),
+      );
+    }
+  }
+
   /// Get featured listings only
   Future<ListingResponse> getFeaturedListings({
     int page = 1,
