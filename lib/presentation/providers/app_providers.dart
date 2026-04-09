@@ -211,7 +211,13 @@ class ConversationsNotifier extends StateNotifier<ConversationsState> {
     if (response.success) {
       state = ConversationsState.loaded(conversations: response.conversations, total: response.total ?? 0);
     } else {
-      state = state.copyWith(isLoading: false, errorMessage: response.message);
+      // If API call fails but we have no data yet, show empty state instead of error
+      // This handles cases like: no conversations, auth issues, network errors
+      if (state.conversations.isEmpty) {
+        state = const ConversationsState.loaded(conversations: [], total: 0);
+      } else {
+        state = state.copyWith(isLoading: false, errorMessage: response.message);
+      }
     }
   }
 }
@@ -270,7 +276,10 @@ class ChatMessagesNotifier extends StateNotifier<ChatMessagesState> {
         hasMore: response.messages.length >= 50,
       );
     } else {
-      state = state.copyWith(isLoading: false, errorMessage: response.message);
+      // Graceful error handling - don't show error if no data yet
+      if (state.messages.isEmpty) {
+        state = const ChatMessagesState.loaded(messages: [], hasMore: false);
+      }
     }
   }
 
