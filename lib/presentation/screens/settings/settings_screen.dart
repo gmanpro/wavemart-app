@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/app_providers.dart';
@@ -137,20 +138,12 @@ class SettingsScreen extends ConsumerWidget {
                 _MenuItemData(
                   icon: Icons.privacy_tip_outlined,
                   title: 'Privacy Policy',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Privacy Policy coming soon')),
-                    );
-                  },
+                  onTap: () => _openWebPage(context, 'https://wavemart.et/privacy', 'Privacy Policy'),
                 ),
                 _MenuItemData(
                   icon: Icons.description_outlined,
                   title: 'Terms of Service',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Terms coming soon')),
-                    );
-                  },
+                  onTap: () => _openWebPage(context, 'https://wavemart.et/terms', 'Terms of Service'),
                 ),
               ],
             ),
@@ -159,6 +152,19 @@ class SettingsScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _openWebPage(BuildContext context, String url, String title) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open $title')),
+        );
+      }
+    }
   }
 
   Widget _buildMenuSection({

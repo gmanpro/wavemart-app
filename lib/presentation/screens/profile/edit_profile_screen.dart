@@ -28,7 +28,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _firstNameController = TextEditingController(text: user?.firstName ?? '');
     _lastNameController = TextEditingController(text: user?.lastName ?? '');
     _emailController = TextEditingController(text: user?.email ?? '');
-    _selectedGender = user?.gender;
+    _selectedGender = user?.gender?.toLowerCase();
   }
 
   @override
@@ -53,8 +53,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       data['email'] = _emailController.text.trim();
     }
 
-    if (_selectedGender != null) {
-      data['gender'] = _selectedGender;
+    if (_selectedGender != null && _selectedGender!.isNotEmpty) {
+      // Backend expects: 'Male' or 'Female'
+      final genderValue = _selectedGender![0].toUpperCase() + _selectedGender!.substring(1);
+      data['gender'] = genderValue;
     }
 
     final success = await ref.read(profileProvider.notifier).updateProfile(data);
@@ -89,25 +91,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Profile'),
-        actions: [
-          TextButton(
-            onPressed: _isSaving ? null : _saveProfile,
-            child: _isSaving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text(
-                    'Save',
-                    style: TextStyle(
-                      color: AppColors.wave600,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-          ),
-        ],
       ),
       body: user == null
           ? const Center(child: CircularProgressIndicator())
@@ -165,10 +148,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
                   // Gender
                   _buildGenderDropdown(),
-                  const SizedBox(height: 16),
-
-                  // Verification badges
-                  _buildVerificationBadges(user),
                   const SizedBox(height: 32),
 
                   // Save button
@@ -277,7 +256,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   Widget _buildGenderDropdown() {
     return DropdownButtonFormField<String>(
-      value: _selectedGender,
+      value: _selectedGender?.isEmpty ?? true ? null : _selectedGender,
       decoration: InputDecoration(
         labelText: 'Gender',
         prefixIcon: const Icon(Icons.wc_outlined, size: 20),
@@ -292,63 +271,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       onChanged: (value) {
         setState(() => _selectedGender = value);
       },
-    );
-  }
-
-  Widget _buildVerificationBadges(dynamic user) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.navy50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.navy200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Verification Status',
-            style: AppTextStyles.labelMedium.copyWith(
-              color: AppColors.navy700,
-            ),
-          ),
-          const SizedBox(height: 12),
-          _buildVerificationRow(
-            icon: Icons.phone,
-            label: 'Phone Verified',
-            isVerified: user.isPhoneVerified,
-          ),
-          const SizedBox(height: 8),
-          _buildVerificationRow(
-            icon: Icons.verified_user,
-            label: 'KYC Verified',
-            isVerified: user.isKycVerified,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVerificationRow({
-    required IconData icon,
-    required String label,
-    required bool isVerified,
-  }) {
-    return Row(
-      children: [
-        Icon(
-          isVerified ? Icons.check_circle : Icons.pending,
-          size: 18,
-          color: isVerified ? AppColors.emerald600 : AppColors.zinc400,
-        ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: isVerified ? AppColors.emerald700 : AppColors.navy500,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -18,8 +18,23 @@ class SubscriptionServiceApi {
       );
 
       if (response.statusCode == 200) {
-        final plans = (response.data['data'] as List)
-            .map((json) => SubscriptionPlan.fromJson(json))
+        final data = response.data;
+        List<dynamic> plansList = [];
+        
+        if (data is Map && data['success'] == true) {
+          final plansData = data['data'];
+          if (plansData is List) {
+            plansList = plansData;
+          } else if (plansData is Map && plansData['data'] is List) {
+            plansList = plansData['data'];
+          }
+        } else if (data is List) {
+          plansList = data;
+        }
+
+        final plans = plansList
+            .whereType<Map>()
+            .map((json) => SubscriptionPlan.fromJson(json as Map<String, dynamic>))
             .toList();
 
         return SubscriptionPlansResponse(

@@ -107,18 +107,36 @@ class PaymentService {
       );
 
       if (response.statusCode == 200) {
-        final outerData = response.data['data'] ?? response.data;
-        final innerData = outerData['data'] ?? outerData;
-        final payments = (innerData['data'] as List)
-            .map((json) => Payment.fromJson(json))
+        final responseData = response.data;
+        List<dynamic> paymentsList = [];
+        int currentPage = page;
+        int totalPages = 1;
+        int total = 0;
+
+        if (responseData is Map && responseData['success'] == true) {
+          final dataField = responseData['data'];
+          if (dataField is Map) {
+            final listRaw = dataField['data'];
+            if (listRaw is List) paymentsList = listRaw;
+            currentPage = _safeInt(dataField['current_page']) ?? page;
+            totalPages = _safeInt(dataField['last_page']) ?? 1;
+            total = _safeInt(dataField['total']) ?? 0;
+          } else if (dataField is List) {
+            paymentsList = dataField;
+          }
+        }
+
+        final payments = paymentsList
+            .whereType<Map>()
+            .map((json) => Payment.fromJson(json as Map<String, dynamic>))
             .toList();
 
         return PaymentHistoryResponse(
           success: true,
           payments: payments,
-          currentPage: innerData['current_page'] ?? page,
-          totalPages: innerData['last_page'] ?? 1,
-          total: innerData['total'] ?? 0,
+          currentPage: currentPage,
+          totalPages: totalPages,
+          total: total,
         );
       }
 
@@ -133,6 +151,14 @@ class PaymentService {
         message: exception.toString().replaceAll(RegExp(r'^\w+: '), ''),
       );
     }
+  }
+
+  int? _safeInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
   /// Get single payment details
