@@ -13,29 +13,55 @@ class NotificationService {
   /// Get user's notifications
   Future<NotificationResponse> getNotifications({
     int page = 1,
-    int perPage = 20,
+    String filter = 'all', // 'all', 'unread', 'read'
   }) async {
     try {
       final response = await _apiClient.dio.get(
         ApiConstants.notifications,
         queryParameters: {
           'page': page,
-          'per_page': perPage,
+          'filter': filter == 'all' ? 'all' : filter,
         },
       );
 
       if (response.statusCode == 200) {
-        final data = response.data['data'] ?? response.data;
-        final notifications = (data['data'] as List)
-            .map((json) => app.Notification.fromJson(json))
+        final responseData = response.data;
+        
+        // API returns: { success: true, data: { notifications: { paginator }, unread_count, filter } }
+        List<dynamic> notifList = [];
+        int currentPage = page;
+        int totalPages = 1;
+        int total = 0;
+
+        if (responseData is Map && responseData['success'] == true) {
+          final dataField = responseData['data'];
+          if (dataField is Map) {
+            final notificationsRaw = dataField['notifications'];
+            if (notificationsRaw is Map) {
+              // Laravel paginator
+              final listRaw = notificationsRaw['data'];
+              if (listRaw is List) notifList = listRaw;
+              currentPage = (notificationsRaw['current_page'] ?? page).toInt();
+              totalPages = (notificationsRaw['last_page'] ?? 1).toInt();
+              total = (notificationsRaw['total'] ?? 0).toInt();
+            } else if (notificationsRaw is List) {
+              notifList = notificationsRaw;
+            }
+          }
+        }
+
+        final notifications = notifList
+            .whereType<Map>()
+            .map((json) => app.Notification.fromJson(json as Map<String, dynamic>))
             .toList();
 
         return NotificationResponse(
           success: true,
           notifications: notifications,
-          currentPage: data['current_page'] ?? page,
-          totalPages: data['last_page'] ?? 1,
-          total: data['total'] ?? 0,
+          currentPage: currentPage,
+          totalPages: totalPages,
+          total: total,
+          unreadCount: responseData['data']?['unread_count'] ?? 0,
         );
       }
 
@@ -161,6 +187,7 @@ class NotificationResponse {
   final int? currentPage;
   final int? totalPages;
   final int? total;
+  final int unreadCount;
 
   const NotificationResponse({
     required this.success,
@@ -169,6 +196,7 @@ class NotificationResponse {
     this.currentPage,
     this.totalPages,
     this.total,
+    this.unreadCount = 0,
   });
 }
 

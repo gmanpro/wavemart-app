@@ -20,7 +20,8 @@
       "Bash(sleep *)",
       "Bash(git log *)",
       "Read(//sdcard/htdocs/WaveMart/routes/**)",
-      "Bash(git diff *)"
+      "Bash(git diff *)",
+      "Bash(php *)"
     ]
   },
   "$version": 3

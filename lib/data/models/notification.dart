@@ -45,7 +45,7 @@ class Notification {
       id: json['id'] ?? 0,
       userId: json['user_id'] ?? 0,
       title: json['title'] ?? '',
-      body: json['body'] ?? '',
+      body: json['message'] ?? json['body'] ?? '',
       type: NotificationType.values.firstWhere(
         (e) => e.toString().split('.').last == (json['type'] ?? 'systemAnnouncement'),
         orElse: () => NotificationType.systemAnnouncement,
@@ -53,7 +53,7 @@ class Notification {
       actionUrl: json['action_url'],
       relatedId: json['related_id'],
       relatedType: json['related_type'],
-      isRead: json['is_read'] ?? false,
+      isRead: json['read_at'] != null,
       readAt: json['read_at'] != null ? DateTime.parse(json['read_at']) : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
