@@ -106,7 +106,8 @@ class ProfileService {
       );
 
       if (response.statusCode == 200) {
-        final user = User.fromJson(response.data['data'] ?? response.data);
+        final userData = response.data['data']?['user'] ?? response.data['data'] ?? response.data;
+        final user = User.fromJson(userData);
         return ProfileResponse(success: true, user: user);
       }
 

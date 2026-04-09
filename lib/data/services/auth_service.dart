@@ -123,7 +123,7 @@ class AuthService {
         ApiConstants.verifyOtp,
         data: {
           'phone_number': phoneNumber,
-          'otp_code': otpCode,
+          'otp': otpCode,
         },
       );
 

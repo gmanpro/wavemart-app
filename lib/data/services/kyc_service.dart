@@ -18,15 +18,16 @@ class KycService {
 
       if (response.statusCode == 200) {
         final data = response.data['data'] ?? response.data;
+        final verification = data['verification'] ?? {};
 
         return KycStatusResponse(
           success: true,
-          status: data['status'] ?? 'none',
-          isVerified: data['is_kyc_verified'] ?? false,
-          documentType: data['document_type'],
-          rejectionReason: data['rejection_reason'],
-          submittedAt: data['submitted_at'],
-          verifiedAt: data['verified_at'],
+          status: verification['verified'] != true ? (data['status'] ?? 'none') : 'approved',
+          isVerified: verification['verified'] ?? false,
+          documentType: verification['document_type'] ?? data['document_type'],
+          rejectionReason: verification['rejection_reason'] ?? data['rejection_reason'],
+          submittedAt: verification['submitted_at'] ?? data['submitted_at'],
+          verifiedAt: verification['verified_at'] ?? data['verified_at'],
         );
       }
 

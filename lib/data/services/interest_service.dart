@@ -24,17 +24,18 @@ class InterestService {
       );
 
       if (response.statusCode == 200) {
-        final data = response.data['data'] ?? response.data;
-        final interests = (data['data'] as List)
+        final outerData = response.data['data'] ?? response.data;
+        final innerData = outerData['data'] ?? outerData;
+        final interests = (innerData['data'] as List)
             .map((json) => InterestRequest.fromJson(json))
             .toList();
 
         return InterestResponse(
           success: true,
           interests: interests,
-          currentPage: data['current_page'] ?? page,
-          totalPages: data['last_page'] ?? 1,
-          total: data['total'] ?? 0,
+          currentPage: innerData['current_page'] ?? page,
+          totalPages: innerData['last_page'] ?? 1,
+          total: innerData['total'] ?? 0,
         );
       }
 

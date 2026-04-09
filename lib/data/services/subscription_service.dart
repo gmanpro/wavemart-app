@@ -50,8 +50,8 @@ class SubscriptionServiceApi {
 
       if (response.statusCode == 200) {
         final data = response.data['data'] ?? response.data;
-        final subscription = data['subscription'] != null
-            ? Subscription.fromJson(data['subscription'])
+        final subscription = data['current_subscription'] != null
+            ? Subscription.fromJson(data['current_subscription'])
             : null;
 
         return CurrentSubscriptionResponse(

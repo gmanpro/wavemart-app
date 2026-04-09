@@ -317,7 +317,7 @@ class MessageService {
     try {
       final queryParams = <String, dynamic>{};
       if (after != null) {
-        queryParams['after'] = after.toIso8601String();
+        queryParams['last_message_id'] = after.toIso8601String();
       }
 
       final response = await _apiClient.dio.get(

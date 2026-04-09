@@ -147,7 +147,7 @@ class FavoriteService {
         return FavoriteResponse(
           success: true,
           message: response.data['message'] ?? 'Favorite toggled',
-          isFavorite: response.data['is_favorite'] ?? false,
+          isFavorite: response.data['added'] ?? false,
         );
       }
 

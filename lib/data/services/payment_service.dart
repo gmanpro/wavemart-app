@@ -64,7 +64,8 @@ class PaymentService {
   Future<PaymentResponse> verifyPayment(String txRef) async {
     try {
       final response = await _apiClient.dio.get(
-        '${ApiConstants.verifyPayment}/$txRef',
+        ApiConstants.verifyPayment,
+        queryParameters: {'tx_ref': txRef},
       );
 
       if (response.statusCode == 200) {
@@ -106,17 +107,18 @@ class PaymentService {
       );
 
       if (response.statusCode == 200) {
-        final data = response.data['data'] ?? response.data;
-        final payments = (data['data'] as List)
+        final outerData = response.data['data'] ?? response.data;
+        final innerData = outerData['data'] ?? outerData;
+        final payments = (innerData['data'] as List)
             .map((json) => Payment.fromJson(json))
             .toList();
 
         return PaymentHistoryResponse(
           success: true,
           payments: payments,
-          currentPage: data['current_page'] ?? page,
-          totalPages: data['last_page'] ?? 1,
-          total: data['total'] ?? 0,
+          currentPage: innerData['current_page'] ?? page,
+          totalPages: innerData['last_page'] ?? 1,
+          total: innerData['total'] ?? 0,
         );
       }
 
