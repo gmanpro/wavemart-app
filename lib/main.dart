@@ -4,14 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'core/network/api_client.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/screens/auth/otp_login_screen.dart';
 import 'presentation/screens/navigation/main_navigation_shell.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive for draft persistence
+  await Hive.initFlutter();
+  await Hive.openBox('listing_drafts');
 
   // Disable google_fonts runtime fetching - fonts are bundled locally
   GoogleFonts.config.allowRuntimeFetching = false;

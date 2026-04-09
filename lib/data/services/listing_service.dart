@@ -1,7 +1,10 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_constants.dart';
 import '../../core/network/error_handler.dart';
 import '../models/listing.dart';
+import '../models/listing_form_data.dart';
 
 /// Service for managing property listings
 class ListingService {
@@ -271,20 +274,115 @@ class ListingService {
     }
   }
 
-  /// Create a new listing
+  /// Create a new listing with multipart form data
   Future<ListingResponse> createListing({
-    required Map<String, dynamic> listingData,
+    required ListingFormData formData,
   }) async {
     try {
+      // Build multipart form data
+      final dioFormData = FormData();
+
+      // Add text fields
+      dioFormData.fields.addAll([
+        MapEntry('type', formData.type),
+        MapEntry('holding_type', formData.holdingType),
+        MapEntry('listing_type', formData.listingType),
+        MapEntry('use_type', formData.useType),
+        if (formData.specificLocation != null) MapEntry('specific_location', formData.specificLocation!),
+        if (formData.priceFixed != null) MapEntry('price_fixed', formData.priceFixed.toString()),
+        if (formData.rentalPeriodUnit != null) MapEntry('rental_period_unit', formData.rentalPeriodUnit!),
+        if (formData.facingDirection != null) MapEntry('facing_direction', formData.facingDirection!),
+        if (formData.description != null) MapEntry('description', formData.description!),
+        if (formData.addressId != null) MapEntry('address_id', formData.addressId.toString()),
+        MapEntry('has_debt_or_encumbrance', formData.hasDebtOrEncumbrance ? '1' : '0'),
+        if (formData.debtAmount != null) MapEntry('debt_amount', formData.debtAmount.toString()),
+        MapEntry('electricity', formData.electricity ? '1' : '0'),
+        MapEntry('water', formData.water ? '1' : '0'),
+        MapEntry('parking_available', formData.parkingAvailable ? '1' : '0'),
+        if (formData.totalSquareMeters != null) MapEntry('total_square_meters', formData.totalSquareMeters.toString()),
+        if (formData.frontAreaSqm != null) MapEntry('front_area_sqm', formData.frontAreaSqm.toString()),
+        if (formData.sideAreaSqm != null) MapEntry('side_area_sqm', formData.sideAreaSqm.toString()),
+      ]);
+
+      // House-specific fields
+      if (formData.type == 'house') {
+        if (formData.totalRooms != null) dioFormData.fields.add(MapEntry('total_rooms', formData.totalRooms.toString()));
+        if (formData.bedrooms != null) dioFormData.fields.add(MapEntry('bedrooms', formData.bedrooms.toString()));
+        if (formData.bathrooms != null) dioFormData.fields.add(MapEntry('bathrooms', formData.bathrooms.toString()));
+        if (formData.kitchens != null) dioFormData.fields.add(MapEntry('kitchens', formData.kitchens.toString()));
+        if (formData.salons != null) dioFormData.fields.add(MapEntry('salons', formData.salons.toString()));
+        if (formData.houseType != null) dioFormData.fields.add(MapEntry('house_type', formData.houseType!));
+        if (formData.yearBuilt != null) dioFormData.fields.add(MapEntry('year_built', formData.yearBuilt.toString()));
+      }
+
+      // Holding-specific fields
+      if (formData.holdingType == 'Free Hold') {
+        if (formData.taxPaidUntilYear != null) dioFormData.fields.add(MapEntry('tax_paid_until_year', formData.taxPaidUntilYear.toString()));
+        if (formData.acquisitionClarification != null) dioFormData.fields.add(MapEntry('acquisition_clarification', formData.acquisitionClarification!));
+      } else if (formData.holdingType == 'Lease Hold') {
+        if (formData.leasedYear != null) dioFormData.fields.add(MapEntry('leased_year', formData.leasedYear.toString()));
+        if (formData.leasePricePerSqm != null) dioFormData.fields.add(MapEntry('lease_price_per_sqm', formData.leasePricePerSqm.toString()));
+        if (formData.buildType != null) dioFormData.fields.add(MapEntry('build_type', formData.buildType!));
+        if (formData.annualPayment != null) dioFormData.fields.add(MapEntry('annual_payment', formData.annualPayment.toString()));
+      } else if (formData.holdingType == 'Cooperative') {
+        if (formData.cooperativeName != null) dioFormData.fields.add(MapEntry('cooperative_name', formData.cooperativeName!));
+        if (formData.cooperativeCode != null) dioFormData.fields.add(MapEntry('cooperative_code', formData.cooperativeCode!));
+        if (formData.buildingStatus != null) dioFormData.fields.add(MapEntry('building_status', formData.buildingStatus!));
+      }
+
+      // Add images
+      for (int i = 0; i < formData.images.length; i++) {
+        final file = formData.images[i];
+        dioFormData.files.add(MapEntry(
+          'images[]',
+          await MultipartFile.fromFile(file.path, filename: 'image_${i}.jpg'),
+        ));
+      }
+
+      // Add site plans
+      for (int i = 0; i < formData.sitePlans.length; i++) {
+        final file = formData.sitePlans[i];
+        dioFormData.files.add(MapEntry(
+          'site_plans[]',
+          await MultipartFile.fromFile(file.path, filename: 'site_plan_${i}.jpg'),
+        ));
+      }
+
+      // Add conditional files
+      if (formData.ownershipProof != null) {
+        dioFormData.files.add(MapEntry(
+          'ownership_proof[]',
+          await MultipartFile.fromFile(formData.ownershipProof!.path, filename: 'ownership_proof.jpg'),
+        ));
+      }
+      if (formData.leaseContract != null) {
+        dioFormData.files.add(MapEntry(
+          'lease_contract[]',
+          await MultipartFile.fromFile(formData.leaseContract!.path, filename: 'lease_contract.jpg'),
+        ));
+      }
+      if (formData.debtDocument != null) {
+        dioFormData.files.add(MapEntry(
+          'debt_encumbrance_file',
+          await MultipartFile.fromFile(formData.debtDocument!.path, filename: 'debt_document.jpg'),
+        ));
+      }
+      if (formData.videoFile != null) {
+        dioFormData.files.add(MapEntry(
+          'video_file',
+          await MultipartFile.fromFile(formData.videoFile!.path, filename: 'video.mp4'),
+        ));
+      }
+
       final response = await _apiClient.dio.post(
         ApiConstants.createListing,
-        data: listingData,
+        data: dioFormData,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return ListingResponse(
           success: true,
-          message: 'Listing created successfully',
+          message: response.data['message'] ?? 'Listing created successfully',
         );
       }
 
