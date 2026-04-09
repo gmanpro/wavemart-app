@@ -22,6 +22,26 @@ int? _safeInt(dynamic value, {int defaultValue = 0}) {
   return defaultValue;
 }
 
+// Parse property type from backend (handles 'App\Models\House' or 'house')
+PropertyType _parsePropertyType(dynamic value) {
+  if (value == null) return PropertyType.house;
+  final str = value.toString();
+  // Extract class name from full namespace like 'App\Models\House'
+  final className = str.contains('\\') ? str.split('\\').last.toLowerCase() : str.toLowerCase();
+  if (className == 'house') return PropertyType.house;
+  if (className == 'land') return PropertyType.land;
+  return PropertyType.house;
+}
+
+// Parse listing type from backend (handles 'sale', 'rental', etc.)
+ListingType _parseListingType(dynamic value) {
+  if (value == null) return ListingType.sale;
+  final str = value.toString().toLowerCase();
+  if (str == 'sale') return ListingType.sale;
+  if (str == 'rental' || str == 'rent') return ListingType.rental;
+  return ListingType.sale;
+}
+
 /// Property types
 enum PropertyType { house, land }
 
@@ -121,14 +141,8 @@ class Listing extends ChangeNotifier {
       id: _safeInt(json['id'], defaultValue: 0)!,
       userId: _safeInt(json['user_id']),
       propertyId: _safeInt(json['property_id']),
-      propertyType: PropertyType.values.firstWhere(
-        (e) => e.toString().split('.').last == (json['property_type'] ?? 'house'),
-        orElse: () => PropertyType.house,
-      ),
-      listingType: ListingType.values.firstWhere(
-        (e) => e.toString().split('.').last == (json['listing_type'] ?? 'sale'),
-        orElse: () => ListingType.sale,
-      ),
+      propertyType: _parsePropertyType(json['property_type']),
+      listingType: _parseListingType(json['listing_type']),
       priceFixed: _parseDouble(json['price_fixed']),
       priceMin: _parseDouble(json['price_min']),
       priceMax: _parseDouble(json['price_max']),
