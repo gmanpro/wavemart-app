@@ -174,35 +174,22 @@ class ProfileScreen extends ConsumerWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 8),
-              if (user.isPhoneVerified)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.emerald50,
-                    borderRadius: BorderRadius.circular(6),
+              // Verification Status Badges
+              Row(
+                children: [
+                  _buildVerificationBadge(
+                    icon: Icons.phone,
+                    label: 'Phone',
+                    isVerified: user.isPhoneVerified,
                   ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.check_circle,
-                        size: 12,
-                        color: AppColors.emerald600,
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Verified',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.emerald700,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(width: 8),
+                  _buildVerificationBadge(
+                    icon: Icons.verified_user,
+                    label: 'KYC',
+                    isVerified: user.isKycVerified,
                   ),
-                ),
+                ],
+              ),
             ],
           ),
         ),
@@ -220,6 +207,43 @@ class ProfileScreen extends ConsumerWidget {
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildVerificationBadge({
+    required IconData icon,
+    required String label,
+    required bool isVerified,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: isVerified ? AppColors.emerald50 : AppColors.zinc100,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: isVerified ? AppColors.emerald200 : AppColors.zinc200,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isVerified ? Icons.check_circle : Icons.pending,
+            size: 11,
+            color: isVerified ? AppColors.emerald600 : AppColors.zinc400,
+          ),
+          const SizedBox(width: 3),
+          Text(
+            isVerified ? '$label ✓' : label,
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+              color: isVerified ? AppColors.emerald700 : AppColors.zinc500,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
