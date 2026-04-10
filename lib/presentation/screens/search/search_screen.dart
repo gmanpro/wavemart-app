@@ -8,52 +8,29 @@ import '../../widgets/listing_card.dart';
 import '../../widgets/common/wave_common_widgets.dart';
 import '../listing/listing_detail_screen.dart';
 
-/// Modern Search & Filter Screen - Elegant, professional design
+/// Modern Search & Filter Screen
 class SearchScreen extends ConsumerStatefulWidget {
-  final String? initialType;
-  final String? initialListingType;
-
-  const SearchScreen({
-    super.key,
-    this.initialType,
-    this.initialListingType,
-  });
+  const SearchScreen({super.key});
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends ConsumerState<SearchScreen>
-    with SingleTickerProviderStateMixin {
+class _SearchScreenState extends ConsumerState<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  String? _selectedType;
-  String? _selectedListingType;
+  String? _selectedType; // 'house', 'land', or null for all
+  String? _selectedListingType; // 'sale', 'rental', or null for all
   String _selectedSort = 'newest';
+  String? _selectedPriceRange; // '0-1M', '1M-5M', '5M-10M', '10M+'
+  int? _selectedBedrooms;
   Map<String, dynamic> _activeFilters = {};
   bool _hasSearched = false;
-  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _selectedType = widget.initialType;
-    _selectedListingType = widget.initialListingType;
-
-    if (widget.initialType != null || widget.initialListingType != null) {
-      _activeFilters = {};
-      if (_selectedType != null) _activeFilters['type'] = _selectedType;
-      if (_selectedListingType != null) {
-        _activeFilters['listing_type'] = _selectedListingType;
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
-      });
-      _hasSearched = true;
-    }
-
     _scrollController.addListener(_onScroll);
   }
 
@@ -74,7 +51,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
-    _tabController.dispose();
     super.dispose();
   }
 
@@ -87,6 +63,32 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       _activeFilters['listing_type'] = _selectedListingType;
     }
     _activeFilters['sort'] = _selectedSort;
+    
+    // Price range filter
+    if (_selectedPriceRange != null) {
+      switch (_selectedPriceRange) {
+        case '0-1M':
+          _activeFilters['price_min'] = 0;
+          _activeFilters['price_max'] = 1000000;
+          break;
+        case '1M-5M':
+          _activeFilters['price_min'] = 1000000;
+          _activeFilters['price_max'] = 5000000;
+          break;
+        case '5M-10M':
+          _activeFilters['price_min'] = 5000000;
+          _activeFilters['price_max'] = 10000000;
+          break;
+        case '10M+':
+          _activeFilters['price_min'] = 10000000;
+          break;
+      }
+    }
+
+    // Bedrooms filter (for houses)
+    if (_selectedBedrooms != null) {
+      _activeFilters['bedrooms'] = _selectedBedrooms;
+    }
 
     setState(() => _hasSearched = true);
     ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
@@ -97,6 +99,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       _selectedType = null;
       _selectedListingType = null;
       _selectedSort = 'newest';
+      _selectedPriceRange = null;
+      _selectedBedrooms = null;
       _activeFilters = {};
       _hasSearched = false;
       _searchController.clear();
@@ -104,7 +108,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   }
 
   bool get _hasActiveFilters =>
-      _selectedType != null || _selectedListingType != null || _searchController.text.isNotEmpty;
+      _selectedType != null ||
+      _selectedListingType != null ||
+      _selectedSort != 'newest' ||
+      _selectedPriceRange != null ||
+      _selectedBedrooms != null ||
+      _searchController.text.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -114,13 +123,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       backgroundColor: AppColors.zinc50,
       body: Column(
         children: [
-          // Modern Search Header
+          // Search Header
           _buildSearchHeader(),
 
-          // Filter Tabs
-          _buildFilterTabs(),
+          // Filter Row
+          _buildFilterRow(),
 
-          // Active Filters Chips
+          // Active Filter Chips
           if (_hasActiveFilters) _buildActiveFilterChips(),
 
           // Results
@@ -148,7 +157,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           child: Row(
             children: [
               // Back Button
@@ -192,10 +201,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                 ),
                 child: const Text(
                   'Search',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                 ),
               ),
             ],
@@ -205,53 +211,132 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     );
   }
 
-  Widget _buildFilterTabs() {
+  Widget _buildFilterRow() {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       color: Colors.white,
-      child: TabBar(
-        controller: _tabController,
-        labelColor: AppColors.wave500,
-        unselectedLabelColor: AppColors.zinc500,
-        indicatorColor: AppColors.wave500,
-        indicatorWeight: 3,
-        labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
-        tabs: const [
-          Tab(text: 'All'),
-          Tab(text: 'Houses'),
-          Tab(text: 'Lands'),
+      child: Row(
+        children: [
+          Expanded(
+            child: _filterDropdown(
+              label: 'Type',
+              value: _selectedType,
+              items: const [
+                DropdownMenuItem(value: null, child: Text('All Types')),
+                DropdownMenuItem(value: 'house', child: Text('House')),
+                DropdownMenuItem(value: 'land', child: Text('Land')),
+              ],
+              onChanged: (v) {
+                setState(() => _selectedType = v);
+                _performSearch();
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _filterDropdown(
+              label: 'Status',
+              value: _selectedListingType,
+              items: const [
+                DropdownMenuItem(value: null, child: Text('All')),
+                DropdownMenuItem(value: 'sale', child: Text('For Sale')),
+                DropdownMenuItem(value: 'rental', child: Text('For Rent')),
+              ],
+              onChanged: (v) {
+                setState(() => _selectedListingType = v);
+                _performSearch();
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          _sortButton(),
         ],
-        onTap: (index) {
-          setState(() {
-            _selectedType = index == 0 ? null : (index == 1 ? 'house' : 'land');
-          });
-          _performSearch();
-        },
+      ),
+    );
+  }
+
+  Widget _filterDropdown({
+    required String label,
+    required String? value,
+    required List<DropdownMenuItem<String>> items,
+    required void Function(String?) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: AppColors.zinc50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.zinc200),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          hint: Text(label, style: const TextStyle(fontSize: 13, color: AppColors.zinc500)),
+          items: items,
+          onChanged: onChanged,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.navy800),
+        ),
+      ),
+    );
+  }
+
+  Widget _sortButton() {
+    return GestureDetector(
+      onTap: () => _showSortBottomSheet(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.zinc50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.zinc200),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.sort, size: 18, color: AppColors.zinc600),
+            const SizedBox(width: 4),
+            Text(
+              _getSortLabel(_selectedSort),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.navy800),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildActiveFilterChips() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       color: Colors.white,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
+            if (_selectedType != null)
+              _filterChip(
+                _selectedType == 'house' ? '🏠 House' : '🌄 Land',
+                () => setState(() => _selectedType = null),
+              ),
             if (_selectedListingType != null)
               _filterChip(
-                _selectedListingType == 'sale' ? 'For Sale' : 'For Rent',
+                _selectedListingType == 'sale' ? '💰 For Sale' : '🔑 For Rent',
                 () => setState(() => _selectedListingType = null),
               ),
-            if (_selectedSort != 'newest')
+            if (_selectedPriceRange != null)
               _filterChip(
-                _selectedSort == 'price_low' ? 'Price: Low to High' : 'Price: High to Low',
-                () => setState(() => _selectedSort = 'newest'),
+                '💵 $_selectedPriceRange',
+                () => setState(() => _selectedPriceRange = null),
+              ),
+            if (_selectedBedrooms != null)
+              _filterChip(
+                '🛏️ $_selectedBedrooms Beds',
+                () => setState(() => _selectedBedrooms = null),
               ),
             if (_searchController.text.isNotEmpty)
               _filterChip(
-                'Location: ${_searchController.text}',
+                '📍 ${_searchController.text}',
                 () {
                   _searchController.clear();
                   setState(() {});
@@ -274,11 +359,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                     SizedBox(width: 4),
                     Text(
                       'Clear All',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.zinc600,
-                      ),
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.zinc600),
                     ),
                   ],
                 ),
@@ -305,11 +386,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           children: [
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.wave700,
-              ),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.wave700),
             ),
             const SizedBox(width: 6),
             GestureDetector(
@@ -327,11 +404,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.search_rounded,
-            size: 80,
-            color: AppColors.navy200,
-          ),
+          Icon(Icons.search_rounded, size: 80, color: AppColors.navy200),
           const SizedBox(height: 24),
           Text(
             'Find Your Perfect Property',
@@ -345,10 +418,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
-              'Search by location, filter by type, and sort by price to discover amazing properties',
-              style: AppTextStyles.bodyLarge.copyWith(
-                color: AppColors.zinc500,
-              ),
+              'Search by location, filter by type, price, and more to discover amazing properties',
+              style: AppTextStyles.bodyLarge.copyWith(color: AppColors.zinc500),
               textAlign: TextAlign.center,
             ),
           ),
@@ -358,10 +429,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
             spacing: 12,
             runSpacing: 12,
             children: [
-              _quickFilterChip(Icons.home_rounded, 'Houses', 'house'),
-              _quickFilterChip(Icons.landscape, 'Lands', 'land'),
-              _quickFilterChip(Icons.sell_rounded, 'For Sale', 'sale'),
-              _quickFilterChip(Icons.key_rounded, 'For Rent', 'rent'),
+              _quickFilterChip('🏠 Houses', 'house'),
+              _quickFilterChip('🌄 Lands', 'land'),
+              _quickFilterChip('💰 For Sale', 'sale'),
+              _quickFilterChip('🔑 For Rent', 'rental'),
+              _quickFilterChip('💵 Under 1M', '0-1M'),
+              _quickFilterChip('💵 1M - 5M', '1M-5M'),
             ],
           ),
         ],
@@ -369,58 +442,29 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     );
   }
 
-  Widget _quickFilterChip(IconData icon, String label, String filterValue) {
-    final isSelected = (filterValue == 'house' || filterValue == 'land')
-        ? _selectedType == filterValue
-        : _selectedListingType == filterValue;
-
+  Widget _quickFilterChip(String label, String filterValue) {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          if (filterValue == 'house' || filterValue == 'land') {
-            _selectedType = isSelected ? null : filterValue;
-          } else {
-            _selectedListingType = isSelected ? null : filterValue;
-          }
-        });
+        // Map filter value to the right field
+        if (filterValue == 'house' || filterValue == 'land') {
+          setState(() => _selectedType = filterValue);
+        } else if (filterValue == 'sale' || filterValue == 'rental') {
+          setState(() => _selectedListingType = filterValue);
+        } else if (filterValue.contains('M')) {
+          setState(() => _selectedPriceRange = filterValue);
+        }
         _performSearch();
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.wave500 : Colors.white,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.wave500 : AppColors.zinc300,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.wave500.withOpacity(0.3),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ]
-              : null,
+          border: Border.all(color: AppColors.zinc300),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected ? Colors.white : AppColors.navy600,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : AppColors.navy700,
-              ),
-            ),
-          ],
+        child: Text(
+          label,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.navy700),
         ),
       ),
     );
@@ -453,42 +497,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         // Results count
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${state.total} properties found',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.zinc500,
-                ),
-              ),
-              // Sort dropdown
-              GestureDetector(
-                onTap: () => _showSortBottomSheet(),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.zinc50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.zinc200),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.sort_rounded, size: 16, color: AppColors.zinc600),
-                      const SizedBox(width: 4),
-                      Text(
-                        _getSortLabel(_selectedSort),
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.zinc700,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+          child: Text(
+            '${state.total} properties found',
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.zinc500),
           ),
         ),
         const Divider(height: 1),
@@ -531,11 +542,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   String _getSortLabel(String sort) {
     switch (sort) {
       case 'price_low':
-        return 'Price: Low to High';
+        return 'Price ↑';
       case 'price_high':
-        return 'Price: High to Low';
-      default:
+        return 'Price ↓';
+      case 'newest':
         return 'Newest';
+      case 'oldest':
+        return 'Oldest';
+      default:
+        return 'Sort';
     }
   }
 
@@ -550,18 +565,46 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Sort By',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              const Text('Sort By', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
-              _sortOption('newest', 'Newest First'),
-              _sortOption('price_low', 'Price: Low to High'),
-              _sortOption('price_high', 'Price: High to Low'),
+              _sortOption('newest', '🆕 Newest First'),
+              _sortOption('oldest', '📅 Oldest First'),
+              _sortOption('price_low', '💰 Price: Low to High'),
+              _sortOption('price_high', '💎 Price: High to Low'),
+              const SizedBox(height: 16),
+              // Additional Filters
+              const Divider(),
+              const SizedBox(height: 8),
+              const Text('Additional Filters', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              const Text('Price Range', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _priceChip('0-1M'),
+                  _priceChip('1M-5M'),
+                  _priceChip('5M-10M'),
+                  _priceChip('10M+'),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Text('Bedrooms', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _bedroomChip(1),
+                  _bedroomChip(2),
+                  _bedroomChip(3),
+                  _bedroomChip(4),
+                  _bedroomChip(5),
+                ],
+              ),
             ],
           ),
         );
@@ -588,6 +631,58 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         Navigator.pop(context);
         _performSearch();
       },
+    );
+  }
+
+  Widget _priceChip(String range) {
+    final isSelected = _selectedPriceRange == range;
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedPriceRange = isSelected ? null : range);
+        Navigator.pop(context);
+        _performSearch();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.wave500 : AppColors.zinc100,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(
+          range,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.white : AppColors.zinc700,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _bedroomChip(int count) {
+    final isSelected = _selectedBedrooms == count;
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedBedrooms = isSelected ? null : count);
+        Navigator.pop(context);
+        _performSearch();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.wave500 : AppColors.zinc100,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(
+          '$count+',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.white : AppColors.zinc700,
+          ),
+        ),
+      ),
     );
   }
 

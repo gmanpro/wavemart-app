@@ -201,13 +201,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            'Profile photo coming soon',
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.zinc400,
-            ),
-          ),
         ],
       ),
     );

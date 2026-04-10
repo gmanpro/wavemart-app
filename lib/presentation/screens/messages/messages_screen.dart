@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/common/wave_common_widgets.dart';
 import '../../../data/models/message.dart' as msg;
 
@@ -362,14 +363,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 }
 
 /// Message Bubble Widget
-class _MessageBubble extends StatelessWidget {
+class _MessageBubble extends ConsumerWidget {
   final msg.Message message;
 
   const _MessageBubble({required this.message});
 
   @override
-  Widget build(BuildContext context) {
-    final isOwn = message.senderId != 0; // Simplified - compare with auth user in real app
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
+    final currentUserId = authState.user?.id ?? 0;
+    final isOwn = message.senderId == currentUserId;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
