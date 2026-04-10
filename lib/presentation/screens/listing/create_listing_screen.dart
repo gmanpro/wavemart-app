@@ -318,9 +318,18 @@ class _Step1Basics extends StatefulWidget {
 class _Step1BasicsState extends State<_Step1Basics> {
   late TextEditingController _priceController;
   late TextEditingController _debtAmountController;
+  late TextEditingController _taxPaidUntilController;
+  late TextEditingController _leasedYearController;
+  late TextEditingController _leasePriceController;
+  late TextEditingController _buildTypeController;
+  late TextEditingController _annualPaymentController;
+  late TextEditingController _cooperativeNameController;
+  late TextEditingController _cooperativeCodeController;
+  late TextEditingController _specificLocationController;
+  
   String? _selectedRegion, _selectedZone, _selectedWoreda, _selectedKebele;
   List<String> _regions = [], _zones = [], _woredas = [], _kebeles = [];
-  Map<String, int?> _kebeleIds = {}; // Maps kebele name to ID
+  Map<String, int?> _kebeleIds = {};
   bool _loadingZones = false, _loadingWoredas = false, _loadingKebeles = false;
   int? _addressId;
 
@@ -333,6 +342,30 @@ class _Step1BasicsState extends State<_Step1Basics> {
     _debtAmountController = TextEditingController(
       text: widget.formData.debtAmount != null ? _formatNumber(widget.formData.debtAmount!) : '',
     );
+    _taxPaidUntilController = TextEditingController(
+      text: widget.formData.taxPaidUntilYear?.toString() ?? '',
+    );
+    _leasedYearController = TextEditingController(
+      text: widget.formData.leasedYear?.toString() ?? '',
+    );
+    _leasePriceController = TextEditingController(
+      text: widget.formData.leasePricePerSqm?.toString() ?? '',
+    );
+    _buildTypeController = TextEditingController(
+      text: widget.formData.buildType ?? '',
+    );
+    _annualPaymentController = TextEditingController(
+      text: widget.formData.annualPayment?.toString() ?? '',
+    );
+    _cooperativeNameController = TextEditingController(
+      text: widget.formData.cooperativeName ?? '',
+    );
+    _cooperativeCodeController = TextEditingController(
+      text: widget.formData.cooperativeCode ?? '',
+    );
+    _specificLocationController = TextEditingController(
+      text: widget.formData.specificLocation ?? '',
+    );
     _loadRegions();
     if (widget.formData.addressRegion != null) {
       _selectedRegion = widget.formData.addressRegion;
@@ -344,6 +377,14 @@ class _Step1BasicsState extends State<_Step1Basics> {
   void dispose() {
     _priceController.dispose();
     _debtAmountController.dispose();
+    _taxPaidUntilController.dispose();
+    _leasedYearController.dispose();
+    _leasePriceController.dispose();
+    _buildTypeController.dispose();
+    _annualPaymentController.dispose();
+    _cooperativeNameController.dispose();
+    _cooperativeCodeController.dispose();
+    _specificLocationController.dispose();
     super.dispose();
   }
 
@@ -625,11 +666,14 @@ class _Step1BasicsState extends State<_Step1Basics> {
         children: [
           Text('Free Hold Details', style: AppTextStyles.labelMedium.copyWith(color: AppColors.navy700, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
-          _buildTextField(
+          _buildPersistedField(
             label: 'Tax Paid Until Year',
+            controller: _taxPaidUntilController,
             keyboardType: TextInputType.number,
-            controller: TextEditingController(text: widget.formData.taxPaidUntilYear?.toString() ?? ''),
-            onChanged: (v) => widget.onUpdate(widget.formData.copyWith(taxPaidUntilYear: int.tryParse(v))),
+            onSubmitted: (v) {
+              final n = int.tryParse(v);
+              if (n != null) widget.onUpdate(widget.formData.copyWith(taxPaidUntilYear: n));
+            },
           ),
           const SizedBox(height: 8),
           _dropdownField(
@@ -652,24 +696,44 @@ class _Step1BasicsState extends State<_Step1Basics> {
         children: [
           Text('Lease Hold Details', style: AppTextStyles.labelMedium.copyWith(color: Colors.purple.shade700, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
-          _buildSimpleTextField('Leased Year', TextInputType.number, (v) {
-            final n = int.tryParse(v);
-            if (n != null) widget.onUpdate(widget.formData.copyWith(leasedYear: n));
-          }),
+          _buildPersistedField(
+            label: 'Leased Year',
+            controller: _leasedYearController,
+            keyboardType: TextInputType.number,
+            onSubmitted: (v) {
+              final n = int.tryParse(v);
+              if (n != null) widget.onUpdate(widget.formData.copyWith(leasedYear: n));
+            },
+          ),
           const SizedBox(height: 8),
-          _buildSimpleTextField('Lease Price per m²', TextInputType.number, (v) {
-            final cleaned = v.replaceAll(',', '');
-            final n = double.tryParse(cleaned);
-            if (n != null) widget.onUpdate(widget.formData.copyWith(leasePricePerSqm: n));
-          }),
+          _buildPersistedField(
+            label: 'Lease Price per m²',
+            controller: _leasePriceController,
+            keyboardType: TextInputType.number,
+            onSubmitted: (v) {
+              final cleaned = v.replaceAll(',', '');
+              final n = double.tryParse(cleaned);
+              if (n != null) widget.onUpdate(widget.formData.copyWith(leasePricePerSqm: n));
+            },
+          ),
           const SizedBox(height: 8),
-          _buildSimpleTextField('Build Type', TextInputType.text, (v) => widget.onUpdate(widget.formData.copyWith(buildType: v))),
+          _buildPersistedField(
+            label: 'Build Type',
+            controller: _buildTypeController,
+            keyboardType: TextInputType.text,
+            onSubmitted: (v) => widget.onUpdate(widget.formData.copyWith(buildType: v)),
+          ),
           const SizedBox(height: 8),
-          _buildSimpleTextField('Annual Payment', TextInputType.number, (v) {
-            final cleaned = v.replaceAll(',', '');
-            final n = double.tryParse(cleaned);
-            if (n != null) widget.onUpdate(widget.formData.copyWith(annualPayment: n));
-          }),
+          _buildPersistedField(
+            label: 'Annual Payment',
+            controller: _annualPaymentController,
+            keyboardType: TextInputType.number,
+            onSubmitted: (v) {
+              final cleaned = v.replaceAll(',', '');
+              final n = double.tryParse(cleaned);
+              if (n != null) widget.onUpdate(widget.formData.copyWith(annualPayment: n));
+            },
+          ),
         ],
       ),
     );
@@ -684,9 +748,19 @@ class _Step1BasicsState extends State<_Step1Basics> {
         children: [
           Text('Cooperative Details', style: AppTextStyles.labelMedium.copyWith(color: AppColors.wave700, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
-          _buildSimpleTextField('Cooperative Name', TextInputType.text, (v) => widget.onUpdate(widget.formData.copyWith(cooperativeName: v))),
+          _buildPersistedField(
+            label: 'Cooperative Name',
+            controller: _cooperativeNameController,
+            keyboardType: TextInputType.text,
+            onSubmitted: (v) => widget.onUpdate(widget.formData.copyWith(cooperativeName: v)),
+          ),
           const SizedBox(height: 8),
-          _buildSimpleTextField('Cooperative Code', TextInputType.text, (v) => widget.onUpdate(widget.formData.copyWith(cooperativeCode: v))),
+          _buildPersistedField(
+            label: 'Cooperative Code',
+            controller: _cooperativeCodeController,
+            keyboardType: TextInputType.text,
+            onSubmitted: (v) => widget.onUpdate(widget.formData.copyWith(cooperativeCode: v)),
+          ),
           const SizedBox(height: 8),
           _dropdownField(
             value: widget.formData.buildingStatus?.isEmpty ?? true ? null : widget.formData.buildingStatus,
@@ -699,8 +773,15 @@ class _Step1BasicsState extends State<_Step1Basics> {
     );
   }
 
-  Widget _buildSimpleTextField(String label, TextInputType keyboardType, void Function(String) onSubmitted) {
+  /// Persistent text field that saves on submit (not on every keystroke)
+  Widget _buildPersistedField({
+    required String label,
+    required TextEditingController controller,
+    TextInputType? keyboardType,
+    required void Function(String) onSubmitted,
+  }) {
     return TextFormField(
+      controller: controller,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -708,6 +789,10 @@ class _Step1BasicsState extends State<_Step1Basics> {
       ),
       keyboardType: keyboardType,
       textInputAction: TextInputAction.done,
+      onEditingComplete: () {
+        onSubmitted(controller.text);
+        FocusScope.of(context).unfocus();
+      },
       onFieldSubmitted: onSubmitted,
     );
   }
@@ -733,7 +818,8 @@ class _Step1BasicsState extends State<_Step1Basics> {
         const SizedBox(height: 8),
         _buildTextField(
           label: 'Specific Location (optional)',
-          onChanged: (v) => widget.onUpdate(widget.formData.copyWith(specificLocation: v)),
+          controller: _specificLocationController,
+          onSubmitted: (v) => widget.onUpdate(widget.formData.copyWith(specificLocation: v)),
         ),
       ],
     );
@@ -764,21 +850,26 @@ class _Step1BasicsState extends State<_Step1Basics> {
     );
   }
 
-  /// Formatted text field that formats number with commas on submit (not on every keystroke)
+  /// Formatted text field that saves on submit
   Widget _buildFormattedField({
     required String label,
     required TextEditingController controller,
     required void Function(String) onSubmitted,
   }) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       keyboardType: TextInputType.number,
       textInputAction: TextInputAction.done,
-      onSubmitted: onSubmitted,
+      onEditingComplete: () {
+        onSubmitted(controller.text);
+        FocusScope.of(context).unfocus();
+      },
+      onFieldSubmitted: onSubmitted,
     );
   }
 
@@ -811,9 +902,9 @@ class _Step1BasicsState extends State<_Step1Basics> {
 
   Widget _buildTextField({
     required String label,
-    void Function(String)? onChanged,
-    TextInputType? keyboardType,
     TextEditingController? controller,
+    void Function(String)? onSubmitted,
+    TextInputType? keyboardType,
   }) {
     return TextFormField(
       controller: controller,
@@ -822,9 +913,15 @@ class _Step1BasicsState extends State<_Step1Basics> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
-      keyboardType: keyboardType,
+      keyboardType: keyboardType ?? TextInputType.text,
       textInputAction: TextInputAction.done,
-      onChanged: onChanged,
+      onEditingComplete: () {
+        if (onSubmitted != null) {
+          onSubmitted((controller ?? TextEditingController()).text);
+        }
+        FocusScope.of(context).unfocus();
+      },
+      onFieldSubmitted: onSubmitted,
     );
   }
 }
@@ -841,6 +938,44 @@ class _Step2Details extends StatefulWidget {
 }
 
 class _Step2DetailsState extends State<_Step2Details> {
+  late TextEditingController _totalRoomsController;
+  late TextEditingController _bedroomsController;
+  late TextEditingController _bathroomsController;
+  late TextEditingController _kitchensController;
+  late TextEditingController _salonsController;
+  late TextEditingController _yearBuiltController;
+  late TextEditingController _totalAreaController;
+  late TextEditingController _frontAreaController;
+  late TextEditingController _sideAreaController;
+
+  @override
+  void initState() {
+    super.initState();
+    _totalRoomsController = TextEditingController(text: widget.formData.totalRooms?.toString() ?? '');
+    _bedroomsController = TextEditingController(text: widget.formData.bedrooms?.toString() ?? '');
+    _bathroomsController = TextEditingController(text: widget.formData.bathrooms?.toString() ?? '');
+    _kitchensController = TextEditingController(text: widget.formData.kitchens?.toString() ?? '');
+    _salonsController = TextEditingController(text: widget.formData.salons?.toString() ?? '');
+    _yearBuiltController = TextEditingController(text: widget.formData.yearBuilt?.toString() ?? '');
+    _totalAreaController = TextEditingController(text: widget.formData.totalSquareMeters?.toStringAsFixed(0) ?? '');
+    _frontAreaController = TextEditingController(text: widget.formData.frontAreaSqm?.toStringAsFixed(0) ?? '');
+    _sideAreaController = TextEditingController(text: widget.formData.sideAreaSqm?.toStringAsFixed(0) ?? '');
+  }
+
+  @override
+  void dispose() {
+    _totalRoomsController.dispose();
+    _bedroomsController.dispose();
+    _bathroomsController.dispose();
+    _kitchensController.dispose();
+    _salonsController.dispose();
+    _yearBuiltController.dispose();
+    _totalAreaController.dispose();
+    _frontAreaController.dispose();
+    _sideAreaController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -851,21 +986,61 @@ class _Step2DetailsState extends State<_Step2Details> {
           if (widget.formData.type == 'house') ...[
             _sectionTitle('Room Configuration'),
             const SizedBox(height: 8),
-            _buildNumberField('Total Rooms', widget.formData.totalRooms, (v) => widget.onUpdate(widget.formData.copyWith(totalRooms: v))),
+            _buildPersistedField(
+              label: 'Total Rooms',
+              controller: _totalRoomsController,
+              keyboardType: TextInputType.number,
+              onSubmitted: (v) {
+                final n = int.tryParse(v);
+                if (n != null) widget.onUpdate(widget.formData.copyWith(totalRooms: n));
+              },
+            ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Expanded(child: _buildNumberField('Bedrooms', widget.formData.bedrooms, (v) => widget.onUpdate(widget.formData.copyWith(bedrooms: v)))),
+                Expanded(child: _buildPersistedField(
+                  label: 'Bedrooms',
+                  controller: _bedroomsController,
+                  keyboardType: TextInputType.number,
+                  onSubmitted: (v) {
+                    final n = int.tryParse(v);
+                    if (n != null) widget.onUpdate(widget.formData.copyWith(bedrooms: n));
+                  },
+                )),
                 const SizedBox(width: 8),
-                Expanded(child: _buildNumberField('Bathrooms', widget.formData.bathrooms, (v) => widget.onUpdate(widget.formData.copyWith(bathrooms: v)))),
+                Expanded(child: _buildPersistedField(
+                  label: 'Bathrooms',
+                  controller: _bathroomsController,
+                  keyboardType: TextInputType.number,
+                  onSubmitted: (v) {
+                    final n = int.tryParse(v);
+                    if (n != null) widget.onUpdate(widget.formData.copyWith(bathrooms: n));
+                  },
+                )),
               ],
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Expanded(child: _buildNumberField('Kitchens', widget.formData.kitchens, (v) => widget.onUpdate(widget.formData.copyWith(kitchens: v)))),
+                Expanded(child: _buildPersistedField(
+                  label: 'Kitchens',
+                  controller: _kitchensController,
+                  keyboardType: TextInputType.number,
+                  onSubmitted: (v) {
+                    final n = int.tryParse(v);
+                    if (n != null) widget.onUpdate(widget.formData.copyWith(kitchens: n));
+                  },
+                )),
                 const SizedBox(width: 8),
-                Expanded(child: _buildNumberField('Salons', widget.formData.salons, (v) => widget.onUpdate(widget.formData.copyWith(salons: v)))),
+                Expanded(child: _buildPersistedField(
+                  label: 'Salons',
+                  controller: _salonsController,
+                  keyboardType: TextInputType.number,
+                  onSubmitted: (v) {
+                    final n = int.tryParse(v);
+                    if (n != null) widget.onUpdate(widget.formData.copyWith(salons: n));
+                  },
+                )),
               ],
             ),
             const SizedBox(height: 16),
@@ -894,13 +1069,37 @@ class _Step2DetailsState extends State<_Step2Details> {
 
           _sectionTitle('Area Dimensions'),
           const SizedBox(height: 8),
-          _buildNumberField('Total Area (m²)', widget.formData.totalSquareMeters?.toInt(), (v) => widget.onUpdate(widget.formData.copyWith(totalSquareMeters: v?.toDouble()))),
+          _buildPersistedField(
+            label: 'Total Area (m²)',
+            controller: _totalAreaController,
+            keyboardType: TextInputType.number,
+            onSubmitted: (v) {
+              final n = int.tryParse(v);
+              if (n != null) widget.onUpdate(widget.formData.copyWith(totalSquareMeters: n.toDouble()));
+            },
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
-              Expanded(child: _buildNumberField('Front Area (m²)', widget.formData.frontAreaSqm?.toInt(), (v) => widget.onUpdate(widget.formData.copyWith(frontAreaSqm: v?.toDouble())))),
+              Expanded(child: _buildPersistedField(
+                label: 'Front Area (m²)',
+                controller: _frontAreaController,
+                keyboardType: TextInputType.number,
+                onSubmitted: (v) {
+                  final n = int.tryParse(v);
+                  if (n != null) widget.onUpdate(widget.formData.copyWith(frontAreaSqm: n.toDouble()));
+                },
+              )),
               const SizedBox(width: 8),
-              Expanded(child: _buildNumberField('Side Area (m²)', widget.formData.sideAreaSqm?.toInt(), (v) => widget.onUpdate(widget.formData.copyWith(sideAreaSqm: v?.toDouble())))),
+              Expanded(child: _buildPersistedField(
+                label: 'Side Area (m²)',
+                controller: _sideAreaController,
+                keyboardType: TextInputType.number,
+                onSubmitted: (v) {
+                  final n = int.tryParse(v);
+                  if (n != null) widget.onUpdate(widget.formData.copyWith(sideAreaSqm: n.toDouble()));
+                },
+              )),
             ],
           ),
           const SizedBox(height: 16),
@@ -936,17 +1135,27 @@ class _Step2DetailsState extends State<_Step2Details> {
     return Text(title, style: AppTextStyles.titleSmall.copyWith(fontWeight: FontWeight.w700, fontSize: 16));
   }
 
-  Widget _buildNumberField(String label, int? value, Function(int?) onChanged) {
+  /// Persistent text field that saves on submit (not on every keystroke)
+  Widget _buildPersistedField({
+    required String label,
+    required TextEditingController controller,
+    TextInputType? keyboardType,
+    required void Function(String) onSubmitted,
+  }) {
     return TextFormField(
-      initialValue: value?.toString() ?? '',
+      controller: controller,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
-      keyboardType: TextInputType.number,
+      keyboardType: keyboardType,
       textInputAction: TextInputAction.done,
-      onFieldSubmitted: (v) => onChanged(int.tryParse(v)),
+      onEditingComplete: () {
+        onSubmitted(controller.text);
+        FocusScope.of(context).unfocus();
+      },
+      onFieldSubmitted: onSubmitted,
     );
   }
 
