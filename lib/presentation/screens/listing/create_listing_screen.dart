@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as dev;
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -315,7 +316,8 @@ class _Step1Basics extends StatefulWidget {
 }
 
 class _Step1BasicsState extends State<_Step1Basics> {
-  final _priceController = TextEditingController();
+  late TextEditingController _priceController;
+  late TextEditingController _debtAmountController;
   String? _selectedRegion, _selectedZone, _selectedWoreda, _selectedKebele;
   List<String> _regions = [], _zones = [], _woredas = [], _kebeles = [];
   bool _loadingZones = false, _loadingWoredas = false, _loadingKebeles = false;
@@ -324,9 +326,12 @@ class _Step1BasicsState extends State<_Step1Basics> {
   @override
   void initState() {
     super.initState();
-    if (widget.formData.priceFixed != null) {
-      _priceController.text = _formatNumber(widget.formData.priceFixed!);
-    }
+    _priceController = TextEditingController(
+      text: widget.formData.priceFixed != null ? _formatNumber(widget.formData.priceFixed!) : '',
+    );
+    _debtAmountController = TextEditingController(
+      text: widget.formData.debtAmount != null ? _formatNumber(widget.formData.debtAmount!) : '',
+    );
     _loadRegions();
     if (widget.formData.addressRegion != null) {
       _selectedRegion = widget.formData.addressRegion;
@@ -337,6 +342,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
   @override
   void dispose() {
     _priceController.dispose();
+    _debtAmountController.dispose();
     super.dispose();
   }
 
@@ -348,9 +354,23 @@ class _Step1BasicsState extends State<_Step1Basics> {
   }
 
   Future<void> _loadRegions() async {
-    final response = await widget.addressService.getRegions();
-    if (response.success && mounted) {
-      setState(() => _regions = response.regions.map((r) => r.region ?? '').where((s) => s.isNotEmpty).toList());
+    try {
+      final response = await widget.addressService.getRegions();
+      if (response.success && mounted) {
+        // API returns array of {region: "Addis Ababa"} objects
+        final regions = response.regions
+            .map((r) => r.region)
+            .where((s) => s != null && s.isNotEmpty)
+            .cast<String>()
+            .toList();
+        dev.log('Loaded ${regions.length} regions: $regions', name: 'AddressPicker');
+        setState(() => _regions = regions);
+      } else {
+        dev.log('Failed to load regions: ${response.message}', name: 'AddressPicker');
+      }
+    } catch (e, st) {
+      dev.log('Error loading regions: $e\n$st', name: 'AddressPicker');
+      if (mounted) setState(() => _regions = []);
     }
   }
 
@@ -526,13 +546,10 @@ class _Step1BasicsState extends State<_Step1Basics> {
           ),
           if (widget.formData.hasDebtOrEncumbrance) ...[
             const SizedBox(height: 8),
-            _buildTextField(
+            _buildFormattedField(
               label: 'Debt Amount',
-              controller: TextEditingController(
-                text: widget.formData.debtAmount != null ? _formatNumber(widget.formData.debtAmount!) : '',
-              ),
-              keyboardType: TextInputType.number,
-              onChanged: (v) {
+              controller: _debtAmountController,
+              onSubmitted: (v) {
                 final cleaned = v.replaceAll(',', '');
                 widget.onUpdate(widget.formData.copyWith(debtAmount: double.tryParse(cleaned)));
               },
@@ -656,7 +673,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
     );
   }
 
-  Widget _buildSimpleTextField(String label, TextInputType keyboardType, void Function(String) onChanged) {
+  Widget _buildSimpleTextField(String label, TextInputType keyboardType, void Function(String) onSubmitted) {
     return TextFormField(
       decoration: InputDecoration(
         labelText: label,
@@ -664,7 +681,8 @@ class _Step1BasicsState extends State<_Step1Basics> {
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       keyboardType: keyboardType,
-      onChanged: onChanged,
+      textInputAction: TextInputAction.done,
+      onFieldSubmitted: onSubmitted,
     );
   }
 
@@ -712,10 +730,29 @@ class _Step1BasicsState extends State<_Step1Basics> {
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: borderColor, width: 2)),
       ),
       keyboardType: TextInputType.number,
-      onChanged: (v) {
+      textInputAction: TextInputAction.done,
+      onSubmitted: (v) {
         final cleaned = v.replaceAll(',', '');
         widget.onUpdate(widget.formData.copyWith(priceFixed: double.tryParse(cleaned)));
       },
+    );
+  }
+
+  /// Formatted text field that formats number with commas on submit (not on every keystroke)
+  Widget _buildFormattedField({
+    required String label,
+    required TextEditingController controller,
+    required void Function(String) onSubmitted,
+  }) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      keyboardType: TextInputType.number,
+      textInputAction: TextInputAction.done,
+      onSubmitted: onSubmitted,
     );
   }
 
@@ -732,10 +769,15 @@ class _Step1BasicsState extends State<_Step1Basics> {
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         suffixIcon: isLoading ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : null,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
+      dropdownColor: Colors.white,
       items: items.isEmpty
           ? [const DropdownMenuItem(value: null, child: Text('No options available', style: TextStyle(color: Colors.grey)))]
-          : items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          : items.map((e) => DropdownMenuItem(
+                value: e,
+                child: Text(e, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14)),
+              )).toList(),
       onChanged: items.isEmpty ? null : onChanged,
       isExpanded: true,
     );
@@ -749,8 +791,13 @@ class _Step1BasicsState extends State<_Step1Basics> {
   }) {
     return TextFormField(
       controller: controller,
-      decoration: InputDecoration(labelText: label, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
       keyboardType: keyboardType,
+      textInputAction: TextInputAction.done,
       onChanged: onChanged,
     );
   }
@@ -864,21 +911,36 @@ class _Step2DetailsState extends State<_Step2Details> {
   }
 
   Widget _buildNumberField(String label, int? value, Function(int?) onChanged) {
-    final controller = TextEditingController(text: value?.toString() ?? '');
     return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(labelText: label, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+      initialValue: value?.toString() ?? '',
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
       keyboardType: TextInputType.number,
+      textInputAction: TextInputAction.done,
       onFieldSubmitted: (v) => onChanged(int.tryParse(v)),
     );
   }
 
   Widget _dropdownField({required String? value, required List<String> items, required String label, required Function(String?) onChanged}) {
     return DropdownButtonFormField<String>(
-      value: value,
-      decoration: InputDecoration(labelText: label, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
-      items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-      onChanged: onChanged,
+      value: items.contains(value) ? value : null,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      dropdownColor: Colors.white,
+      items: items.isEmpty
+          ? [const DropdownMenuItem(value: null, child: Text('Select', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.normal)))]
+          : items.map((e) => DropdownMenuItem(
+                value: e,
+                child: Text(e, style: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14)),
+              )).toList(),
+      onChanged: items.isEmpty ? null : onChanged,
+      isExpanded: true,
     );
   }
 
