@@ -320,6 +320,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
   late TextEditingController _debtAmountController;
   String? _selectedRegion, _selectedZone, _selectedWoreda, _selectedKebele;
   List<String> _regions = [], _zones = [], _woredas = [], _kebeles = [];
+  Map<String, int?> _kebeleIds = {}; // Maps kebele name to ID
   bool _loadingZones = false, _loadingWoredas = false, _loadingKebeles = false;
   int? _addressId;
 
@@ -357,7 +358,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
     try {
       final response = await widget.addressService.getRegions();
       if (response.success && mounted) {
-        // API returns array of {region: "Addis Ababa"} objects
+        // API now returns simple string array: ["Tigray", "Amhara", ...]
         final regions = response.regions
             .map((r) => r.region)
             .where((s) => s != null && s.isNotEmpty)
@@ -395,9 +396,13 @@ class _Step1BasicsState extends State<_Step1Basics> {
     try {
       final response = await widget.addressService.getZones(region: _selectedRegion!);
       if (response.success && mounted) {
-        setState(() {
-          _zones = response.zones.map((z) => z.zone ?? '').where((s) => s.isNotEmpty).toList();
-        });
+        // API returns simple string array: ["Centeral", "Eastern", ...]
+        final zones = response.zones
+            .map((z) => z.zone)
+            .where((s) => s != null && s.isNotEmpty)
+            .cast<String>()
+            .toList();
+        setState(() => _zones = zones);
       }
     } catch (_) {
       if (mounted) setState(() => _zones = []);
@@ -425,7 +430,13 @@ class _Step1BasicsState extends State<_Step1Basics> {
     try {
       final response = await widget.addressService.getWoredas(region: _selectedRegion!, zone: _selectedZone!);
       if (response.success && mounted) {
-        setState(() => _woredas = response.woredas.map((w) => w.woreda ?? '').where((s) => s.isNotEmpty).toList());
+        // API returns simple string array: ["01", "02", ...]
+        final woredas = response.woredas
+            .map((w) => w.woreda)
+            .where((s) => s != null && s.isNotEmpty)
+            .cast<String>()
+            .toList();
+        setState(() => _woredas = woredas);
       }
     } catch (_) {
       if (mounted) setState(() => _woredas = []);
@@ -455,7 +466,20 @@ class _Step1BasicsState extends State<_Step1Basics> {
         woreda: _selectedWoreda!,
       );
       if (response.success && mounted) {
-        setState(() => _kebeles = response.kebeles.map((k) => k.kebele ?? '').where((s) => s.isNotEmpty).toList());
+        // API returns array of {id, kebele}: [{id: 1, kebele: "Kebele 01"}, ...]
+        final kebeles = response.kebeles
+            .map((k) => k.kebele)
+            .where((s) => s != null && s.isNotEmpty)
+            .cast<String>()
+            .toList();
+        // Store IDs for address_id mapping
+        _kebeleIds.clear();
+        for (final k in response.kebeles) {
+          if (k.kebele != null && k.kebele!.isNotEmpty) {
+            _kebeleIds[k.kebele!] = k.id;
+          }
+        }
+        setState(() => _kebeles = kebeles);
       }
     } catch (_) {
       if (mounted) setState(() => _kebeles = []);
@@ -467,7 +491,9 @@ class _Step1BasicsState extends State<_Step1Basics> {
   void _onKebeleSelected(String? kebele) {
     setState(() {
       _selectedKebele = kebele;
-      _addressId = kebele != null ? _kebeles.indexOf(kebele) + 1 : null; // Simplified - should use actual ID
+      // Look up the actual address ID from the kebele ID map
+      _addressId = kebele != null ? _kebeleIds[kebele] : null;
+      dev.log('Kebele selected: $kebele, addressId: $_addressId', name: 'AddressPicker');
     });
     _syncAddressToForm();
   }

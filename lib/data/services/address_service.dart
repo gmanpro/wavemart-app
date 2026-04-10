@@ -11,12 +11,18 @@ class AddressService {
       : _apiClient = apiClient ?? ApiClient();
 
   /// Get all regions
+  /// API returns simple string array: ["Tigray", "Amhara", ...]
   Future<AddressResponse> getRegions() async {
     try {
       final response = await _apiClient.dio.get(ApiConstants.regions);
 
       if (response.statusCode == 200) {
-        final regions = _parseList(response.data['data'] ?? response.data);
+        final data = response.data;
+        final regionNames = (data is List) 
+            ? data.whereType<String>().toList() 
+            : <String>[];
+        
+        final regions = regionNames.map((name) => Address(region: name)).toList();
         return AddressResponse(success: true, regions: regions);
       }
 
@@ -34,6 +40,7 @@ class AddressService {
   }
 
   /// Get zones by region
+  /// API returns simple string array: ["Centeral", "Eastern", ...]
   Future<AddressResponse> getZones({required String region}) async {
     try {
       final response = await _apiClient.dio.get(
@@ -42,7 +49,12 @@ class AddressService {
       );
 
       if (response.statusCode == 200) {
-        final zones = _parseList(response.data['data'] ?? response.data);
+        final data = response.data;
+        final zoneNames = (data is List) 
+            ? data.whereType<String>().toList() 
+            : <String>[];
+        
+        final zones = zoneNames.map((name) => Address(zone: name)).toList();
         return AddressResponse(success: true, zones: zones);
       }
 
@@ -60,6 +72,7 @@ class AddressService {
   }
 
   /// Get woredas by region and zone
+  /// API returns simple string array: ["01", "02", ...]
   Future<AddressResponse> getWoredas({
     required String region,
     required String zone,
@@ -74,7 +87,12 @@ class AddressService {
       );
 
       if (response.statusCode == 200) {
-        final woredas = _parseList(response.data['data'] ?? response.data);
+        final data = response.data;
+        final woredaNames = (data is List) 
+            ? data.whereType<String>().toList() 
+            : <String>[];
+        
+        final woredas = woredaNames.map((name) => Address(woreda: name)).toList();
         return AddressResponse(success: true, woredas: woredas);
       }
 
@@ -92,6 +110,7 @@ class AddressService {
   }
 
   /// Get kebeles by region, zone, and woreda
+  /// API returns array of {id, kebele}: [{id: 1, kebele: "Kebele 01"}, ...]
   Future<AddressResponse> getKebeles({
     required String region,
     required String zone,
@@ -108,7 +127,18 @@ class AddressService {
       );
 
       if (response.statusCode == 200) {
-        final kebeles = _parseList(response.data['data'] ?? response.data);
+        final data = response.data;
+        final kebeles = (data is List)
+            ? data
+                .whereType<Map>()
+                .map((m) => Address(
+                      id: m['id'] as int?,
+                      kebele: m['kebele'] as String?,
+                    ))
+                .where((a) => a.kebele != null && a.kebele!.isNotEmpty)
+                .toList()
+            : <Address>[];
+        
         return AddressResponse(success: true, kebeles: kebeles);
       }
 
