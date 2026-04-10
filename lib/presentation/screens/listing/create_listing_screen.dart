@@ -372,12 +372,17 @@ class _Step1BasicsState extends State<_Step1Basics> {
   Future<void> _loadZones() async {
     if (_selectedRegion == null) return;
     setState(() => _loadingZones = true);
-    final response = await widget.addressService.getZones(region: _selectedRegion!);
-    if (response.success && mounted) {
-      setState(() {
-        _zones = response.zones.map((z) => z.zone ?? '').where((s) => s.isNotEmpty).toList();
-        _loadingZones = false;
-      });
+    try {
+      final response = await widget.addressService.getZones(region: _selectedRegion!);
+      if (response.success && mounted) {
+        setState(() {
+          _zones = response.zones.map((z) => z.zone ?? '').where((s) => s.isNotEmpty).toList();
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _zones = []);
+    } finally {
+      if (mounted) setState(() => _loadingZones = false);
     }
   }
 
@@ -397,12 +402,15 @@ class _Step1BasicsState extends State<_Step1Basics> {
   Future<void> _loadWoredas() async {
     if (_selectedRegion == null || _selectedZone == null) return;
     setState(() => _loadingWoredas = true);
-    final response = await widget.addressService.getWoredas(region: _selectedRegion!, zone: _selectedZone!);
-    if (response.success && mounted) {
-      setState(() {
-        _woredas = response.woredas.map((w) => w.woreda ?? '').where((s) => s.isNotEmpty).toList();
-        _loadingWoredas = false;
-      });
+    try {
+      final response = await widget.addressService.getWoredas(region: _selectedRegion!, zone: _selectedZone!);
+      if (response.success && mounted) {
+        setState(() => _woredas = response.woredas.map((w) => w.woreda ?? '').where((s) => s.isNotEmpty).toList());
+      }
+    } catch (_) {
+      if (mounted) setState(() => _woredas = []);
+    } finally {
+      if (mounted) setState(() => _loadingWoredas = false);
     }
   }
 
@@ -420,16 +428,19 @@ class _Step1BasicsState extends State<_Step1Basics> {
   Future<void> _loadKebeles() async {
     if (_selectedRegion == null || _selectedZone == null || _selectedWoreda == null) return;
     setState(() => _loadingKebeles = true);
-    final response = await widget.addressService.getKebeles(
-      region: _selectedRegion!,
-      zone: _selectedZone!,
-      woreda: _selectedWoreda!,
-    );
-    if (response.success && mounted) {
-      setState(() {
-        _kebeles = response.kebeles.map((k) => k.kebele ?? '').where((s) => s.isNotEmpty).toList();
-        _loadingKebeles = false;
-      });
+    try {
+      final response = await widget.addressService.getKebeles(
+        region: _selectedRegion!,
+        zone: _selectedZone!,
+        woreda: _selectedWoreda!,
+      );
+      if (response.success && mounted) {
+        setState(() => _kebeles = response.kebeles.map((k) => k.kebele ?? '').where((s) => s.isNotEmpty).toList());
+      }
+    } catch (_) {
+      if (mounted) setState(() => _kebeles = []);
+    } finally {
+      if (mounted) setState(() => _loadingKebeles = false);
     }
   }
 
@@ -543,17 +554,18 @@ class _Step1BasicsState extends State<_Step1Basics> {
       child: GestureDetector(
         onTap: () => widget.onUpdate(widget.formData.copyWith(type: value)),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.navy950 : Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(color: isSelected ? AppColors.navy950 : AppColors.zinc300, width: 2),
           ),
-          child: Column(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: isSelected ? Colors.white : AppColors.navy600, size: 32),
-              const SizedBox(height: 8),
-              Text(label, style: TextStyle(fontWeight: FontWeight.w600, color: isSelected ? Colors.white : AppColors.navy800)),
+              Icon(icon, color: isSelected ? Colors.white : AppColors.navy600, size: 20),
+              const SizedBox(width: 6),
+              Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : AppColors.navy800)),
             ],
           ),
         ),
@@ -597,7 +609,24 @@ class _Step1BasicsState extends State<_Step1Basics> {
         children: [
           Text('Lease Hold Details', style: AppTextStyles.labelMedium.copyWith(color: Colors.purple.shade700, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
-          _buildTextField(label: 'Leased Year', keyboardType: TextInputType.number, onChanged: (v) {}),
+          _buildSimpleTextField('Leased Year', TextInputType.number, (v) {
+            final n = int.tryParse(v);
+            if (n != null) widget.onUpdate(widget.formData.copyWith(leasedYear: n));
+          }),
+          const SizedBox(height: 8),
+          _buildSimpleTextField('Lease Price per m²', TextInputType.number, (v) {
+            final cleaned = v.replaceAll(',', '');
+            final n = double.tryParse(cleaned);
+            if (n != null) widget.onUpdate(widget.formData.copyWith(leasePricePerSqm: n));
+          }),
+          const SizedBox(height: 8),
+          _buildSimpleTextField('Build Type', TextInputType.text, (v) => widget.onUpdate(widget.formData.copyWith(buildType: v))),
+          const SizedBox(height: 8),
+          _buildSimpleTextField('Annual Payment', TextInputType.number, (v) {
+            final cleaned = v.replaceAll(',', '');
+            final n = double.tryParse(cleaned);
+            if (n != null) widget.onUpdate(widget.formData.copyWith(annualPayment: n));
+          }),
         ],
       ),
     );
@@ -612,17 +641,30 @@ class _Step1BasicsState extends State<_Step1Basics> {
         children: [
           Text('Cooperative Details', style: AppTextStyles.labelMedium.copyWith(color: AppColors.wave700, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
-          _buildTextField(
-            label: 'Cooperative Name',
-            onChanged: (v) => widget.onUpdate(widget.formData.copyWith(cooperativeName: v)),
-          ),
+          _buildSimpleTextField('Cooperative Name', TextInputType.text, (v) => widget.onUpdate(widget.formData.copyWith(cooperativeName: v))),
           const SizedBox(height: 8),
-          _buildTextField(
-            label: 'Cooperative Code',
-            onChanged: (v) => widget.onUpdate(widget.formData.copyWith(cooperativeCode: v)),
+          _buildSimpleTextField('Cooperative Code', TextInputType.text, (v) => widget.onUpdate(widget.formData.copyWith(cooperativeCode: v))),
+          const SizedBox(height: 8),
+          _dropdownField(
+            value: widget.formData.buildingStatus?.isEmpty ?? true ? null : widget.formData.buildingStatus,
+            items: const ['Finished', 'Unfinished'],
+            label: 'Building Status',
+            onChanged: (v) => widget.onUpdate(widget.formData.copyWith(buildingStatus: v)),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSimpleTextField(String label, TextInputType keyboardType, void Function(String) onChanged) {
+    return TextFormField(
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      keyboardType: keyboardType,
+      onChanged: onChanged,
     );
   }
 
@@ -685,10 +727,17 @@ class _Step1BasicsState extends State<_Step1Basics> {
     bool isLoading = false,
   }) {
     return DropdownButtonFormField<String>(
-      value: value,
-      decoration: InputDecoration(labelText: label, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
-      items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-      onChanged: isLoading ? null : onChanged,
+      value: items.contains(value) ? value : null,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        suffixIcon: isLoading ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : null,
+      ),
+      items: items.isEmpty
+          ? [const DropdownMenuItem(value: null, child: Text('No options available', style: TextStyle(color: Colors.grey)))]
+          : items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+      onChanged: items.isEmpty ? null : onChanged,
+      isExpanded: true,
     );
   }
 
@@ -815,11 +864,12 @@ class _Step2DetailsState extends State<_Step2Details> {
   }
 
   Widget _buildNumberField(String label, int? value, Function(int?) onChanged) {
+    final controller = TextEditingController(text: value?.toString() ?? '');
     return TextFormField(
-      initialValue: value?.toString() ?? '',
+      controller: controller,
       decoration: InputDecoration(labelText: label, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
       keyboardType: TextInputType.number,
-      onChanged: (v) => onChanged(int.tryParse(v)),
+      onFieldSubmitted: (v) => onChanged(int.tryParse(v)),
     );
   }
 
