@@ -837,20 +837,28 @@ class _Step1BasicsState extends State<_Step1Basics> {
       else if (price < 100000) borderColor = Colors.amber;
       else borderColor = AppColors.emerald500;
     }
-    return TextField(
-      controller: _priceController,
-      decoration: InputDecoration(
-        labelText: 'Price',
-        prefixIcon: const Icon(Icons.attach_money, size: 20),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: borderColor)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: borderColor, width: 2)),
-      ),
-      keyboardType: TextInputType.number,
-      textInputAction: TextInputAction.done,
-      onSubmitted: (v) {
-        final cleaned = v.replaceAll(',', '');
-        widget.onUpdate(widget.formData.copyWith(priceFixed: double.tryParse(cleaned)));
+    return Focus(
+      onFocusChange: (hasFocus) {
+        if (!hasFocus) {
+          final cleaned = _priceController.text.replaceAll(',', '');
+          widget.onUpdate(widget.formData.copyWith(priceFixed: double.tryParse(cleaned)));
+        }
       },
+      child: TextField(
+        controller: _priceController,
+        decoration: InputDecoration(
+          labelText: 'Price',
+          prefixIcon: const Icon(Icons.attach_money, size: 20),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: borderColor)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: borderColor, width: 2)),
+        ),
+        keyboardType: TextInputType.number,
+        textInputAction: TextInputAction.done,
+        onSubmitted: (v) {
+          final cleaned = v.replaceAll(',', '');
+          widget.onUpdate(widget.formData.copyWith(priceFixed: double.tryParse(cleaned)));
+        },
+      ),
     );
   }
 
