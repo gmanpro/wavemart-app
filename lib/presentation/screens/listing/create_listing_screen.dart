@@ -773,27 +773,31 @@ class _Step1BasicsState extends State<_Step1Basics> {
     );
   }
 
-  /// Persistent text field that saves on submit (not on every keystroke)
+  /// Persistent text field that saves on submit OR focus loss
   Widget _buildPersistedField({
     required String label,
     required TextEditingController controller,
     TextInputType? keyboardType,
     required void Function(String) onSubmitted,
   }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-      keyboardType: keyboardType,
-      textInputAction: TextInputAction.done,
-      onEditingComplete: () {
-        onSubmitted(controller.text);
-        FocusScope.of(context).unfocus();
+    return Focus(
+      onFocusChange: (hasFocus) {
+        // Save value when focus is lost
+        if (!hasFocus) {
+          onSubmitted(controller.text);
+        }
       },
-      onFieldSubmitted: onSubmitted,
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
+        keyboardType: keyboardType,
+        textInputAction: TextInputAction.done,
+        onFieldSubmitted: onSubmitted,
+      ),
     );
   }
 
@@ -850,26 +854,29 @@ class _Step1BasicsState extends State<_Step1Basics> {
     );
   }
 
-  /// Formatted text field that saves on submit
+  /// Formatted text field that saves on submit OR focus loss
   Widget _buildFormattedField({
     required String label,
     required TextEditingController controller,
     required void Function(String) onSubmitted,
   }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-      keyboardType: TextInputType.number,
-      textInputAction: TextInputAction.done,
-      onEditingComplete: () {
-        onSubmitted(controller.text);
-        FocusScope.of(context).unfocus();
+    return Focus(
+      onFocusChange: (hasFocus) {
+        if (!hasFocus) {
+          onSubmitted(controller.text);
+        }
       },
-      onFieldSubmitted: onSubmitted,
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
+        keyboardType: TextInputType.number,
+        textInputAction: TextInputAction.done,
+        onFieldSubmitted: onSubmitted,
+      ),
     );
   }
 
@@ -906,22 +913,23 @@ class _Step1BasicsState extends State<_Step1Basics> {
     void Function(String)? onSubmitted,
     TextInputType? keyboardType,
   }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-      keyboardType: keyboardType ?? TextInputType.text,
-      textInputAction: TextInputAction.done,
-      onEditingComplete: () {
-        if (onSubmitted != null) {
-          onSubmitted((controller ?? TextEditingController()).text);
+    return Focus(
+      onFocusChange: (hasFocus) {
+        if (!hasFocus && onSubmitted != null && controller != null) {
+          onSubmitted(controller.text);
         }
-        FocusScope.of(context).unfocus();
       },
-      onFieldSubmitted: onSubmitted,
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
+        keyboardType: keyboardType ?? TextInputType.text,
+        textInputAction: TextInputAction.done,
+        onFieldSubmitted: onSubmitted,
+      ),
     );
   }
 }
@@ -1116,14 +1124,21 @@ class _Step2DetailsState extends State<_Step2Details> {
 
           _sectionTitle('Description'),
           const SizedBox(height: 8),
-          TextFormField(
-            initialValue: widget.formData.description,
-            maxLines: 4,
-            decoration: InputDecoration(
-              labelText: 'Describe your property',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          Focus(
+            onFocusChange: (hasFocus) {
+              if (!hasFocus) {
+                widget.onUpdate(widget.formData.copyWith(description: widget.formData.description));
+              }
+            },
+            child: TextFormField(
+              initialValue: widget.formData.description,
+              maxLines: 4,
+              decoration: InputDecoration(
+                labelText: 'Describe your property',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onChanged: (v) => widget.onUpdate(widget.formData.copyWith(description: v)),
             ),
-            onChanged: (v) => widget.onUpdate(widget.formData.copyWith(description: v)),
           ),
           const SizedBox(height: 32),
         ],
@@ -1135,27 +1150,31 @@ class _Step2DetailsState extends State<_Step2Details> {
     return Text(title, style: AppTextStyles.titleSmall.copyWith(fontWeight: FontWeight.w700, fontSize: 16));
   }
 
-  /// Persistent text field that saves on submit (not on every keystroke)
+  /// Persistent text field that saves on submit OR focus loss
   Widget _buildPersistedField({
     required String label,
     required TextEditingController controller,
     TextInputType? keyboardType,
     required void Function(String) onSubmitted,
   }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-      keyboardType: keyboardType,
-      textInputAction: TextInputAction.done,
-      onEditingComplete: () {
-        onSubmitted(controller.text);
-        FocusScope.of(context).unfocus();
+    return Focus(
+      onFocusChange: (hasFocus) {
+        // Save value when focus is lost
+        if (!hasFocus) {
+          onSubmitted(controller.text);
+        }
       },
-      onFieldSubmitted: onSubmitted,
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
+        keyboardType: keyboardType,
+        textInputAction: TextInputAction.done,
+        onFieldSubmitted: onSubmitted,
+      ),
     );
   }
 
