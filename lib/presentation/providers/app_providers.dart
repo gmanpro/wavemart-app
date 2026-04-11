@@ -218,6 +218,14 @@ class ConversationsNotifier extends StateNotifier<ConversationsState> {
       }
     }
   }
+
+  /// Refresh conversations list (e.g., after reading a message)
+  Future<void> refreshConversations({int? currentUserId}) async {
+    final response = await _messageService.getConversations(page: 1, currentUserId: currentUserId);
+    if (response.success) {
+      state = ConversationsState.loaded(conversations: response.conversations, total: response.total ?? 0);
+    }
+  }
 }
 
 class ConversationsState {

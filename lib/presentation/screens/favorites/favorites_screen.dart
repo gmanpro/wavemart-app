@@ -70,9 +70,9 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
   }
 
   Widget _buildBody(FavoritesState state) {
-    // Loading state
+    // Loading state - show skeleton cards
     if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildSkeletonList(5);
     }
 
     // Error state
@@ -146,6 +146,56 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                 ),
               ),
             ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSkeletonList(int count) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: count,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.zinc200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  child: AspectRatio(
+                    aspectRatio: 4 / 3,
+                    child: Container(color: AppColors.zinc200),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(height: 20, width: 120, color: AppColors.zinc200),
+                      const SizedBox(height: 10),
+                      Container(height: 16, width: double.infinity, color: AppColors.zinc200),
+                      const SizedBox(height: 8),
+                      Container(height: 14, width: 180, color: AppColors.zinc200),
+                      const SizedBox(height: 14),
+                      Row(children: [
+                        Container(height: 20, width: 60, color: AppColors.zinc200),
+                        const SizedBox(width: 8),
+                        Container(height: 20, width: 45, color: AppColors.zinc200),
+                      ]),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

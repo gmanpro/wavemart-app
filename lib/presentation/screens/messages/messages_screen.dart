@@ -7,7 +7,19 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/common/wave_common_widgets.dart';
 import '../../../data/models/message.dart' as msg;
 
-/// Messages Screen - Conversations list
+/// Format a DateTime into a human-readable time string
+String _formatTime(DateTime? dt) {
+  if (dt == null) return '';
+  final now = DateTime.now();
+  final diff = now.difference(dt);
+  if (diff.inMinutes < 1) return 'Now';
+  if (diff.inHours < 1) return '${diff.inMinutes}m';
+  if (diff.inDays < 1) return '${diff.inHours}h';
+  if (diff.inDays < 7) return '${diff.inDays}d';
+  return '${dt.day}/${dt.month}';
+}
+
+/// Messages Screen - Conversations list with auto-refresh on tab visibility
 class MessagesScreen extends ConsumerStatefulWidget {
   const MessagesScreen({super.key});
 
@@ -15,19 +27,45 @@ class MessagesScreen extends ConsumerStatefulWidget {
   ConsumerState<MessagesScreen> createState() => _MessagesScreenState();
 }
 
-class _MessagesScreenState extends ConsumerState<MessagesScreen> {
+class _MessagesScreenState extends ConsumerState<MessagesScreen> with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   final ScrollController _scrollController = ScrollController();
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authState = ref.read(authStateProvider);
       ref.read(conversationsProvider.notifier).loadConversations(
             currentUserId: authState.user?.id,
           );
     });
-    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (ModalRoute.of(context)?.isCurrent == true) {
+      _refreshIfNeeded();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _refreshIfNeeded() {
+    final authState = ref.read(authStateProvider);
+    ref.read(conversationsProvider.notifier).refreshConversations(
+          currentUserId: authState.user?.id,
+        );
   }
 
   void _onScroll() {
@@ -45,12 +83,6 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
   }
 
   @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final state = ref.watch(conversationsProvider);
 
@@ -64,7 +96,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
 
   Widget _buildBody(ConversationsState state) {
     if (state.isLoading && state.conversations.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildConversationsSkeleton();
     }
 
     if (state.errorMessage != null && state.conversations.isEmpty) {
@@ -91,7 +123,10 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
 
     return RefreshIndicator(
       onRefresh: () async {
-        await ref.read(conversationsProvider.notifier).loadConversations();
+        final authState = ref.read(authStateProvider);
+        await ref.read(conversationsProvider.notifier).loadConversations(
+              currentUserId: authState.user?.id,
+            );
       },
       child: ListView.separated(
         controller: _scrollController,
@@ -108,16 +143,44 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
           final conversation = state.conversations[index] as msg.Conversation;
           return _ConversationTile(
             conversation: conversation,
-            onTap: () {
-              Navigator.of(context).push(
+            onTap: () async {
+              await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => ChatScreen(conversationId: conversation.id, conversation: conversation),
                 ),
               );
+              // Refresh conversations after returning to update unread badges
+              if (mounted) {
+                final authState = ref.read(authStateProvider);
+                ref.read(conversationsProvider.notifier).refreshConversations(
+                      currentUserId: authState.user?.id,
+                    );
+              }
             },
           );
         },
       ),
+    );
+  }
+
+  Widget _buildConversationsSkeleton() {
+    return ListView.builder(
+      itemCount: 6,
+      itemBuilder: (context, index) {
+        return ListTile(
+          leading: Container(
+            width: 50,
+            height: 50,
+            decoration: const BoxDecoration(
+              color: AppColors.zinc200,
+              shape: BoxShape.circle,
+            ),
+          ),
+          title: Container(height: 16, width: 140, color: AppColors.zinc200),
+          subtitle: Container(height: 12, width: 200, color: AppColors.zinc200, margin: const EdgeInsets.only(top: 8)),
+          trailing: Container(height: 12, width: 40, color: AppColors.zinc200),
+        );
+      },
     );
   }
 }
@@ -137,9 +200,9 @@ class _ConversationTile extends ConsumerWidget {
     final authState = ref.watch(authStateProvider);
     final currentUserId = authState.user?.id ?? 0;
 
-    // Get actual user initials and name
-    final initials = conversation.otherParticipantInitials;
-    final displayName = conversation.displayTitle;
+    // Compute initials and name dynamically with currentUserId
+    final initials = conversation.getInitials(currentUserId);
+    final displayName = conversation.getDisplayTitle(currentUserId);
 
     // Check if this is a property-related conversation
     final isAssetChat = conversation.isAssetChat || conversation.listingId != null;
@@ -147,10 +210,10 @@ class _ConversationTile extends ConsumerWidget {
 
     final hasUnread = conversation.unreadCount != null && conversation.unreadCount! > 0;
 
-    // Format "You: " prefix for own messages
+    // Format "You: " prefix for own messages - use lastMessageSenderId for accuracy
     String previewText = conversation.previewText;
     if (conversation.lastMessage != null && conversation.lastMessage!.isNotEmpty) {
-      final isOwnLastMessage = conversation.senderId == currentUserId;
+      final isOwnLastMessage = conversation.isLastMessageFromMe(currentUserId);
       if (isOwnLastMessage) {
         previewText = 'You: $previewText';
       }
@@ -265,17 +328,6 @@ class _ConversationTile extends ConsumerWidget {
       onTap: onTap,
     );
   }
-
-  String _formatTime(DateTime? dt) {
-    if (dt == null) return '';
-    final now = DateTime.now();
-    final diff = now.difference(dt);
-    if (diff.inMinutes < 1) return 'Now';
-    if (diff.inHours < 1) return '${diff.inMinutes}m';
-    if (diff.inDays < 1) return '${diff.inHours}h';
-    if (diff.inDays < 7) return '${diff.inDays}d';
-    return '${dt.day}/${dt.month}';
-  }
 }
 
 /// Chat Screen - Individual conversation with full messaging
@@ -341,7 +393,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final currentUserId = authState.user?.id ?? 0;
 
     // Build proper title from conversation data
-    String title = widget.conversation.displayTitle;
+    String title = widget.conversation.getDisplayTitle(currentUserId);
     String subtitle = widget.conversation.isAssetChat
         ? (widget.conversation.listingTitle ?? 'Property Chat')
         : 'Direct Message';
@@ -362,7 +414,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           // Messages list
           Expanded(
             child: chatState.isLoading && chatState.messages.isEmpty
-                ? const Center(child: CircularProgressIndicator())
+                ? _buildMessagesSkeleton()
                 : chatState.errorMessage != null && chatState.messages.isEmpty
                     ? WaveErrorBanner(
                         message: chatState.errorMessage!,
@@ -447,6 +499,60 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ),
     );
   }
+}
+
+/// Skeleton loader for chat messages
+Widget _buildMessagesSkeleton() {
+  return ListView.builder(
+    padding: const EdgeInsets.all(12),
+    itemCount: 6,
+    itemBuilder: (context, index) {
+      final isLeft = index % 2 == 0;
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          mainAxisAlignment: isLeft ? MainAxisAlignment.start : MainAxisAlignment.end,
+          children: [
+            if (isLeft) ...[
+              Container(
+                width: 32,
+                height: 32,
+                decoration: const BoxDecoration(
+                  color: AppColors.zinc200,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+            Container(
+              height: 40,
+              width: 120 + (index * 20),
+              decoration: BoxDecoration(
+                color: AppColors.zinc200,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  topRight: const Radius.circular(16),
+                  bottomLeft: Radius.circular(isLeft ? 16 : 4),
+                  bottomRight: Radius.circular(isLeft ? 4 : 16),
+                ),
+              ),
+            ),
+            if (!isLeft) ...[
+              const SizedBox(width: 8),
+              Container(
+                width: 32,
+                height: 32,
+                decoration: const BoxDecoration(
+                  color: AppColors.zinc200,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    },
+  );
 }
 
 /// Message Bubble Widget - WhatsApp-like with actual user initials

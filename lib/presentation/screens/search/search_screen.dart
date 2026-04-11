@@ -211,6 +211,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       color: Colors.white,
       child: Row(
         children: [
+          // Type dropdown
           Expanded(
             child: _filterDropdown(
               label: 'Type',
@@ -226,26 +227,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               },
             ),
           ),
-          if (_rentalEnabled) ...[
-            const SizedBox(width: 8),
-            Expanded(
-              child: _filterDropdown(
-                label: 'Status',
-                value: _selectedListingType,
-                items: const [
-                  DropdownMenuItem(value: null, child: Text('All')),
-                  DropdownMenuItem(value: 'sale', child: Text('💰 For Sale')),
-                  DropdownMenuItem(value: 'rental', child: Text('🔑 For Rent')),
-                ],
-                onChanged: (v) {
-                  setState(() => _selectedListingType = v);
-                  _performSearch();
-                },
-              ),
-            ),
-          ],
+          // Sort button
           const SizedBox(width: 8),
           _sortButton(),
+          // Filter button
+          const SizedBox(width: 8),
+          _filterButton(),
         ],
       ),
     );
@@ -279,7 +266,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Widget _sortButton() {
     return GestureDetector(
-      onTap: () => _showSortBottomSheet(),
+      onTap: () => _showFilterModal(),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
@@ -287,17 +274,32 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.zinc200),
         ),
-        child: Row(
+        child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.sort, size: 18, color: AppColors.zinc600),
-            const SizedBox(width: 4),
+            Icon(Icons.tune, size: 18, color: AppColors.zinc600),
+            SizedBox(width: 4),
             Text(
-              _getSortLabel(_selectedSort),
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.navy800),
+              'Filters',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.navy800),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _filterButton() {
+    return GestureDetector(
+      onTap: () => _showFilterModal(),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppColors.zinc50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.zinc200),
+        ),
+        child: const Icon(Icons.filter_alt_outlined, size: 18, color: AppColors.zinc600),
       ),
     );
   }
@@ -313,12 +315,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             if (_selectedType != null)
               _filterChip(
                 _selectedType == 'house' ? '🏠 House' : '🌄 Land',
-                () => setState(() => _selectedType = null),
+                () {
+                  setState(() => _selectedType = null);
+                  _performSearch();
+                },
               ),
             if (_selectedListingType != null)
               _filterChip(
                 _selectedListingType == 'sale' ? '💰 For Sale' : '🔑 For Rent',
-                () => setState(() => _selectedListingType = null),
+                () {
+                  setState(() => _selectedListingType = null);
+                  _performSearch();
+                },
               ),
             if (_selectedPriceLabel != null)
               _filterChip(
@@ -329,6 +337,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     _selectedPriceMin = null;
                     _selectedPriceMax = null;
                   });
+                  _performSearch();
                 },
               ),
             if (_searchController.text.isNotEmpty)
@@ -431,11 +440,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             runSpacing: 12,
             alignment: WrapAlignment.center,
             children: [
-              _popularSearchChip('🏠 Houses', () => setState(() => _selectedType = 'house')),
-              _popularSearchChip('🌄 Lands', () => setState(() => _selectedType = 'land')),
-              _popularSearchChip('💰 For Sale', () => setState(() => _selectedListingType = 'sale')),
+              _popularSearchChip('🏠 Houses', () {
+                setState(() => _selectedType = 'house');
+                _performSearch();
+              }),
+              _popularSearchChip('🌄 Lands', () {
+                setState(() => _selectedType = 'land');
+                _performSearch();
+              }),
+              _popularSearchChip('💰 For Sale', () {
+                setState(() => _selectedListingType = 'sale');
+                _performSearch();
+              }),
               if (_rentalEnabled)
-                _popularSearchChip('🔑 For Rent', () => setState(() => _selectedListingType = 'rental')),
+                _popularSearchChip('🔑 For Rent', () {
+                  setState(() => _selectedListingType = 'rental');
+                  _performSearch();
+                }),
               _popularSearchChip('💰 Under 5M', () {
                 setState(() {
                   _selectedPriceLabel = 'Under 5M';
@@ -503,7 +524,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Widget _buildResults(ListingsState state) {
     if (state.isLoading && state.listings.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildSkeletonList(5);
     }
 
     if (state.errorMessage != null && state.listings.isEmpty) {
@@ -534,37 +555,98 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         ),
         const Divider(height: 1),
         Expanded(
-          child: ListView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
-            itemCount: state.listings.length + (state.isLoadingMore ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index >= state.listings.length) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-              final listing = state.listings[index];
-              final fav = _isFavorite(listing.id);
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: PropertyListingCard(
-                  listing: listing,
-                  isFavorite: fav,
-                  isTogglingFavorite: _isToggling(listing.id),
-                  onFavorite: () => _toggleFavorite(listing.id),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ListingDetailScreen(listingId: listing.id),
+          child: Stack(
+            children: [
+              ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+                itemCount: state.listings.length + (state.isLoadingMore ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index >= state.listings.length) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  final listing = state.listings[index];
+                  final fav = _isFavorite(listing.id);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: PropertyListingCard(
+                      listing: listing,
+                      isFavorite: fav,
+                      isTogglingFavorite: _isToggling(listing.id),
+                      onFavorite: () => _toggleFavorite(listing.id),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ListingDetailScreen(listingId: listing.id),
+                        ),
+                      ),
                     ),
+                  );
+                },
+              ),
+              if (state.isLoading && state.listings.isNotEmpty)
+                Positioned.fill(
+                  child: Container(
+                    color: AppColors.zinc50.withOpacity(0.7),
+                    child: const Center(child: CircularProgressIndicator()),
                   ),
                 ),
-              );
-            },
+            ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSkeletonList(int count) {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+      itemCount: count,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.zinc200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  child: AspectRatio(
+                    aspectRatio: 4 / 3,
+                    child: Container(color: AppColors.zinc200),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(height: 20, width: 120, color: AppColors.zinc200),
+                      const SizedBox(height: 10),
+                      Container(height: 16, width: double.infinity, color: AppColors.zinc200),
+                      const SizedBox(height: 8),
+                      Container(height: 14, width: 180, color: AppColors.zinc200),
+                      const SizedBox(height: 14),
+                      Row(children: [
+                        Container(height: 20, width: 60, color: AppColors.zinc200),
+                        const SizedBox(width: 8),
+                        Container(height: 20, width: 45, color: AppColors.zinc200),
+                      ]),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -583,51 +665,182 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
-  void _showSortBottomSheet() {
+  void _showFilterModal() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Sort By', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              _sortOption('newest', '🆕 Newest First'),
-              _sortOption('oldest', '📅 Oldest First'),
-              _sortOption('price_low', '💰 Price: Low to High'),
-              _sortOption('price_high', '💎 Price: High to Low'),
-            ],
-          ),
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Filters', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        TextButton(
+                          onPressed: () {
+                            setModalState(() {
+                              _selectedType = null;
+                              _selectedListingType = null;
+                              _selectedSort = 'newest';
+                              _selectedPriceLabel = null;
+                              _selectedPriceMin = null;
+                              _selectedPriceMax = null;
+                            });
+                          },
+                          child: const Text('Reset', style: TextStyle(color: AppColors.zinc500)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Property Type
+                    const Text('Property Type', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 10),
+                    _modalChipRow([
+                      ('All', null, _selectedType == null),
+                      ('🏠 House', 'house', _selectedType == 'house'),
+                      ('🌄 Land', 'land', _selectedType == 'land'),
+                    ], (v) {
+                      setModalState(() => _selectedType = v);
+                    }),
+
+                    const SizedBox(height: 16),
+
+                    // Listing Status (only if rental enabled)
+                    if (_rentalEnabled) ...[
+                      const Text('Listing Status', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 10),
+                      _modalChipRow([
+                        ('All', null, _selectedListingType == null),
+                        ('💰 For Sale', 'sale', _selectedListingType == 'sale'),
+                        ('🔑 For Rent', 'rental', _selectedListingType == 'rental'),
+                      ], (v) {
+                        setModalState(() => _selectedListingType = v);
+                      }),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // Sort
+                    const Text('Sort By', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 10),
+                    _modalChipRow([
+                      ('🆕 Newest', 'newest', _selectedSort == 'newest'),
+                      ('📅 Oldest', 'oldest', _selectedSort == 'oldest'),
+                      ('💰 Price ↑', 'price_low', _selectedSort == 'price_low'),
+                      ('💎 Price ↓', 'price_high', _selectedSort == 'price_high'),
+                    ], (v) {
+                      setModalState(() => _selectedSort = v as String);
+                    }),
+
+                    const SizedBox(height: 16),
+
+                    // Price Range
+                    const Text('Price Range', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 10),
+                    _modalChipRow([
+                      ('Any', null, _selectedPriceLabel == null),
+                      ('💰 Under 5M', 'Under 5M', _selectedPriceLabel == 'Under 5M'),
+                      ('💎 5M-10M', '5M-10M', _selectedPriceLabel == '5M-10M'),
+                      ('🏆 10M-50M', '10M-50M', _selectedPriceLabel == '10M-50M'),
+                      ('👑 50M-100M', '50M-100M', _selectedPriceLabel == '50M-100M'),
+                      ('✨ 100M+', '100M+', _selectedPriceLabel == '100M+'),
+                    ], (v) {
+                      setModalState(() => _setPriceFilter(v as String?));
+                    }),
+
+                    const SizedBox(height: 24),
+
+                    // Apply button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _performSearch();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.wave500,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text('Apply Filters', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );
   }
 
-  Widget _sortOption(String value, String label) {
-    final isSelected = _selectedSort == value;
-    return ListTile(
-      leading: Icon(
-        isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-        color: isSelected ? AppColors.wave500 : AppColors.zinc400,
-      ),
-      title: Text(
-        label,
-        style: TextStyle(
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-          color: isSelected ? AppColors.wave600 : AppColors.zinc700,
-        ),
-      ),
-      onTap: () {
-        setState(() => _selectedSort = value);
-        Navigator.pop(context);
-        _performSearch();
-      },
+  void _setPriceFilter(String? label) {
+    _selectedPriceLabel = label;
+    switch (label) {
+      case 'Under 5M':
+        _selectedPriceMin = 0;
+        _selectedPriceMax = 5000000;
+        break;
+      case '5M-10M':
+        _selectedPriceMin = 5000000;
+        _selectedPriceMax = 10000000;
+        break;
+      case '10M-50M':
+        _selectedPriceMin = 10000000;
+        _selectedPriceMax = 50000000;
+        break;
+      case '50M-100M':
+        _selectedPriceMin = 50000000;
+        _selectedPriceMax = 100000000;
+        break;
+      case '100M+':
+        _selectedPriceMin = 100000000;
+        _selectedPriceMax = null;
+        break;
+      default:
+        _selectedPriceMin = null;
+        _selectedPriceMax = null;
+    }
+  }
+
+  Widget _modalChipRow(List<(String, dynamic, bool)> chips, void Function(dynamic) onSelected) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: chips.map((chip) {
+        final (label, value, isSelected) = chip;
+        return GestureDetector(
+          onTap: () => onSelected(value),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.wave500 : AppColors.zinc100,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? Colors.white : AppColors.zinc700,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 

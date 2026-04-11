@@ -17,6 +17,11 @@ class Conversation {
   final String? otherParticipantLastName;
   final String? listingTitle;
   final bool isAssetChat;
+  
+  // Raw sender/receiver data for dynamic name computation
+  final Map<String, dynamic>? _senderData;
+  final Map<String, dynamic>? _receiverData;
+  final int? lastMessageSenderId;
 
   Conversation({
     required this.id,
@@ -34,13 +39,20 @@ class Conversation {
     this.otherParticipantLastName,
     this.listingTitle,
     this.isAssetChat = false,
-  });
+    Map<String, dynamic>? senderData,
+    Map<String, dynamic>? receiverData,
+    this.lastMessageSenderId,
+  }) : _senderData = senderData,
+       _receiverData = receiverData;
 
   factory Conversation.fromJson(Map<String, dynamic> json, {int? currentUserId}) {
     // Extract last message from nested relationships
     String? lastMsg;
+    int? lastMsgSenderId;
     if (json['latest_message'] is Map) {
-      lastMsg = json['latest_message']['body'] ?? json['latest_message']['message'];
+      final lm = json['latest_message'] as Map<String, dynamic>;
+      lastMsg = lm['body'] ?? lm['message'];
+      lastMsgSenderId = _safeInt(lm['sender_id']);
     } else if (json['last_message'] != null) {
       lastMsg = json['last_message'];
     }
@@ -54,15 +66,22 @@ class Conversation {
       isAssetChat = json['listing_id'] != null;
     }
 
-    // Determine other participant
+    // Store raw sender/receiver data for dynamic name computation
+    final senderData = json['sender'] is Map ? Map<String, dynamic>.from(json['sender']) : null;
+    final receiverData = json['receiver'] is Map ? Map<String, dynamic>.from(json['receiver']) : null;
+
+    // Determine other participant at parse time (if currentUserId is available)
     String? otherFirstName, otherLastName;
     if (currentUserId != null) {
-      if (json['sender'] is Map && json['sender']['id'] != currentUserId) {
-        otherFirstName = json['sender']['first_name'];
-        otherLastName = json['sender']['last_name'];
-      } else if (json['receiver'] is Map && json['receiver']['id'] != currentUserId) {
-        otherFirstName = json['receiver']['first_name'];
-        otherLastName = json['receiver']['last_name'];
+      final sid = _safeInt(senderData?['id']);
+      final rid = _safeInt(receiverData?['id']);
+      
+      if (sid != null && sid != currentUserId && senderData != null) {
+        otherFirstName = senderData['first_name'];
+        otherLastName = senderData['last_name'];
+      } else if (rid != null && rid != currentUserId && receiverData != null) {
+        otherFirstName = receiverData['first_name'];
+        otherLastName = receiverData['last_name'];
       }
     }
 
@@ -91,6 +110,9 @@ class Conversation {
       otherParticipantLastName: otherLastName,
       listingTitle: listingTitle,
       isAssetChat: isAssetChat,
+      senderData: senderData,
+      receiverData: receiverData,
+      lastMessageSenderId: lastMsgSenderId,
     );
   }
 
@@ -104,25 +126,67 @@ class Conversation {
     return null;
   }
 
-  String get displayTitle {
-    // Use other participant's name if available
+  /// Get display title (other participant's name) computed dynamically
+  String getDisplayTitle(int currentUserId) {
+    // First try pre-computed name (if available from parse time)
     if (otherParticipantFirstName != null) {
       final full = [otherParticipantFirstName, otherParticipantLastName].where((e) => e != null && e.isNotEmpty).join(' ');
       if (full.isNotEmpty) return full;
     }
+    
+    // Compute dynamically from raw data
+    final otherData = _getOtherParticipantData(currentUserId);
+    if (otherData != null) {
+      final first = otherData['first_name'] ?? '';
+      final last = otherData['last_name'] ?? '';
+      final full = [first, last].where((e) => e.isNotEmpty).join(' ');
+      if (full.isNotEmpty) return full;
+    }
+    
     if (subject != null && subject!.isNotEmpty) return subject!;
     if (listingTitle != null && listingTitle!.isNotEmpty) return listingTitle!;
     return 'Conversation #$id';
   }
 
-  String get otherParticipantInitials {
-    final first = otherParticipantFirstName ?? '';
-    final last = otherParticipantLastName ?? '';
-    if (first.isNotEmpty && last.isNotEmpty) {
-      return '${first[0]}${last[0]}'.toUpperCase();
+  /// Get other participant's initials computed dynamically
+  String getInitials(int currentUserId) {
+    // First try pre-computed name
+    if (otherParticipantFirstName != null && otherParticipantFirstName!.isNotEmpty) {
+      final first = otherParticipantFirstName!;
+      final last = otherParticipantLastName ?? '';
+      if (last.isNotEmpty) return '${first[0]}${last[0]}'.toUpperCase();
+      return first.substring(0, first.length > 1 ? 2 : 1).toUpperCase();
     }
-    if (first.isNotEmpty) return first.substring(0, first.length > 1 ? 2 : 1).toUpperCase();
+    
+    // Compute dynamically from raw data
+    final otherData = _getOtherParticipantData(currentUserId);
+    if (otherData != null) {
+      final first = otherData['first_name'] ?? '';
+      final last = otherData['last_name'] ?? '';
+      if (first.isNotEmpty && last.isNotEmpty) return '${first[0]}${last[0]}'.toUpperCase();
+      if (first.isNotEmpty) return first.substring(0, first.length > 1 ? 2 : 1).toUpperCase();
+    }
+    
     return '??';
+  }
+  
+  /// Get the other participant's raw data based on currentUserId
+  Map<String, dynamic>? _getOtherParticipantData(int currentUserId) {
+    final sid = _safeInt(_senderData?['id']);
+    final rid = _safeInt(_receiverData?['id']);
+    
+    if (sid != null && sid != currentUserId) return _senderData;
+    if (rid != null && rid != currentUserId) return _receiverData;
+    return null;
+  }
+
+  /// Check if the last message was sent by the current user
+  bool isLastMessageFromMe(int currentUserId) {
+    if (lastMessageSenderId != null) {
+      return lastMessageSenderId == currentUserId;
+    }
+    // Fallback: check the conversation sender
+    return senderId == currentUserId;
   }
 
   String get previewText {
