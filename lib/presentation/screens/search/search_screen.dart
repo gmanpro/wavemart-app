@@ -123,9 +123,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           // Search Header
           _buildSearchHeader(),
 
-          // Filter Row
-          _buildFilterRow(),
-
           // Active Filter Chips
           if (_hasActiveFilters) _buildActiveFilterChips(),
 
@@ -154,152 +151,89 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
           child: Row(
             children: [
+              // Back button
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back_ios, size: 20),
-                padding: const EdgeInsets.all(8),
+                icon: const Icon(Icons.arrow_back_ios, size: 18),
+                padding: const EdgeInsets.all(4),
+                constraints: const BoxConstraints(),
               ),
+              // Search input with integrated icon
               Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search by location...',
-                    prefixIcon: const Icon(Icons.search, color: AppColors.navy400),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: AppColors.zinc50,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    isDense: true,
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.zinc50,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.zinc200),
                   ),
-                  textInputAction: TextInputAction.search,
-                  onSubmitted: (_) => _performSearch(),
+                  child: Row(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(left: 10),
+                        child: Icon(Icons.search, size: 18, color: AppColors.zinc400),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: const InputDecoration(
+                            hintText: 'Search by location...',
+                            hintStyle: TextStyle(fontSize: 14, color: AppColors.zinc400),
+                            border: InputBorder.none,
+                            filled: false,
+                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                            isDense: true,
+                          ),
+                          style: const TextStyle(fontSize: 14),
+                          textInputAction: TextInputAction.search,
+                          onSubmitted: (_) => _performSearch(),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: _performSearch,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.wave500,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              const SizedBox(width: 6),
+              // Filter button
+              GestureDetector(
+                onTap: () => _showFilterModal(),
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: _hasActiveFilters ? AppColors.wave50 : AppColors.zinc50,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: _hasActiveFilters ? AppColors.wave200 : AppColors.zinc200,
+                    ),
                   ),
-                  elevation: 0,
+                  child: Icon(
+                    Icons.tune,
+                    size: 20,
+                    color: _hasActiveFilters ? AppColors.wave600 : AppColors.zinc500,
+                  ),
                 ),
-                child: const Text(
-                  'Search',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              ),
+              const SizedBox(width: 6),
+              // Search button
+              GestureDetector(
+                onTap: _performSearch,
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.wave500,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.search, size: 20, color: Colors.white),
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildFilterRow() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Colors.white,
-      child: Row(
-        children: [
-          // Type dropdown
-          Expanded(
-            child: _filterDropdown(
-              label: 'Type',
-              value: _selectedType,
-              items: const [
-                DropdownMenuItem(value: null, child: Text('All Types')),
-                DropdownMenuItem(value: 'house', child: Text('🏠 House')),
-                DropdownMenuItem(value: 'land', child: Text('🌄 Land')),
-              ],
-              onChanged: (v) {
-                setState(() => _selectedType = v);
-                _performSearch();
-              },
-            ),
-          ),
-          // Sort button
-          const SizedBox(width: 8),
-          _sortButton(),
-          // Filter button
-          const SizedBox(width: 8),
-          _filterButton(),
-        ],
-      ),
-    );
-  }
-
-  Widget _filterDropdown({
-    required String label,
-    required String? value,
-    required List<DropdownMenuItem<String>> items,
-    required void Function(String?) onChanged,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: AppColors.zinc50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.zinc200),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          isExpanded: true,
-          hint: Text(label, style: const TextStyle(fontSize: 13, color: AppColors.zinc500)),
-          items: items,
-          onChanged: onChanged,
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.navy800),
-        ),
-      ),
-    );
-  }
-
-  Widget _sortButton() {
-    return GestureDetector(
-      onTap: () => _showFilterModal(),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppColors.zinc50,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.zinc200),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.tune, size: 18, color: AppColors.zinc600),
-            SizedBox(width: 4),
-            Text(
-              'Filters',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.navy800),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _filterButton() {
-    return GestureDetector(
-      onTap: () => _showFilterModal(),
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: AppColors.zinc50,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.zinc200),
-        ),
-        child: const Icon(Icons.filter_alt_outlined, size: 18, color: AppColors.zinc600),
       ),
     );
   }
