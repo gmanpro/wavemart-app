@@ -730,20 +730,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       const SizedBox(height: 16),
                     ],
 
-                    // Sort
-                    const Text('Sort By', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 10),
-                    _modalChipRow([
-                      ('🆕 Newest', 'newest', _selectedSort == 'newest'),
-                      ('📅 Oldest', 'oldest', _selectedSort == 'oldest'),
-                      ('💰 Price ↑', 'price_low', _selectedSort == 'price_low'),
-                      ('💎 Price ↓', 'price_high', _selectedSort == 'price_high'),
-                    ], (v) {
-                      setModalState(() => _selectedSort = v as String);
-                    }),
-
-                    const SizedBox(height: 16),
-
                     // Price Range
                     const Text('Price Range', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 10),
@@ -756,6 +742,20 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       ('✨ 100M+', '100M+', _selectedPriceLabel == '100M+'),
                     ], (v) {
                       setModalState(() => _setPriceFilter(v as String?));
+                    }),
+
+                    const SizedBox(height: 16),
+
+                    // Sort By (last)
+                    const Text('Sort By', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 10),
+                    _modalChipRow([
+                      ('🆕 Newest', 'newest', _selectedSort == 'newest'),
+                      ('📅 Oldest', 'oldest', _selectedSort == 'oldest'),
+                      ('💰 Price ↑', 'price_low', _selectedSort == 'price_low'),
+                      ('💎 Price ↓', 'price_high', _selectedSort == 'price_high'),
+                    ], (v) {
+                      setModalState(() => _selectedSort = v as String);
                     }),
 
                     const SizedBox(height: 24),
