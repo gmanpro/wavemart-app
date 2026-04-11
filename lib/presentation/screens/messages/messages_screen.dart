@@ -22,7 +22,10 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(conversationsProvider.notifier).loadConversations();
+      final authState = ref.read(authStateProvider);
+      ref.read(conversationsProvider.notifier).loadConversations(
+            currentUserId: authState.user?.id,
+          );
     });
     _scrollController.addListener(_onScroll);
   }
@@ -33,7 +36,11 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
             _scrollController.position.maxScrollExtent - 200 &&
         !state.isLoading) {
       final nextPage = (state.conversations.length ~/ 10) + 1;
-      ref.read(conversationsProvider.notifier).loadConversations(page: nextPage);
+      final authState = ref.read(authStateProvider);
+      ref.read(conversationsProvider.notifier).loadConversations(
+            page: nextPage,
+            currentUserId: authState.user?.id,
+          );
     }
   }
 
@@ -115,7 +122,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
   }
 }
 
-/// Conversation Tile Widget
+/// Conversation Tile Widget - WhatsApp-like with actual user initials
 class _ConversationTile extends ConsumerWidget {
   final msg.Conversation conversation;
   final VoidCallback onTap;
@@ -125,75 +132,120 @@ class _ConversationTile extends ConsumerWidget {
     required this.onTap,
   });
 
-  String _getOtherUserName() {
-    if (conversation.subject != null && conversation.subject!.isNotEmpty) {
-      return conversation.subject!;
-    }
-    // Try to extract from listing title
-    return 'Conversation #${conversation.id}';
-  }
-
-  String _getInitials(String name) {
-    final parts = name.trim().split(' ');
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    }
-    return name.substring(0, name.length > 1 ? 2 : 1).toUpperCase();
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
     final currentUserId = authState.user?.id ?? 0;
-    
-    // Determine the other participant
-    String displayName = _getOtherUserName();
-    String initials = _getInitials(displayName);
-    
-    final isSeller = conversation.senderId == currentUserId;
-    // In a real scenario, you'd fetch the other user's name from the conversation
-    // For now, use a generic approach
-    if (displayName.startsWith('Conversation #')) {
-      displayName = isSeller ? 'Buyer' : 'Seller';
-      initials = isSeller ? 'BY' : 'SL';
-    }
+
+    // Get actual user initials and name
+    final initials = conversation.otherParticipantInitials;
+    final displayName = conversation.displayTitle;
+
+    // Check if this is a property-related conversation
+    final isAssetChat = conversation.isAssetChat || conversation.listingId != null;
+    final listingTitle = conversation.listingTitle;
 
     final hasUnread = conversation.unreadCount != null && conversation.unreadCount! > 0;
 
+    // Format "You: " prefix for own messages
+    String previewText = conversation.previewText;
+    if (conversation.lastMessage != null && conversation.lastMessage!.isNotEmpty) {
+      final isOwnLastMessage = conversation.senderId == currentUserId;
+      if (isOwnLastMessage) {
+        previewText = 'You: $previewText';
+      }
+    }
+
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: hasUnread ? AppColors.wave500 : AppColors.navy200,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Center(
-          child: Text(
-            initials,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: hasUnread ? Colors.white : AppColors.navy700,
+      leading: Stack(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: hasUnread
+                    ? [AppColors.wave500, AppColors.wave600]
+                    : [AppColors.navy400, AppColors.navy600],
+              ),
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: Center(
+              child: Text(
+                initials,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
-        ),
+          // Unread badge
+          if (hasUnread)
+            Positioned(
+              right: -2,
+              top: -2,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.redAccent,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                child: Center(
+                  child: Text(
+                    conversation.unreadCount! > 99 ? '99+' : '${conversation.unreadCount}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
       title: Text(
         displayName,
         style: TextStyle(
-          fontWeight: hasUnread ? FontWeight.w600 : FontWeight.normal,
+          fontWeight: hasUnread ? FontWeight.w600 : FontWeight.w500,
           fontSize: 15,
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      subtitle: Text(
-        conversation.previewText,
-        style: AppTextStyles.bodySmall,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+      subtitle: Row(
+        children: [
+          if (isAssetChat) ...[
+            const Icon(Icons.home_outlined, size: 12, color: AppColors.zinc400),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                listingTitle ?? 'Property',
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.zinc500),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Text('·', style: TextStyle(color: AppColors.zinc400)),
+            const SizedBox(width: 4),
+          ],
+          Expanded(
+            child: Text(
+              previewText,
+              style: AppTextStyles.bodySmall.copyWith(
+                fontWeight: hasUnread ? FontWeight.w500 : FontWeight.normal,
+                color: hasUnread ? AppColors.navy800 : AppColors.zinc500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -202,28 +254,12 @@ class _ConversationTile extends ConsumerWidget {
           if (conversation.lastMessageAt != null)
             Text(
               _formatTime(conversation.lastMessageAt),
-              style: AppTextStyles.caption.copyWith(
+              style: TextStyle(
+                fontSize: 11,
                 color: hasUnread ? AppColors.wave600 : AppColors.zinc400,
+                fontWeight: hasUnread ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
-          if (hasUnread) ...[
-            const SizedBox(height: 4),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: AppColors.wave500,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '${conversation.unreadCount}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
         ],
       ),
       onTap: onTap,
@@ -301,13 +337,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatMessagesProvider(widget.conversationId));
-    
-    // Get conversation title from listing or other user
-    String title = widget.conversation.subject ?? 'Conversation';
+    final authState = ref.watch(authStateProvider);
+    final currentUserId = authState.user?.id ?? 0;
+
+    // Build proper title from conversation data
+    String title = widget.conversation.displayTitle;
+    String subtitle = widget.conversation.isAssetChat
+        ? (widget.conversation.listingTitle ?? 'Property Chat')
+        : 'Direct Message';
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+            Text(subtitle, style: const TextStyle(fontSize: 11, color: Colors.white70)),
+          ],
+        ),
       ),
       body: Column(
         children: [
@@ -401,18 +449,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 }
 
-/// Message Bubble Widget
+/// Message Bubble Widget - WhatsApp-like with actual user initials
 class _MessageBubble extends ConsumerWidget {
   final msg.Message message;
 
   const _MessageBubble({required this.message});
-
-  String _getInitials(int senderId, int currentUserId) {
-    // For simplicity, use generic initials
-    // In production, you'd fetch the actual user's name
-    if (senderId == currentUserId) return 'YO';
-    return 'OT';
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -420,6 +461,7 @@ class _MessageBubble extends ConsumerWidget {
     final currentUserId = authState.user?.id ?? 0;
     final isOwn = message.senderId == currentUserId;
     final isSeen = message.readAt != null;
+    final initials = message.senderInitials;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -433,16 +475,18 @@ class _MessageBubble extends ConsumerWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: AppColors.navy200,
+                gradient: LinearGradient(
+                  colors: [AppColors.navy400, AppColors.navy600],
+                ),
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Text(
-                  'OT',
+                  initials,
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.navy700,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -453,16 +497,23 @@ class _MessageBubble extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isOwn ? AppColors.wave500 : AppColors.zinc100,
+                color: isOwn ? AppColors.navy600 : Colors.white,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(16),
                   topRight: const Radius.circular(16),
                   bottomLeft: Radius.circular(isOwn ? 16 : 4),
                   bottomRight: Radius.circular(isOwn ? 4 : 16),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: isOwn ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 children: [
                   Text(
                     message.body,
@@ -488,7 +539,7 @@ class _MessageBubble extends ConsumerWidget {
                           isSeen ? Icons.done_all : Icons.done,
                           size: 14,
                           color: isSeen
-                              ? Colors.white.withOpacity(0.9)
+                              ? AppColors.wave300
                               : Colors.white.withOpacity(0.5),
                         ),
                       ],
@@ -505,16 +556,18 @@ class _MessageBubble extends ConsumerWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: AppColors.wave200,
+                gradient: LinearGradient(
+                  colors: [AppColors.wave400, AppColors.wave600],
+                ),
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Text(
-                  'YO',
+                  initials,
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.wave700,
+                    color: Colors.white,
                   ),
                 ),
               ),

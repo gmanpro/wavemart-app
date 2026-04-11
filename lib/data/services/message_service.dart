@@ -15,10 +15,11 @@ class MessageService {
   Future<ConversationResponse> getConversations({
     int page = 1,
     int perPage = 15,
+    int? currentUserId,
   }) async {
     try {
       dev.log('=== FETCHING CONVERSATIONS (page=$page, perPage=$perPage) ===', name: 'Messages');
-      
+
       final response = await _apiClient.dio.get(
         ApiConstants.messages,
         queryParameters: {
@@ -27,14 +28,10 @@ class MessageService {
         },
       );
 
-      dev.log('Response Status: ${response.statusCode}', name: 'Messages');
-      dev.log('Response Data Type: ${response.data.runtimeType}', name: 'Messages');
-      
       if (response.statusCode == 200) {
         final responseData = response.data;
-        dev.log('Response Data: $responseData', name: 'Messages');
+        dev.log('Response: $responseData', name: 'Messages');
 
-        // Backend returns: { success: true, data: { current_page, last_page, total, data: [...] } }
         List<dynamic> dataList = [];
         int currentPage = page;
         int totalPages = 1;
@@ -42,39 +39,21 @@ class MessageService {
 
         if (responseData is Map && responseData['success'] == true) {
           final dataField = responseData['data'];
-          dev.log('Data field type: ${dataField.runtimeType}', name: 'Messages');
-
           if (dataField is Map) {
-            // Laravel paginator structure
             final dataListRaw = dataField['data'];
-            dev.log('DataList raw type: ${dataListRaw.runtimeType}', name: 'Messages');
-            
-            if (dataListRaw is List) {
-              dataList = dataListRaw;
-              dev.log('Found ${dataList.length} conversations', name: 'Messages');
-              for (int i = 0; i < dataList.length; i++) {
-                dev.log('Conversation $i: ${dataList[i]}', name: 'Messages');
-              }
-            }
-
+            if (dataListRaw is List) dataList = dataListRaw;
             currentPage = _safeInt(dataField['current_page']) ?? page;
             totalPages = _safeInt(dataField['last_page']) ?? 1;
             total = _safeInt(dataField['total']) ?? 0;
           } else if (dataField is List) {
             dataList = dataField;
-            dev.log('Data field is direct list with ${dataList.length} items', name: 'Messages');
           }
-        } else if (responseData is Map) {
-          dev.log('Response not successful or missing success:true. Keys: ${responseData.keys}', name: 'Messages');
-          dev.log('Success field: ${responseData['success']}', name: 'Messages');
         }
 
         final conversations = dataList
             .whereType<Map>()
-            .map((json) => msg.Conversation.fromJson(json as Map<String, dynamic>))
+            .map((json) => msg.Conversation.fromJson(json as Map<String, dynamic>, currentUserId: currentUserId))
             .toList();
-
-        dev.log('Parsed ${conversations.length} conversation objects', name: 'Messages');
 
         return ConversationResponse(
           success: true,
@@ -85,14 +64,12 @@ class MessageService {
         );
       }
 
-      dev.log('Non-200 status: ${response.statusCode}', name: 'Messages');
       return ConversationResponse(
         success: false,
         message: response.data['message'] ?? 'Failed to fetch conversations',
       );
     } catch (e, stackTrace) {
-      dev.log('ERROR fetching conversations: $e', name: 'Messages');
-      dev.log('Stack trace: $stackTrace', name: 'Messages');
+      dev.log('Error fetching conversations: $e\n$stackTrace', name: 'Messages');
       final exception = ApiErrorHandler.handle(e);
       return ConversationResponse(
         success: false,

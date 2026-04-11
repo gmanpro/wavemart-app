@@ -12,6 +12,12 @@ class Conversation {
   final DateTime createdAt;
   final DateTime? updatedAt;
 
+  // Additional fields for WhatsApp-like UI
+  final String? otherParticipantFirstName;
+  final String? otherParticipantLastName;
+  final String? listingTitle;
+  final bool isAssetChat;
+
   Conversation({
     required this.id,
     required this.senderId,
@@ -24,10 +30,14 @@ class Conversation {
     this.unreadCount,
     required this.createdAt,
     this.updatedAt,
+    this.otherParticipantFirstName,
+    this.otherParticipantLastName,
+    this.listingTitle,
+    this.isAssetChat = false,
   });
 
-  factory Conversation.fromJson(Map<String, dynamic> json) {
-    // Extract last message from nested relationships if available
+  factory Conversation.fromJson(Map<String, dynamic> json, {int? currentUserId}) {
+    // Extract last message from nested relationships
     String? lastMsg;
     if (json['latest_message'] is Map) {
       lastMsg = json['latest_message']['body'] ?? json['latest_message']['message'];
@@ -35,11 +45,25 @@ class Conversation {
       lastMsg = json['last_message'];
     }
 
-    // Get subject from listing relationship
-    String? subj;
+    // Get listing info
+    String? listingTitle;
+    bool isAssetChat = false;
     if (json['listing'] is Map) {
       final listing = json['listing'] as Map<String, dynamic>;
-      subj = listing['title'] ?? (listing['property_type'] == 'house' ? 'House Listing' : 'Land Listing');
+      listingTitle = listing['title'];
+      isAssetChat = json['listing_id'] != null;
+    }
+
+    // Determine other participant
+    String? otherFirstName, otherLastName;
+    if (currentUserId != null) {
+      if (json['sender'] is Map && json['sender']['id'] != currentUserId) {
+        otherFirstName = json['sender']['first_name'];
+        otherLastName = json['sender']['last_name'];
+      } else if (json['receiver'] is Map && json['receiver']['id'] != currentUserId) {
+        otherFirstName = json['receiver']['first_name'];
+        otherLastName = json['receiver']['last_name'];
+      }
     }
 
     // Handle both unread_count and total_unread_count field names
@@ -51,7 +75,7 @@ class Conversation {
       receiverId: _safeInt(json['receiver_id']) ?? 0,
       listingId: _safeInt(json['listing_id']),
       type: json['type'],
-      subject: subj ?? json['subject'],
+      subject: listingTitle ?? json['subject'],
       lastMessage: lastMsg,
       lastMessageAt: json['last_message_at'] != null
           ? DateTime.parse(json['last_message_at'])
@@ -63,6 +87,10 @@ class Conversation {
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'])
           : null,
+      otherParticipantFirstName: otherFirstName,
+      otherParticipantLastName: otherLastName,
+      listingTitle: listingTitle,
+      isAssetChat: isAssetChat,
     );
   }
 
@@ -77,9 +105,24 @@ class Conversation {
   }
 
   String get displayTitle {
+    // Use other participant's name if available
+    if (otherParticipantFirstName != null) {
+      final full = [otherParticipantFirstName, otherParticipantLastName].where((e) => e != null && e.isNotEmpty).join(' ');
+      if (full.isNotEmpty) return full;
+    }
     if (subject != null && subject!.isNotEmpty) return subject!;
-    if (listingId != null) return 'Listing #$listingId';
+    if (listingTitle != null && listingTitle!.isNotEmpty) return listingTitle!;
     return 'Conversation #$id';
+  }
+
+  String get otherParticipantInitials {
+    final first = otherParticipantFirstName ?? '';
+    final last = otherParticipantLastName ?? '';
+    if (first.isNotEmpty && last.isNotEmpty) {
+      return '${first[0]}${last[0]}'.toUpperCase();
+    }
+    if (first.isNotEmpty) return first.substring(0, first.length > 1 ? 2 : 1).toUpperCase();
+    return '??';
   }
 
   String get previewText {
@@ -102,6 +145,10 @@ class Message {
   final String? attachmentType;
   final DateTime createdAt;
 
+  // Sender info for WhatsApp-like avatars
+  final String? senderFirstName;
+  final String? senderLastName;
+
   Message({
     required this.id,
     required this.conversationId,
@@ -112,9 +159,17 @@ class Message {
     this.attachmentUrl,
     this.attachmentType,
     required this.createdAt,
+    this.senderFirstName,
+    this.senderLastName,
   });
 
   factory Message.fromJson(Map<String, dynamic> json) {
+    String? firstName, lastName;
+    if (json['sender'] is Map) {
+      firstName = json['sender']['first_name'];
+      lastName = json['sender']['last_name'];
+    }
+
     return Message(
       id: _safeInt(json['id']) ?? 0,
       conversationId: _safeInt(json['conversation_id']) ?? 0,
@@ -127,6 +182,8 @@ class Message {
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : DateTime.now(),
+      senderFirstName: firstName,
+      senderLastName: lastName,
     );
   }
 
@@ -150,5 +207,15 @@ class Message {
     if (diff.inDays < 7) return '${diff.inDays}d ago';
 
     return '${createdAt.day}/${createdAt.month}/${createdAt.year}';
+  }
+
+  String get senderInitials {
+    final first = senderFirstName ?? '';
+    final last = senderLastName ?? '';
+    if (first.isNotEmpty && last.isNotEmpty) {
+      return '${first[0]}${last[0]}'.toUpperCase();
+    }
+    if (first.isNotEmpty) return first.substring(0, first.length > 1 ? 2 : 1).toUpperCase();
+    return '??';
   }
 }

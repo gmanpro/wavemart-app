@@ -205,14 +205,12 @@ class ConversationsNotifier extends StateNotifier<ConversationsState> {
   final MessageService _messageService;
   ConversationsNotifier(this._messageService) : super(const ConversationsState.initial());
 
-  Future<void> loadConversations({int page = 1}) async {
+  Future<void> loadConversations({int page = 1, int? currentUserId}) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
-    final response = await _messageService.getConversations(page: page);
+    final response = await _messageService.getConversations(page: page, currentUserId: currentUserId);
     if (response.success) {
       state = ConversationsState.loaded(conversations: response.conversations, total: response.total ?? 0);
     } else {
-      // If API call fails but we have no data yet, show empty state instead of error
-      // This handles cases like: no conversations, auth issues, network errors
       if (state.conversations.isEmpty) {
         state = const ConversationsState.loaded(conversations: [], total: 0);
       } else {

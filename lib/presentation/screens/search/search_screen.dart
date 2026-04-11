@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
+import '../../../../core/network/api_client.dart';
+import '../../../../core/network/api_constants.dart';
 import '../../providers/listing_provider.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/listing_card.dart';
@@ -23,13 +25,34 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   String? _selectedType; // 'house', 'land', or null for all
   String? _selectedListingType; // 'sale', 'rental', or null for all
   String _selectedSort = 'newest';
+  int? _selectedPriceMin;
+  int? _selectedPriceMax;
+  String? _selectedPriceLabel;
   Map<String, dynamic> _activeFilters = {};
   bool _hasSearched = false;
+  bool _rentalEnabled = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    try {
+      final response = await ApiClient().dio.get(ApiConstants.apiBase + '/settings');
+      if (response.statusCode == 200 && response.data is Map) {
+        final data = response.data['data'];
+        if (data is Map) {
+          setState(() {
+            _rentalEnabled = data['rental_enabled'] == true;
+          });
+        }
+      }
+    } catch (_) {
+      // Silently fail - default to rental disabled
+    }
   }
 
   void _onScroll() {
@@ -57,10 +80,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     _activeFilters = {};
     if (query.isNotEmpty) _activeFilters['location'] = query;
     if (_selectedType != null) _activeFilters['type'] = _selectedType;
-    if (_selectedListingType != null) {
-      _activeFilters['listing_type'] = _selectedListingType;
-    }
+    if (_selectedListingType != null) _activeFilters['listing_type'] = _selectedListingType;
     _activeFilters['sort'] = _selectedSort;
+
+    // Price range filter
+    if (_selectedPriceMin != null) _activeFilters['price_min'] = _selectedPriceMin!;
+    if (_selectedPriceMax != null) _activeFilters['price_max'] = _selectedPriceMax!;
 
     setState(() => _hasSearched = true);
     ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
@@ -71,6 +96,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       _selectedType = null;
       _selectedListingType = null;
       _selectedSort = 'newest';
+      _selectedPriceMin = null;
+      _selectedPriceMax = null;
+      _selectedPriceLabel = null;
       _activeFilters = {};
       _hasSearched = false;
       _searchController.clear();
@@ -81,6 +109,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       _selectedType != null ||
       _selectedListingType != null ||
       _selectedSort != 'newest' ||
+      _selectedPriceLabel != null ||
       _searchController.text.isNotEmpty;
 
   @override
@@ -197,22 +226,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               },
             ),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _filterDropdown(
-              label: 'Status',
-              value: _selectedListingType,
-              items: const [
-                DropdownMenuItem(value: null, child: Text('All')),
-                DropdownMenuItem(value: 'sale', child: Text('💰 For Sale')),
-                DropdownMenuItem(value: 'rental', child: Text('🔑 For Rent')),
-              ],
-              onChanged: (v) {
-                setState(() => _selectedListingType = v);
-                _performSearch();
-              },
+          if (_rentalEnabled) ...[
+            const SizedBox(width: 8),
+            Expanded(
+              child: _filterDropdown(
+                label: 'Status',
+                value: _selectedListingType,
+                items: const [
+                  DropdownMenuItem(value: null, child: Text('All')),
+                  DropdownMenuItem(value: 'sale', child: Text('💰 For Sale')),
+                  DropdownMenuItem(value: 'rental', child: Text('🔑 For Rent')),
+                ],
+                onChanged: (v) {
+                  setState(() => _selectedListingType = v);
+                  _performSearch();
+                },
+              ),
             ),
-          ),
+          ],
           const SizedBox(width: 8),
           _sortButton(),
         ],
@@ -288,6 +319,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               _filterChip(
                 _selectedListingType == 'sale' ? '💰 For Sale' : '🔑 For Rent',
                 () => setState(() => _selectedListingType = null),
+              ),
+            if (_selectedPriceLabel != null)
+              _filterChip(
+                '💵 $_selectedPriceLabel',
+                () {
+                  setState(() {
+                    _selectedPriceLabel = null;
+                    _selectedPriceMin = null;
+                    _selectedPriceMax = null;
+                  });
+                },
               ),
             if (_searchController.text.isNotEmpty)
               _filterChip(
@@ -392,36 +434,47 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               _popularSearchChip('🏠 Houses', () => setState(() => _selectedType = 'house')),
               _popularSearchChip('🌄 Lands', () => setState(() => _selectedType = 'land')),
               _popularSearchChip('💰 For Sale', () => setState(() => _selectedListingType = 'sale')),
-              _popularSearchChip('🔑 For Rent', () => setState(() => _selectedListingType = 'rental')),
+              if (_rentalEnabled)
+                _popularSearchChip('🔑 For Rent', () => setState(() => _selectedListingType = 'rental')),
               _popularSearchChip('💰 Under 5M', () {
-                setState(() => _selectedListingType = null);
-                _activeFilters = {'price_max': 5000000, 'sort': _selectedSort};
-                _hasSearched = true;
-                ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
+                setState(() {
+                  _selectedPriceLabel = 'Under 5M';
+                  _selectedPriceMin = 0;
+                  _selectedPriceMax = 5000000;
+                });
+                _performSearch();
               }),
               _popularSearchChip('💎 5M - 10M', () {
-                setState(() => _selectedListingType = null);
-                _activeFilters = {'price_min': 5000000, 'price_max': 10000000, 'sort': _selectedSort};
-                _hasSearched = true;
-                ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
+                setState(() {
+                  _selectedPriceLabel = '5M - 10M';
+                  _selectedPriceMin = 5000000;
+                  _selectedPriceMax = 10000000;
+                });
+                _performSearch();
               }),
               _popularSearchChip('🏆 10M - 50M', () {
-                setState(() => _selectedListingType = null);
-                _activeFilters = {'price_min': 10000000, 'price_max': 50000000, 'sort': _selectedSort};
-                _hasSearched = true;
-                ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
+                setState(() {
+                  _selectedPriceLabel = '10M - 50M';
+                  _selectedPriceMin = 10000000;
+                  _selectedPriceMax = 50000000;
+                });
+                _performSearch();
               }),
               _popularSearchChip('👑 50M - 100M', () {
-                setState(() => _selectedListingType = null);
-                _activeFilters = {'price_min': 50000000, 'price_max': 100000000, 'sort': _selectedSort};
-                _hasSearched = true;
-                ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
+                setState(() {
+                  _selectedPriceLabel = '50M - 100M';
+                  _selectedPriceMin = 50000000;
+                  _selectedPriceMax = 100000000;
+                });
+                _performSearch();
               }),
               _popularSearchChip('✨ 100M+', () {
-                setState(() => _selectedListingType = null);
-                _activeFilters = {'price_min': 100000000, 'sort': _selectedSort};
-                _hasSearched = true;
-                ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
+                setState(() {
+                  _selectedPriceLabel = '100M+';
+                  _selectedPriceMin = 100000000;
+                  _selectedPriceMax = null;
+                });
+                _performSearch();
               }),
             ],
           ),
