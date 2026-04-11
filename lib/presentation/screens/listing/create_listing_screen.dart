@@ -841,10 +841,13 @@ class _Step1BasicsState extends State<_Step1Basics> {
       onFocusChange: (hasFocus) {
         if (!hasFocus) {
           final cleaned = _priceController.text.replaceAll(',', '');
-          widget.onUpdate(widget.formData.copyWith(priceFixed: double.tryParse(cleaned)));
+          final parsed = double.tryParse(cleaned);
+          if (parsed != null && parsed > 0) {
+            widget.onUpdate(widget.formData.copyWith(priceFixed: parsed));
+          }
         }
       },
-      child: TextField(
+      child: TextFormField(
         controller: _priceController,
         decoration: InputDecoration(
           labelText: 'Price',
@@ -854,9 +857,19 @@ class _Step1BasicsState extends State<_Step1Basics> {
         ),
         keyboardType: TextInputType.number,
         textInputAction: TextInputAction.done,
-        onSubmitted: (v) {
+        onChanged: (v) {
           final cleaned = v.replaceAll(',', '');
-          widget.onUpdate(widget.formData.copyWith(priceFixed: double.tryParse(cleaned)));
+          final parsed = double.tryParse(cleaned);
+          if (parsed != null && parsed > 0) {
+            widget.onUpdate(widget.formData.copyWith(priceFixed: parsed));
+          }
+        },
+        onFieldSubmitted: (v) {
+          final cleaned = v.replaceAll(',', '');
+          final parsed = double.tryParse(cleaned);
+          if (parsed != null && parsed > 0) {
+            widget.onUpdate(widget.formData.copyWith(priceFixed: parsed));
+          }
         },
       ),
     );

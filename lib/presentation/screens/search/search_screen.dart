@@ -23,8 +23,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   String? _selectedType; // 'house', 'land', or null for all
   String? _selectedListingType; // 'sale', 'rental', or null for all
   String _selectedSort = 'newest';
-  String? _selectedPriceRange; // '0-1M', '1M-5M', '5M-10M', '10M+'
-  int? _selectedBedrooms;
   Map<String, dynamic> _activeFilters = {};
   bool _hasSearched = false;
 
@@ -63,32 +61,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       _activeFilters['listing_type'] = _selectedListingType;
     }
     _activeFilters['sort'] = _selectedSort;
-    
-    // Price range filter
-    if (_selectedPriceRange != null) {
-      switch (_selectedPriceRange) {
-        case '0-1M':
-          _activeFilters['price_min'] = 0;
-          _activeFilters['price_max'] = 1000000;
-          break;
-        case '1M-5M':
-          _activeFilters['price_min'] = 1000000;
-          _activeFilters['price_max'] = 5000000;
-          break;
-        case '5M-10M':
-          _activeFilters['price_min'] = 5000000;
-          _activeFilters['price_max'] = 10000000;
-          break;
-        case '10M+':
-          _activeFilters['price_min'] = 10000000;
-          break;
-      }
-    }
-
-    // Bedrooms filter (for houses)
-    if (_selectedBedrooms != null) {
-      _activeFilters['bedrooms'] = _selectedBedrooms;
-    }
 
     setState(() => _hasSearched = true);
     ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
@@ -99,8 +71,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       _selectedType = null;
       _selectedListingType = null;
       _selectedSort = 'newest';
-      _selectedPriceRange = null;
-      _selectedBedrooms = null;
       _activeFilters = {};
       _hasSearched = false;
       _searchController.clear();
@@ -111,8 +81,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       _selectedType != null ||
       _selectedListingType != null ||
       _selectedSort != 'newest' ||
-      _selectedPriceRange != null ||
-      _selectedBedrooms != null ||
       _searchController.text.isNotEmpty;
 
   @override
@@ -160,13 +128,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           child: Row(
             children: [
-              // Back Button
               IconButton(
                 onPressed: () => Navigator.pop(context),
                 icon: const Icon(Icons.arrow_back_ios, size: 20),
                 padding: const EdgeInsets.all(8),
               ),
-              // Search Input
               Expanded(
                 child: TextField(
                   controller: _searchController,
@@ -187,7 +153,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              // Search Button
               ElevatedButton(
                 onPressed: _performSearch,
                 style: ElevatedButton.styleFrom(
@@ -223,8 +188,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               value: _selectedType,
               items: const [
                 DropdownMenuItem(value: null, child: Text('All Types')),
-                DropdownMenuItem(value: 'house', child: Text('House')),
-                DropdownMenuItem(value: 'land', child: Text('Land')),
+                DropdownMenuItem(value: 'house', child: Text('🏠 House')),
+                DropdownMenuItem(value: 'land', child: Text('🌄 Land')),
               ],
               onChanged: (v) {
                 setState(() => _selectedType = v);
@@ -239,8 +204,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               value: _selectedListingType,
               items: const [
                 DropdownMenuItem(value: null, child: Text('All')),
-                DropdownMenuItem(value: 'sale', child: Text('For Sale')),
-                DropdownMenuItem(value: 'rental', child: Text('For Rent')),
+                DropdownMenuItem(value: 'sale', child: Text('💰 For Sale')),
+                DropdownMenuItem(value: 'rental', child: Text('🔑 For Rent')),
               ],
               onChanged: (v) {
                 setState(() => _selectedListingType = v);
@@ -324,16 +289,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 _selectedListingType == 'sale' ? '💰 For Sale' : '🔑 For Rent',
                 () => setState(() => _selectedListingType = null),
               ),
-            if (_selectedPriceRange != null)
-              _filterChip(
-                '💵 $_selectedPriceRange',
-                () => setState(() => _selectedPriceRange = null),
-              ),
-            if (_selectedBedrooms != null)
-              _filterChip(
-                '🛏️ $_selectedBedrooms Beds',
-                () => setState(() => _selectedBedrooms = null),
-              ),
             if (_searchController.text.isNotEmpty)
               _filterChip(
                 '📍 ${_searchController.text}',
@@ -343,7 +298,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 },
               ),
             const SizedBox(width: 8),
-            // Clear All
             GestureDetector(
               onTap: _clearAllFilters,
               child: Container(
@@ -418,23 +372,57 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
-              'Search by location, filter by type, price, and more to discover amazing properties',
+              'Search by location, filter by type and status to discover amazing properties',
               style: AppTextStyles.bodyLarge.copyWith(color: AppColors.zinc500),
               textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: 32),
-          // Quick Filters
+          // Popular Searches
+          const Text(
+            'Popular Searches',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.navy800),
+          ),
+          const SizedBox(height: 16),
           Wrap(
             spacing: 12,
             runSpacing: 12,
+            alignment: WrapAlignment.center,
             children: [
-              _quickFilterChip('🏠 Houses', 'house'),
-              _quickFilterChip('🌄 Lands', 'land'),
-              _quickFilterChip('💰 For Sale', 'sale'),
-              _quickFilterChip('🔑 For Rent', 'rental'),
-              _quickFilterChip('💵 Under 1M', '0-1M'),
-              _quickFilterChip('💵 1M - 5M', '1M-5M'),
+              _popularSearchChip('🏠 Houses', () => setState(() => _selectedType = 'house')),
+              _popularSearchChip('🌄 Lands', () => setState(() => _selectedType = 'land')),
+              _popularSearchChip('💰 For Sale', () => setState(() => _selectedListingType = 'sale')),
+              _popularSearchChip('🔑 For Rent', () => setState(() => _selectedListingType = 'rental')),
+              _popularSearchChip('💰 Under 5M', () {
+                setState(() => _selectedListingType = null);
+                _activeFilters = {'price_max': 5000000, 'sort': _selectedSort};
+                _hasSearched = true;
+                ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
+              }),
+              _popularSearchChip('💎 5M - 10M', () {
+                setState(() => _selectedListingType = null);
+                _activeFilters = {'price_min': 5000000, 'price_max': 10000000, 'sort': _selectedSort};
+                _hasSearched = true;
+                ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
+              }),
+              _popularSearchChip('🏆 10M - 50M', () {
+                setState(() => _selectedListingType = null);
+                _activeFilters = {'price_min': 10000000, 'price_max': 50000000, 'sort': _selectedSort};
+                _hasSearched = true;
+                ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
+              }),
+              _popularSearchChip('👑 50M - 100M', () {
+                setState(() => _selectedListingType = null);
+                _activeFilters = {'price_min': 50000000, 'price_max': 100000000, 'sort': _selectedSort};
+                _hasSearched = true;
+                ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
+              }),
+              _popularSearchChip('✨ 100M+', () {
+                setState(() => _selectedListingType = null);
+                _activeFilters = {'price_min': 100000000, 'sort': _selectedSort};
+                _hasSearched = true;
+                ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
+              }),
             ],
           ),
         ],
@@ -442,19 +430,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  Widget _quickFilterChip(String label, String filterValue) {
+  Widget _popularSearchChip(String label, VoidCallback onTap) {
     return GestureDetector(
-      onTap: () {
-        // Map filter value to the right field
-        if (filterValue == 'house' || filterValue == 'land') {
-          setState(() => _selectedType = filterValue);
-        } else if (filterValue == 'sale' || filterValue == 'rental') {
-          setState(() => _selectedListingType = filterValue);
-        } else if (filterValue.contains('M')) {
-          setState(() => _selectedPriceRange = filterValue);
-        }
-        _performSearch();
-      },
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
@@ -494,7 +472,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     return Column(
       children: [
-        // Results count
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
@@ -503,7 +480,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ),
         ),
         const Divider(height: 1),
-        // Results list
         Expanded(
           child: ListView.builder(
             controller: _scrollController,
@@ -573,38 +549,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               _sortOption('oldest', '📅 Oldest First'),
               _sortOption('price_low', '💰 Price: Low to High'),
               _sortOption('price_high', '💎 Price: High to Low'),
-              const SizedBox(height: 16),
-              // Additional Filters
-              const Divider(),
-              const SizedBox(height: 8),
-              const Text('Additional Filters', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              const Text('Price Range', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _priceChip('0-1M'),
-                  _priceChip('1M-5M'),
-                  _priceChip('5M-10M'),
-                  _priceChip('10M+'),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const Text('Bedrooms', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _bedroomChip(1),
-                  _bedroomChip(2),
-                  _bedroomChip(3),
-                  _bedroomChip(4),
-                  _bedroomChip(5),
-                ],
-              ),
             ],
           ),
         );
@@ -631,58 +575,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         Navigator.pop(context);
         _performSearch();
       },
-    );
-  }
-
-  Widget _priceChip(String range) {
-    final isSelected = _selectedPriceRange == range;
-    return GestureDetector(
-      onTap: () {
-        setState(() => _selectedPriceRange = isSelected ? null : range);
-        Navigator.pop(context);
-        _performSearch();
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.wave500 : AppColors.zinc100,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(
-          range,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : AppColors.zinc700,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _bedroomChip(int count) {
-    final isSelected = _selectedBedrooms == count;
-    return GestureDetector(
-      onTap: () {
-        setState(() => _selectedBedrooms = isSelected ? null : count);
-        Navigator.pop(context);
-        _performSearch();
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.wave500 : AppColors.zinc100,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(
-          '$count+',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : AppColors.zinc700,
-          ),
-        ),
-      ),
     );
   }
 

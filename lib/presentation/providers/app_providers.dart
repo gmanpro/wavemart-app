@@ -197,7 +197,7 @@ final unreadMessagesCountProvider = StreamProvider<int>((ref) async* {
     } catch (e) {
       yield 0;
     }
-    await Future.delayed(const Duration(seconds: 30));
+    await Future.delayed(const Duration(seconds: 15));
   }
 });
 
@@ -253,7 +253,7 @@ class ChatMessagesNotifier extends StateNotifier<ChatMessagesState> {
 
   void _startPolling() {
     _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(const Duration(seconds: 10), (_) => _pollNewMessages());
+    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) => _pollNewMessages());
   }
 
   Future<void> loadMessages({int page = 1}) async {

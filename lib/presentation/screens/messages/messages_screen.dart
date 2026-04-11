@@ -116,7 +116,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
 }
 
 /// Conversation Tile Widget
-class _ConversationTile extends StatelessWidget {
+class _ConversationTile extends ConsumerWidget {
   final msg.Conversation conversation;
   final VoidCallback onTap;
 
@@ -125,8 +125,39 @@ class _ConversationTile extends StatelessWidget {
     required this.onTap,
   });
 
+  String _getOtherUserName() {
+    if (conversation.subject != null && conversation.subject!.isNotEmpty) {
+      return conversation.subject!;
+    }
+    // Try to extract from listing title
+    return 'Conversation #${conversation.id}';
+  }
+
+  String _getInitials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return name.substring(0, name.length > 1 ? 2 : 1).toUpperCase();
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
+    final currentUserId = authState.user?.id ?? 0;
+    
+    // Determine the other participant
+    String displayName = _getOtherUserName();
+    String initials = _getInitials(displayName);
+    
+    final isSeller = conversation.senderId == currentUserId;
+    // In a real scenario, you'd fetch the other user's name from the conversation
+    // For now, use a generic approach
+    if (displayName.startsWith('Conversation #')) {
+      displayName = isSeller ? 'Buyer' : 'Seller';
+      initials = isSeller ? 'BY' : 'SL';
+    }
+
     final hasUnread = conversation.unreadCount != null && conversation.unreadCount! > 0;
 
     return ListTile(
@@ -135,17 +166,22 @@ class _ConversationTile extends StatelessWidget {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: hasUnread ? AppColors.wave100 : AppColors.navy50,
+          color: hasUnread ? AppColors.wave500 : AppColors.navy200,
           borderRadius: BorderRadius.circular(24),
         ),
-        child: Icon(
-          hasUnread ? Icons.chat : Icons.chat_bubble_outline,
-          size: 24,
-          color: hasUnread ? AppColors.wave600 : AppColors.navy400,
+        child: Center(
+          child: Text(
+            initials,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: hasUnread ? Colors.white : AppColors.navy700,
+            ),
+          ),
         ),
       ),
       title: Text(
-        conversation.displayTitle,
+        displayName,
         style: TextStyle(
           fontWeight: hasUnread ? FontWeight.w600 : FontWeight.normal,
           fontSize: 15,
@@ -265,10 +301,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatMessagesProvider(widget.conversationId));
+    
+    // Get conversation title from listing or other user
+    String title = widget.conversation.subject ?? 'Conversation';
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.conversation.displayTitle),
+        title: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
       ),
       body: Column(
         children: [
@@ -368,11 +407,19 @@ class _MessageBubble extends ConsumerWidget {
 
   const _MessageBubble({required this.message});
 
+  String _getInitials(int senderId, int currentUserId) {
+    // For simplicity, use generic initials
+    // In production, you'd fetch the actual user's name
+    if (senderId == currentUserId) return 'YO';
+    return 'OT';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
     final currentUserId = authState.user?.id ?? 0;
     final isOwn = message.senderId == currentUserId;
+    final isSeen = message.readAt != null;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -380,15 +427,25 @@ class _MessageBubble extends ConsumerWidget {
         mainAxisAlignment: isOwn ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
+          // Avatar for incoming messages
           if (!isOwn) ...[
             Container(
               width: 32,
               height: 32,
-              decoration: const BoxDecoration(
-                color: AppColors.navy100,
+              decoration: BoxDecoration(
+                color: AppColors.navy200,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.person, size: 18, color: AppColors.navy600),
+              child: Center(
+                child: Text(
+                  'OT',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.navy700,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(width: 8),
           ],
@@ -415,19 +472,54 @@ class _MessageBubble extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    message.displayTime,
-                    style: TextStyle(
-                      color: isOwn ? Colors.white.withOpacity(0.7) : AppColors.zinc400,
-                      fontSize: 10,
-                    ),
-                    textAlign: isOwn ? TextAlign.right : TextAlign.left,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        message.displayTime,
+                        style: TextStyle(
+                          color: isOwn ? Colors.white.withOpacity(0.7) : AppColors.zinc400,
+                          fontSize: 10,
+                        ),
+                      ),
+                      if (isOwn) ...[
+                        const SizedBox(width: 4),
+                        Icon(
+                          isSeen ? Icons.done_all : Icons.done,
+                          size: 14,
+                          color: isSeen
+                              ? Colors.white.withOpacity(0.9)
+                              : Colors.white.withOpacity(0.5),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
             ),
           ),
-          if (isOwn) const SizedBox(width: 8),
+          // Avatar for outgoing messages
+          if (isOwn) ...[
+            const SizedBox(width: 8),
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: AppColors.wave200,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  'YO',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.wave700,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
