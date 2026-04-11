@@ -105,6 +105,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     });
   }
 
+  /// Remove a filter, re-search with remaining filters, or reset if none left
+  void _removeFilterAndCheck(VoidCallback onRemove) {
+    onRemove();
+    if (_hasActiveFilters) {
+      // Still have filters, re-search with remaining ones
+      _performSearch();
+    } else if (_hasSearched) {
+      // No filters left, reset to welcome state
+      setState(() => _hasSearched = false);
+    }
+  }
+
   bool get _hasActiveFilters =>
       _selectedType != null ||
       _selectedListingType != null ||
@@ -157,78 +169,90 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               // Back button
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back_ios, size: 18),
+                icon: const Icon(Icons.arrow_back_ios, size: 16),
                 padding: const EdgeInsets.all(4),
                 constraints: const BoxConstraints(),
               ),
-              // Search input with integrated icon
+              // Unified search container
               Expanded(
                 child: Container(
-                  height: 40,
+                  height: 42,
                   decoration: BoxDecoration(
                     color: AppColors.zinc50,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: AppColors.zinc200),
                   ),
                   child: Row(
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.only(left: 10),
-                        child: Icon(Icons.search, size: 18, color: AppColors.zinc400),
-                      ),
+                      // Search icon + input
                       Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          decoration: const InputDecoration(
-                            hintText: 'Search by location...',
-                            hintStyle: TextStyle(fontSize: 14, color: AppColors.zinc400),
-                            border: InputBorder.none,
-                            filled: false,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                            isDense: true,
+                        child: Row(
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.only(left: 12),
+                              child: Icon(Icons.search, size: 18, color: AppColors.zinc400),
+                            ),
+                            Expanded(
+                              child: TextField(
+                                controller: _searchController,
+                                decoration: const InputDecoration(
+                                  hintText: 'Search by location...',
+                                  hintStyle: TextStyle(fontSize: 14, color: AppColors.zinc400),
+                                  border: InputBorder.none,
+                                  filled: false,
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                                  isDense: true,
+                                ),
+                                style: const TextStyle(fontSize: 14),
+                                textInputAction: TextInputAction.search,
+                                onSubmitted: (_) => _performSearch(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Vertical divider
+                      Container(width: 1, height: 24, color: AppColors.zinc200),
+                      // Filter button
+                      GestureDetector(
+                        onTap: () => _showFilterModal(),
+                        child: Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: _hasActiveFilters ? AppColors.wave50 : Colors.transparent,
+                            borderRadius: const BorderRadius.only(
+                              topRight: Radius.circular(12),
+                              bottomRight: Radius.circular(12),
+                            ),
                           ),
-                          style: const TextStyle(fontSize: 14),
-                          textInputAction: TextInputAction.search,
-                          onSubmitted: (_) => _performSearch(),
+                          child: Icon(
+                            Icons.tune,
+                            size: 20,
+                            color: _hasActiveFilters ? AppColors.wave600 : AppColors.zinc500,
+                          ),
+                        ),
+                      ),
+                      // Vertical divider
+                      Container(width: 1, height: 24, color: AppColors.zinc200),
+                      // Search button
+                      GestureDetector(
+                        onTap: _performSearch,
+                        child: Container(
+                          width: 42,
+                          height: 42,
+                          decoration: const BoxDecoration(
+                            color: AppColors.wave500,
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(12),
+                              bottomRight: Radius.circular(12),
+                            ),
+                          ),
+                          child: const Icon(Icons.search, size: 20, color: Colors.white),
                         ),
                       ),
                     ],
                   ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              // Filter button
-              GestureDetector(
-                onTap: () => _showFilterModal(),
-                child: Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: _hasActiveFilters ? AppColors.wave50 : AppColors.zinc50,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: _hasActiveFilters ? AppColors.wave200 : AppColors.zinc200,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.tune,
-                    size: 20,
-                    color: _hasActiveFilters ? AppColors.wave600 : AppColors.zinc500,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              // Search button
-              GestureDetector(
-                onTap: _performSearch,
-                child: Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.wave500,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.search, size: 20, color: Colors.white),
                 ),
               ),
             ],
@@ -249,37 +273,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             if (_selectedType != null)
               _filterChip(
                 _selectedType == 'house' ? '🏠 House' : '🌄 Land',
-                () {
-                  setState(() => _selectedType = null);
-                  _performSearch();
-                },
+                () => _removeFilterAndCheck(() => setState(() => _selectedType = null)),
               ),
             if (_selectedListingType != null)
               _filterChip(
                 _selectedListingType == 'sale' ? '💰 For Sale' : '🔑 For Rent',
-                () {
-                  setState(() => _selectedListingType = null);
-                  _performSearch();
-                },
+                () => _removeFilterAndCheck(() => setState(() => _selectedListingType = null)),
               ),
             if (_selectedPriceLabel != null)
               _filterChip(
                 '💵 $_selectedPriceLabel',
-                () {
-                  setState(() {
-                    _selectedPriceLabel = null;
-                    _selectedPriceMin = null;
-                    _selectedPriceMax = null;
-                  });
-                  _performSearch();
-                },
+                () => _removeFilterAndCheck(() => setState(() {
+                  _selectedPriceLabel = null;
+                  _selectedPriceMin = null;
+                  _selectedPriceMax = null;
+                })),
               ),
             if (_searchController.text.isNotEmpty)
               _filterChip(
                 '📍 ${_searchController.text}',
                 () {
                   _searchController.clear();
-                  setState(() {});
+                  _removeFilterAndCheck(() {});
                 },
               ),
             const SizedBox(width: 8),
