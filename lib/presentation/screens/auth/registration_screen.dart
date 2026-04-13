@@ -1,11 +1,13 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/auth_provider.dart';
-import '../../widgets/common/wave_button.dart';
+import '../navigation/main_navigation_shell.dart';
 
-/// Registration Screen - Create new account with phone, name, gender
+/// Modern Registration Screen with consistent design
 class RegistrationScreen extends ConsumerStatefulWidget {
   const RegistrationScreen({super.key});
 
@@ -14,20 +16,23 @@ class RegistrationScreen extends ConsumerStatefulWidget {
 }
 
 class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
-  final _formKey = GlobalKey<FormState>();
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _otpController = TextEditingController();
+  final List<TextEditingController> _otpControllers =
+      List.generate(6, (_) => TextEditingController());
+  final List<FocusNode> _otpFocusNodes =
+      List.generate(6, (_) => FocusNode());
 
   String? _selectedGender;
   bool _isOtpSent = false;
   bool _isLoading = false;
+  int _resendCountdown = 0;
+  Timer? _countdownTimer;
 
   @override
   void initState() {
     super.initState();
-    // Clear any stale error from previous screens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(authStateProvider.notifier).clearError();
     });
@@ -38,61 +43,178 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
-    _otpController.dispose();
+    _countdownTimer?.cancel();
+    for (var controller in _otpControllers) {
+      controller.dispose();
+    }
+    for (var node in _otpFocusNodes) {
+      node.dispose();
+    }
     super.dispose();
+  }
+
+  void _startCountdown() {
+    _countdownTimer?.cancel();
+    setState(() => _resendCountdown = 60);
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendCountdown <= 1) {
+        timer.cancel();
+        setState(() => _resendCountdown = 0);
+      } else {
+        setState(() => _resendCountdown--);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authStateProvider);
+
+    // If authenticated, navigate to home
+    if (authState.isAuthenticated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainNavigationShell()),
+        );
+      });
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Account'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF0A416B), // Navy from SVG
+              Color(0xFF0A355C),
+              Color(0xFF18996C), // Green accent
+            ],
+            stops: [0.0, 0.6, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header
-                _buildHeader(),
-                const SizedBox(height: 32),
-
-                // Registration Form
-                if (!_isOtpSent) ...[
-                  _buildRegistrationForm(),
-                ] else ...[
-                  _buildOtpVerification(),
-                ],
-
                 const SizedBox(height: 24),
 
-                // Already have account link
+                // Back button + Logo row
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Already have an account? ',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.navy600,
-                      ),
-                    ),
                     GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Text(
-                        'Login',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.wave600,
-                          fontWeight: FontWeight.w600,
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.white,
+                          size: 18,
                         ),
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+
+                // Logo
+                _buildLogo(),
+                const SizedBox(height: 24),
+
+                // Title
+                Text(
+                  'Create Your Account',
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Join Ethiopia\'s Premier Real Estate Marketplace',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+
+                // White card container
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Step 1: Registration Form
+                      if (!_isOtpSent) ...[
+                        _buildSectionTitle('Personal Information'),
+                        const SizedBox(height: 20),
+                        _buildNameInputs(),
+                        const SizedBox(height: 16),
+                        _buildPhoneInput(),
+                        const SizedBox(height: 16),
+                        _buildGenderSelection(),
+                        const SizedBox(height: 24),
+                        _buildContinueButton(),
+                      ],
+
+                      // Step 2: OTP Verification
+                      if (_isOtpSent) ...[
+                        _buildSectionTitle('Verify Your Phone'),
+                        const SizedBox(height: 8),
+                        Text(
+                          'We sent a 6-digit code to ${_phoneController.text}',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.zinc500,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        _buildOtpInput(),
+                        const SizedBox(height: 24),
+                        _buildVerifyButton(),
+                        const SizedBox(height: 16),
+                        _buildResendOtp(),
+                      ],
+
+                      // Error Message
+                      if (authState.errorMessage != null) ...[
+                        const SizedBox(height: 16),
+                        _buildInlineError(authState.errorMessage!),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Login Link
+                _buildLoginLink(),
+
+                // Loading indicator
+                if (_isLoading) ...[
+                  const SizedBox(height: 24),
+                  const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ],
               ],
             ),
           ),
@@ -101,97 +223,99 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     );
   }
 
-  Widget _buildHeader() {
-    return Column(
+  Widget _buildLogo() {
+    return Container(
+      width: 90,
+      height: 90,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.wave500, AppColors.emerald500],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white.withOpacity(0.2),
+            blurRadius: 20,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: const Icon(
+        Icons.home_rounded,
+        color: Colors.white,
+        size: 45,
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: AppColors.navy900,
+      ),
+    );
+  }
+
+  Widget _buildNameInputs() {
+    return Row(
       children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.navy900, AppColors.navy950],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.navy950.withOpacity(0.15),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.person_add_outlined,
-            color: Colors.white,
-            size: 40,
+        Expanded(
+          child: _buildInputField(
+            controller: _firstNameController,
+            hint: 'First Name',
+            icon: Icons.person_outline,
           ),
         ),
-        const SizedBox(height: 24),
-        Text(
-          'Join WaveMart',
-          style: AppTextStyles.headline3,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Create your account to start browsing\nproperties in Ethiopia',
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.navy600,
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildInputField(
+            controller: _lastNameController,
+            hint: 'Last Name',
+            icon: Icons.person_outline,
           ),
-          textAlign: TextAlign.center,
         ),
       ],
     );
   }
 
-  Widget _buildRegistrationForm() {
-    return Column(
-      children: [
-        // First Name
-        WaveTextField(
-          label: 'First Name',
-          hint: 'Enter your first name',
-          prefixIcon: Icons.person_outline,
-          controller: _firstNameController,
-          keyboardType: TextInputType.text,
-        ),
-        const SizedBox(height: 16),
+  Widget _buildPhoneInput() {
+    return _buildInputField(
+      controller: _phoneController,
+      hint: '+251912345678',
+      icon: Icons.phone_outlined,
+      keyboardType: TextInputType.phone,
+    );
+  }
 
-        // Last Name
-        WaveTextField(
-          label: 'Last Name',
-          hint: 'Enter your last name',
-          prefixIcon: Icons.person_outline,
-          controller: _lastNameController,
-          keyboardType: TextInputType.text,
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    TextInputType? keyboardType,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.zinc50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.zinc200),
+      ),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: const TextStyle(color: AppColors.zinc400, fontSize: 14),
+          prefixIcon: Icon(icon, color: AppColors.navy600, size: 20),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
-        const SizedBox(height: 16),
-
-        // Phone Number
-        WaveTextField(
-          label: 'Phone Number',
-          hint: '+251912345678',
-          prefixIcon: Icons.phone_outlined,
-          controller: _phoneController,
-          keyboardType: TextInputType.phone,
-        ),
-        const SizedBox(height: 16),
-
-        // Gender Selection
-        _buildGenderSelection(),
-        const SizedBox(height: 24),
-
-        // Register Button
-        WaveButton(
-          text: 'Continue',
-          icon: Icons.arrow_forward,
-          isLoading: _isLoading,
-          isFullWidth: true,
-          onPressed: _isLoading ? null : _sendRegistrationOtp,
-        ),
-      ],
+        keyboardType: keyboardType,
+        style: const TextStyle(fontSize: 15),
+      ),
     );
   }
 
@@ -199,13 +323,15 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Gender',
-          style: AppTextStyles.labelMedium.copyWith(
-            color: AppColors.navy900,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.navy800,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Row(
           children: [
             Expanded(
@@ -228,10 +354,10 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.wave50 : Colors.white,
+          color: isSelected ? AppColors.wave50 : AppColors.zinc50,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.wave500 : AppColors.zinc300,
+            color: isSelected ? AppColors.wave500 : AppColors.zinc200,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -240,15 +366,16 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           children: [
             Icon(
               icon,
-              size: 20,
-              color: isSelected ? AppColors.wave600 : AppColors.navy600,
+              size: 18,
+              color: isSelected ? AppColors.wave600 : AppColors.zinc500,
             ),
             const SizedBox(width: 8),
             Text(
               gender,
               style: TextStyle(
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? AppColors.wave700 : AppColors.navy700,
+                fontSize: 14,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? AppColors.wave700 : AppColors.zinc600,
               ),
             ),
           ],
@@ -257,71 +384,215 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     );
   }
 
-  Widget _buildOtpVerification() {
-    return Column(
+  Widget _buildOtpInput() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: List.generate(6, (index) {
+        return SizedBox(
+          width: 48,
+          child: TextField(
+            controller: _otpControllers[index],
+            focusNode: _otpFocusNodes[index],
+            textAlign: TextAlign.center,
+            keyboardType: TextInputType.number,
+            maxLength: 1,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.navy900,
+            ),
+            decoration: InputDecoration(
+              counterText: '',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: AppColors.zinc50,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.zinc200),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.wave500, width: 2),
+              ),
+            ),
+            onChanged: (value) {
+              if (value.isNotEmpty && index < 5) {
+                _otpFocusNodes[index + 1].requestFocus();
+              }
+            },
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildContinueButton() {
+    return GestureDetector(
+      onTap: _isLoading ? null : _sendRegistrationOtp,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.wave500, AppColors.emerald500],
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.wave500.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Continue',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVerifyButton() {
+    return GestureDetector(
+      onTap: _isLoading ? null : _verifyAndRegister,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.wave500, AppColors.emerald500],
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.wave500.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Verify & Create Account',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResendOtp() {
+    if (_resendCountdown > 0) {
+      return Text(
+        'Resend code in ${_resendCountdown}s',
+        style: AppTextStyles.bodyMedium.copyWith(
+          color: AppColors.zinc400,
+        ),
+      );
+    }
+
+    return TextButton(
+      onPressed: _sendRegistrationOtp,
+      child: const Text(
+        'Resend Code',
+        style: TextStyle(
+          color: AppColors.wave600,
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginLink() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // OTP Info Banner
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.wave50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.wave200),
-          ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.info_outline,
-                color: AppColors.wave600,
-                size: 20,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'We sent a 6-digit code to ${_phoneController.text}',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.wave700,
-                  ),
-                ),
-              ),
-            ],
+        Text(
+          'Already have an account? ',
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: 14,
           ),
         ),
-        const SizedBox(height: 24),
-
-        // OTP Input Field
-        WaveTextField(
-          label: 'Verification Code',
-          hint: 'Enter 6-digit code',
-          prefixIcon: Icons.lock_outline,
-          controller: _otpController,
-          keyboardType: TextInputType.number,
-          maxLength: 6,
-        ),
-        const SizedBox(height: 16),
-
-        // Verify Button
-        WaveButton(
-          text: 'Verify & Create Account',
-          icon: Icons.check_circle,
-          isLoading: _isLoading,
-          isFullWidth: true,
-          onPressed: _isLoading ? null : _verifyAndRegister,
-        ),
-        const SizedBox(height: 16),
-
-        // Resend Code
-        TextButton(
-          onPressed: _isLoading ? null : _sendRegistrationOtp,
-          child: Text(
-            'Resend Code',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.wave600,
+        GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: const Text(
+            'Login',
+            style: TextStyle(
+              color: Colors.white,
               fontWeight: FontWeight.w600,
+              fontSize: 14,
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildInlineError(String message) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.error.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.error.withOpacity(0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.error_outline,
+            size: 20,
+            color: AppColors.error,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.error,
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              ref.read(authStateProvider.notifier).clearError();
+            },
+            child: const Icon(
+              Icons.close,
+              size: 18,
+              color: AppColors.error,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -343,31 +614,17 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           _isOtpSent = true;
           _isLoading = false;
         });
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Verification code sent!'),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        }
+        _startCountdown();
       } else {
         setState(() => _isLoading = false);
-        if (mounted) {
-          _showErrorSnackBar(response.message);
-        }
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      if (mounted) {
-        _showErrorSnackBar('Network error. Please try again.');
-      }
     }
   }
 
   Future<void> _verifyAndRegister() async {
-    final otp = _otpController.text.trim();
+    final otp = _otpControllers.map((c) => c.text).join();
     if (otp.length != 6) {
       _showErrorSnackBar('Please enter the complete 6-digit code');
       return;
@@ -385,19 +642,17 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       );
 
       if (response.success && mounted) {
-        // Don't navigate manually — let auth state change in main.dart
-        // automatically swap home: from login to MainNavigationShell.
-        // Manual navigation causes double-mount and freezes.
         setState(() => _isLoading = false);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainNavigationShell()),
+        );
       } else if (mounted) {
         setState(() => _isLoading = false);
         _showErrorSnackBar(response.message);
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      if (mounted) {
-        _showErrorSnackBar('Network error. Please try again.');
-      }
+      _showErrorSnackBar('Network error. Please try again.');
     }
   }
 
