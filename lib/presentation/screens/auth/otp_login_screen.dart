@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +9,7 @@ import '../../widgets/common/wave_button.dart';
 import 'registration_screen.dart';
 import '../navigation/main_navigation_shell.dart';
 
-/// OTP Login Screen - Wired to Auth Provider
+/// Modern OTP Login Screen with 60-second countdown
 class OtpLoginScreen extends ConsumerStatefulWidget {
   const OtpLoginScreen({super.key});
 
@@ -23,10 +24,12 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
   final List<FocusNode> _otpFocusNodes =
       List.generate(6, (_) => FocusNode());
 
+  int _resendCountdown = 0;
+  Timer? _countdownTimer;
+
   @override
   void initState() {
     super.initState();
-    // Clear any stale error from previous screens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(authStateProvider.notifier).clearError();
     });
@@ -35,6 +38,7 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
   @override
   void dispose() {
     _phoneController.dispose();
+    _countdownTimer?.cancel();
     for (var controller in _otpControllers) {
       controller.dispose();
     }
@@ -42,6 +46,19 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
       node.dispose();
     }
     super.dispose();
+  }
+
+  void _startCountdown() {
+    _countdownTimer?.cancel();
+    setState(() => _resendCountdown = 60);
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendCountdown <= 1) {
+        timer.cancel();
+        setState(() => _resendCountdown = 0);
+      } else {
+        setState(() => _resendCountdown--);
+      }
+    });
   }
 
   @override
@@ -60,213 +77,301 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
     }
 
     return PopScope(
-      canPop: false, // Prevent back navigation
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        // Exit app instead of going back
         if (!didPop) {
           SystemNavigator.pop();
         }
       },
       child: Scaffold(
-        body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              const SizedBox(height: 48),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF0A416B), // Navy from SVG
+                Color(0xFF0A355C),
+                Color(0xFF18996C), // Green accent
+              ],
+              stops: [0.0, 0.6, 1.0],
+            ),
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  const SizedBox(height: 32),
 
-              // Logo
-              _buildLogo(),
-              const SizedBox(height: 48),
+                  // Logo
+                  _buildLogo(),
+                  const SizedBox(height: 32),
 
-              // Title
-              Text(
-                'Welcome',
-                style: AppTextStyles.headline3,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Sign in with OTP to continue',
-                style: AppTextStyles.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-
-              // Inline Error Message (compact, friendly)
-              if (authState.errorMessage != null)
-                _buildInlineError(authState.errorMessage!),
-
-              const SizedBox(height: 16),
-
-              // Step 1: Phone Input
-              if (!authState.otpSent) ...[
-                WaveTextField(
-                  label: 'Phone Number',
-                  hint: '+251912345678',
-                  prefixIcon: Icons.phone_outlined,
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                ),
-                const SizedBox(height: 24),
-                WaveButton(
-                  text: 'Send OTP',
-                  icon: Icons.send,
-                  isLoading: authState.isLoading,
-                  isFullWidth: true,
-                  onPressed: authState.isLoading ? null : _sendOtp,
-                ),
-                const SizedBox(height: 24),
-
-                // Registration Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Don\'t have an account? ',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.navy600,
-                      ),
+                  // Title
+                  const Text(
+                    'Welcome to WaveMart',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const RegistrationScreen(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        'Register',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.wave600,
-                          fontWeight: FontWeight.w600,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Ethiopia\'s Premier Real Estate Marketplace',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white.withOpacity(0.7),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 40),
+
+                  // White card container
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
                         ),
-                      ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        // Inline Error Message
+                        if (authState.errorMessage != null)
+                          _buildInlineError(authState.errorMessage!),
+
+                        if (authState.errorMessage != null)
+                          const SizedBox(height: 16),
+
+                        // Step 1: Phone Input
+                        if (!authState.otpSent) ...[
+                          _buildSectionTitle('Enter Your Phone Number'),
+                          const SizedBox(height: 16),
+                          _buildPhoneInput(),
+                          const SizedBox(height: 20),
+                          WaveButton(
+                            text: 'Continue',
+                            icon: Icons.arrow_forward_rounded,
+                            isLoading: authState.isLoading,
+                            isFullWidth: true,
+                            onPressed: authState.isLoading ? null : _sendOtp,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildRegisterLink(),
+                        ],
+
+                        // Step 2: OTP Input
+                        if (authState.otpSent) ...[
+                          _buildSectionTitle('Enter Verification Code'),
+                          const SizedBox(height: 8),
+                          Text(
+                            'We sent a 6-digit code to ${authState.phoneNumber}',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.zinc500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          _buildOtpInput(),
+                          const SizedBox(height: 20),
+                          WaveButton(
+                            text: 'Verify & Continue',
+                            icon: Icons.check_circle_rounded,
+                            isLoading: authState.isLoading,
+                            isFullWidth: true,
+                            onPressed: authState.isLoading ? null : _verifyOtp,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildResendOtp(),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Loading indicator
+                  if (authState.isLoading) ...[
+                    const SizedBox(height: 24),
+                    const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   ],
-                ),
-              ],
-
-              // Step 2: OTP Input
-              if (authState.otpSent) ...[
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.wave50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.wave200),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.info_outline,
-                        color: AppColors.wave600,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'OTP sent to ${authState.phoneNumber}',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.wave700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // OTP Input Fields
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(6, (index) {
-                    return SizedBox(
-                      width: 48,
-                      child: TextField(
-                        controller: _otpControllers[index],
-                        focusNode: _otpFocusNodes[index],
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
-                        maxLength: 1,
-                        style: AppTextStyles.headline4,
-                        decoration: InputDecoration(
-                          counterText: '',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: AppColors.navy200,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: AppColors.navy200,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: AppColors.wave500,
-                              width: 2,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: AppColors.zinc50,
-                        ),
-                        onChanged: (value) {
-                          if (value.isNotEmpty && index < 5) {
-                            _otpFocusNodes[index + 1].requestFocus();
-                          }
-                        },
-                      ),
-                    );
-                  }),
-                ),
-                const SizedBox(height: 24),
-
-                // Verify OTP Button
-                WaveButton(
-                  text: 'Verify & Login',
-                  icon: Icons.check_circle,
-                  isLoading: authState.isLoading,
-                  isFullWidth: true,
-                  onPressed: authState.isLoading ? null : _verifyOtp,
-                ),
-                const SizedBox(height: 16),
-
-                // Resend OTP
-                TextButton(
-                  onPressed: authState.isLoading ? null : _resendOtp,
-                  child: Text(
-                    'Resend OTP',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.wave600,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-
-              // Loading indicator
-              if (authState.isLoading) ...[
-                const SizedBox(height: 24),
-                const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.wave500,
-                  ),
-                ),
-              ],
-            ],
+                ],
+              ),
+            ),
           ),
         ),
-      ),
       ),
     );
   }
 
-  /// Compact inline error message
+  Widget _buildLogo() {
+    return Container(
+      width: 100,
+      height: 100,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.wave500, AppColors.emerald500],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white.withOpacity(0.2),
+            blurRadius: 20,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: const Icon(
+        Icons.home_rounded,
+        color: Colors.white,
+        size: 50,
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: AppColors.navy900,
+      ),
+    );
+  }
+
+  Widget _buildPhoneInput() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.zinc50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.zinc200),
+      ),
+      child: TextField(
+        controller: _phoneController,
+        decoration: const InputDecoration(
+          hintText: '+251912345678',
+          prefixIcon: Icon(Icons.phone_outlined, color: AppColors.navy600),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        ),
+        keyboardType: TextInputType.phone,
+        style: const TextStyle(fontSize: 16),
+      ),
+    );
+  }
+
+  Widget _buildOtpInput() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: List.generate(6, (index) {
+        return SizedBox(
+          width: 48,
+          child: TextField(
+            controller: _otpControllers[index],
+            focusNode: _otpFocusNodes[index],
+            textAlign: TextAlign.center,
+            keyboardType: TextInputType.number,
+            maxLength: 1,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.navy900,
+            ),
+            decoration: InputDecoration(
+              counterText: '',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: AppColors.zinc50,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.zinc200),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.wave500, width: 2),
+              ),
+            ),
+            onChanged: (value) {
+              if (value.isNotEmpty && index < 5) {
+                _otpFocusNodes[index + 1].requestFocus();
+              }
+            },
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildResendOtp() {
+    if (_resendCountdown > 0) {
+      return Text(
+        'Resend code in ${_resendCountdown}s',
+        style: AppTextStyles.bodyMedium.copyWith(
+          color: AppColors.zinc400,
+        ),
+      );
+    }
+
+    return TextButton(
+      onPressed: _resendOtp,
+      child: const Text(
+        'Resend Code',
+        style: TextStyle(
+          color: AppColors.wave600,
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRegisterLink() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Don\'t have an account? ',
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.navy600,
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const RegistrationScreen(),
+              ),
+            );
+          },
+          child: const Text(
+            'Register',
+            style: TextStyle(
+              color: AppColors.wave600,
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildInlineError(String message) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -279,7 +384,7 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.error_outline,
             size: 20,
             color: AppColors.error,
@@ -288,20 +393,20 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
           Expanded(
             child: Text(
               message,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.error.withOpacity(0.9),
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.error,
               ),
             ),
           ),
           GestureDetector(
             onTap: () {
-              // Clear error
               ref.read(authStateProvider.notifier).clearError();
             },
-            child: Icon(
+            child: const Icon(
               Icons.close,
               size: 18,
-              color: AppColors.error.withOpacity(0.6),
+              color: AppColors.error,
             ),
           ),
         ],
@@ -322,6 +427,9 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
     }
 
     await ref.read(authStateProvider.notifier).sendOtp(phone);
+    if (mounted) {
+      _startCountdown();
+    }
   }
 
   Future<void> _verifyOtp() async {
@@ -338,9 +446,7 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
 
     final response = await ref.read(authStateProvider.notifier).login(otp);
     
-    // Navigate to home immediately on success - skip "Welcome Back" message
     if (mounted && response.success) {
-      // Use pushReplacement to prevent back navigation to login
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const MainNavigationShell()),
       );
@@ -352,6 +458,7 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
         await ref.read(authStateProvider.notifier).resendOtp();
     if (mounted) {
       if (response.success) {
+        _startCountdown();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response.message),
@@ -367,32 +474,5 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
         );
       }
     }
-  }
-
-  Widget _buildLogo() {
-    return Container(
-      width: 100,
-      height: 100,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.navy900, AppColors.navy950],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.navy950.withOpacity(0.2),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: const Icon(
-        Icons.home_rounded,
-        color: Colors.white,
-        size: 50,
-      ),
-    );
   }
 }
