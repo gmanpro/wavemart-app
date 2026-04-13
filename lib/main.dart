@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'core/theme/app_theme.dart';
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/screens/auth/otp_login_screen.dart';
 import 'presentation/screens/navigation/main_navigation_shell.dart';
+import 'presentation/screens/splash/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,36 +69,58 @@ class WaveMartApp extends ConsumerStatefulWidget {
 
 class _WaveMartAppState extends ConsumerState<WaveMartApp> {
   bool _showHome = false;
-  bool _hasToken = false;
+  bool _showSplash = true;
 
   @override
   void initState() {
     super.initState();
-    _checkLocalAuth();
+    _initializeApp();
   }
 
-  /// Check local token to decide initial screen.
-  /// If token exists locally, show home immediately (works offline with cached data).
-  /// API auth check runs in background — only redirects to login on explicit 401.
-  Future<void> _checkLocalAuth() async {
+  /// Initialize app: show splash, check auth, then navigate
+  Future<void> _initializeApp() async {
+    // Show splash for a minimum duration
+    final stopwatch = Stopwatch()..start();
+    
+    // Check local token in parallel with splash timer
     final client = ApiClient();
-    _hasToken = await client.isAuthenticated();
+    final hasToken = await client.isAuthenticated();
+    
+    // Ensure minimum splash duration (1.5 seconds)
+    final elapsed = stopwatch.elapsedMilliseconds;
+    if (elapsed < 1500) {
+      await Future.delayed(Duration(milliseconds: 1500 - elapsed));
+    }
 
-    if (mounted) {
-      setState(() => _showHome = _hasToken);
+    if (!mounted) return;
 
-      // Background API auth check — don't block UI
-      if (_hasToken) {
-        ref.read(authStateProvider.notifier).checkAuth().then((_) {
-          if (mounted) {
-            final authState = ref.read(authStateProvider);
-            // Only switch to login if API explicitly rejected (401 cleared token)
-            if (!authState.isAuthenticated && !authState.isLoading) {
-              setState(() => _showHome = false);
-            }
+    if (hasToken) {
+      // User has local token - show home immediately
+      // Works offline with cached data
+      setState(() {
+        _showHome = true;
+        _showSplash = false;
+      });
+
+      // Background API auth check — only redirect to login on explicit 401
+      ref.read(authStateProvider.notifier).checkAuth().then((_) {
+        if (mounted) {
+          final authState = ref.read(authStateProvider);
+          // Only switch to login if API explicitly rejected (401 cleared token)
+          if (!authState.isAuthenticated && !authState.isLoading) {
+            setState(() {
+              _showHome = false;
+              _showSplash = false;
+            });
           }
-        });
-      }
+        }
+      });
+    } else {
+      // No local token - show login
+      setState(() {
+        _showHome = false;
+        _showSplash = false;
+      });
     }
   }
 
@@ -105,26 +129,34 @@ class _WaveMartAppState extends ConsumerState<WaveMartApp> {
     final authState = ref.watch(authStateProvider);
 
     // When auth state changes to authenticated (e.g. after login), show home
-    if (authState.isAuthenticated && !_showHome) {
+    if (authState.isAuthenticated && !_showHome && !_showSplash) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() => _showHome = true);
       });
     }
 
     // When auth state changes to unauthenticated and we had a token, show login
-    if (!authState.isAuthenticated && !authState.isLoading && _showHome) {
+    if (!authState.isAuthenticated && !authState.isLoading && _showHome && !_showSplash) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() => _showHome = false);
       });
+    }
+
+    // Build the appropriate screen
+    Widget targetScreen;
+    if (_showSplash) {
+      targetScreen = const SplashScreen();
+    } else if (_showHome) {
+      targetScreen = const MainNavigationShell();
+    } else {
+      targetScreen = const OtpLoginScreen();
     }
 
     return MaterialApp(
       title: 'WaveMart',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: _showHome
-          ? const MainNavigationShell()
-          : const OtpLoginScreen(),
+      home: targetScreen,
       onGenerateRoute: _generateRoute,
       builder: (context, child) {
         if (child == null) {

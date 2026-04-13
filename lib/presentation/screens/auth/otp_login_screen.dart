@@ -6,6 +6,7 @@ import '../../../../core/theme/text_styles.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/wave_button.dart';
 import 'registration_screen.dart';
+import '../navigation/main_navigation_shell.dart';
 
 /// OTP Login Screen - Wired to Auth Provider
 class OtpLoginScreen extends ConsumerStatefulWidget {
@@ -47,6 +48,17 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
 
+    // If authenticated, show loading while navigating to home
+    if (authState.isAuthenticated) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.wave500),
+          ),
+        ),
+      );
+    }
+
     return PopScope(
       canPop: false, // Prevent back navigation
       onPopInvokedWithResult: (didPop, result) {
@@ -69,15 +81,13 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
 
               // Title
               Text(
-                authState.isAuthenticated ? 'Welcome Back!' : 'Welcome',
+                'Welcome',
                 style: AppTextStyles.headline3,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                authState.isAuthenticated
-                    ? 'You are logged in'
-                    : 'Sign in with OTP to continue',
+                'Sign in with OTP to continue',
                 style: AppTextStyles.bodyMedium,
                 textAlign: TextAlign.center,
               ),
@@ -90,7 +100,7 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
               const SizedBox(height: 16),
 
               // Step 1: Phone Input
-              if (!authState.otpSent && !authState.isAuthenticated) ...[
+              if (!authState.otpSent) ...[
                 WaveTextField(
                   label: 'Phone Number',
                   hint: '+251912345678',
@@ -139,7 +149,7 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
               ],
 
               // Step 2: OTP Input
-              if (authState.otpSent && !authState.isAuthenticated) ...[
+              if (authState.otpSent) ...[
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -326,10 +336,15 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
       return;
     }
 
-    // Don't navigate manually — let the auth state change in main.dart
-    // automatically swap home: from OtpLoginScreen to MainNavigationShell.
-    // Manual navigation causes double-mount and freezes.
-    await ref.read(authStateProvider.notifier).login(otp);
+    final response = await ref.read(authStateProvider.notifier).login(otp);
+    
+    // Navigate to home immediately on success - skip "Welcome Back" message
+    if (mounted && response.success) {
+      // Use pushReplacement to prevent back navigation to login
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainNavigationShell()),
+      );
+    }
   }
 
   Future<void> _resendOtp() async {
