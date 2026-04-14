@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/wave_button.dart';
+import '../../widgets/common/app_logo.dart';
 import '../navigation/main_navigation_shell.dart';
 
 /// Modern Registration Screen with consistent design
@@ -131,7 +132,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                 const SizedBox(height: 16),
 
                 // Logo
-                _buildLogo(),
+                const AppLogo(size: 90),
                 const SizedBox(height: 24),
 
                 // Title
@@ -271,33 +272,6 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           ],
         );
       },
-    );
-  }
-
-  Widget _buildLogo() {
-    return Container(
-      width: 90,
-      height: 90,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.wave500, AppColors.emerald500],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.white.withOpacity(0.2),
-            blurRadius: 20,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: const Icon(
-        Icons.home_rounded,
-        color: Colors.white,
-        size: 45,
-      ),
     );
   }
 

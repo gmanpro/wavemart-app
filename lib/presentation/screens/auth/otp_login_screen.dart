@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/wave_button.dart';
+import '../../widgets/common/app_logo.dart';
 import 'registration_screen.dart';
 import '../navigation/main_navigation_shell.dart';
 
@@ -106,7 +107,7 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
                   const SizedBox(height: 32),
 
                   // Logo
-                  _buildLogo(),
+                  const AppLogo(size: 100),
                   const SizedBox(height: 32),
 
                   // Title
@@ -211,33 +212,6 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildLogo() {
-    return Container(
-      width: 100,
-      height: 100,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.wave500, AppColors.emerald500],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.white.withOpacity(0.2),
-            blurRadius: 20,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: const Icon(
-        Icons.home_rounded,
-        color: Colors.white,
-        size: 50,
       ),
     );
   }

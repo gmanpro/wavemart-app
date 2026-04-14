@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../widgets/common/app_logo.dart';
 
 /// Modern Splash Screen displayed on app start
 class SplashScreen extends StatelessWidget {
@@ -14,31 +15,7 @@ class SplashScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Logo
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.wave500, AppColors.emerald500],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.wave500.withOpacity(0.3),
-                    blurRadius: 32,
-                    spreadRadius: 4,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.home_rounded,
-                color: Colors.white,
-                size: 60,
-              ),
-            ),
+            const AppLogo(size: 120),
             const SizedBox(height: 24),
             const Text(
               'WaveMart',
