@@ -85,6 +85,7 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
       },
       child: Scaffold(
         body: Container(
+          constraints: const BoxConstraints.expand(),
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,

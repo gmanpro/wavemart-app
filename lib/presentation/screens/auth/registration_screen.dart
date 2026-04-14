@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/common/wave_button.dart';
 import '../navigation/main_navigation_shell.dart';
 
 /// Modern Registration Screen with consistent design
@@ -81,6 +82,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
     return Scaffold(
       body: Container(
+        constraints: const BoxConstraints.expand(),
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -173,7 +175,13 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                         const SizedBox(height: 16),
                         _buildGenderSelection(),
                         const SizedBox(height: 24),
-                        _buildContinueButton(),
+                        WaveButton(
+                          text: 'Continue',
+                          icon: Icons.arrow_forward_rounded,
+                          isLoading: _isLoading,
+                          isFullWidth: true,
+                          onPressed: _isLoading ? null : _sendRegistrationOtp,
+                        ),
                       ],
 
                       // Step 2: OTP Verification
@@ -190,7 +198,13 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                         const SizedBox(height: 24),
                         _buildOtpInput(),
                         const SizedBox(height: 24),
-                        _buildVerifyButton(),
+                        WaveButton(
+                          text: 'Verify & Create Account',
+                          icon: Icons.check_circle_rounded,
+                          isLoading: _isLoading,
+                          isFullWidth: true,
+                          onPressed: _isLoading ? null : _verifyAndRegister,
+                        ),
                         const SizedBox(height: 16),
                         _buildResendOtp(),
                       ],
@@ -426,82 +440,6 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           ),
         );
       }),
-    );
-  }
-
-  Widget _buildContinueButton() {
-    return GestureDetector(
-      onTap: _isLoading ? null : _sendRegistrationOtp,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.wave500, AppColors.emerald500],
-          ),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.wave500.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Continue',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVerifyButton() {
-    return GestureDetector(
-      onTap: _isLoading ? null : _verifyAndRegister,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.wave500, AppColors.emerald500],
-          ),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.wave500.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Verify & Create Account',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-          ],
-        ),
-      ),
     );
   }
 
