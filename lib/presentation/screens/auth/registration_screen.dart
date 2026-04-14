@@ -261,6 +261,8 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
             TextButton(
               onPressed: () {
                 _countdownTimer?.cancel();
+                // Reset auth state so login shows phone input, not OTP
+                ref.read(authStateProvider.notifier).resetState();
                 Navigator.pop(context); // Close dialog
                 Navigator.pop(context); // Go back to login
               },

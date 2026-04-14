@@ -111,6 +111,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(errorMessage: null);
   }
 
+  /// Reset auth state to initial (used when canceling registration)
+  void resetState() {
+    state = AuthState.initial();
+  }
+
   /// Register new account
   Future<AuthResponse> register({
     required String firstName,
