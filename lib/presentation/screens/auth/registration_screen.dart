@@ -25,7 +25,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   final List<FocusNode> _otpFocusNodes =
       List.generate(6, (_) => FocusNode());
 
-  String? _selectedGender;
+  String? _selectedGender = 'Male';
   bool _isOtpSent = false;
   bool _isLoading = false;
   int _resendCountdown = 0;
@@ -80,7 +80,13 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       });
     }
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _showCancelDialog();
+      },
+      child: Scaffold(
       body: Container(
         constraints: const BoxConstraints.expand(),
         decoration: const BoxDecoration(
@@ -106,7 +112,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                 Row(
                   children: [
                     GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                      onTap: _showCancelDialog,
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
@@ -234,6 +240,35 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           ),
         ),
       ),
+      ),
+    );
+  }
+
+  void _showCancelDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Cancel Registration'),
+          content: const Text('Are you sure you want to cancel? Your progress will be lost.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('No, Continue', style: TextStyle(color: AppColors.wave600)),
+            ),
+            TextButton(
+              onPressed: () {
+                _countdownTimer?.cancel();
+                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); // Go back to login
+              },
+              child: const Text('Yes, Cancel', style: TextStyle(color: AppColors.error)),
+            ),
+          ],
+        );
+      },
     );
   }
 
