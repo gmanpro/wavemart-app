@@ -13,8 +13,11 @@ class AppLogo extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.wave500, AppColors.emerald500],
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withOpacity(0.9),
+            Colors.white.withOpacity(0.6)
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -63,8 +66,8 @@ class GlassLogoContainer extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppColors.wave500.withOpacity(0.35),
-                AppColors.emerald500.withOpacity(0.25),
+                Colors.white.withOpacity(0.35),
+                Colors.white.withOpacity(0.25),
               ],
             ),
             borderRadius: BorderRadius.circular(size * 0.24),
@@ -74,7 +77,7 @@ class GlassLogoContainer extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.wave500.withOpacity(0.15),
+                color: Colors.white.withOpacity(0.15),
                 blurRadius: 20,
                 spreadRadius: 2,
               ),

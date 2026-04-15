@@ -143,7 +143,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
                   // Logo with glassmorphism
                   const GlassLogoContainer(size: 72, logoSize: 52),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 24),
 
                   // Title
                   Text(

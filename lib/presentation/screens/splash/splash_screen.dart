@@ -78,8 +78,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const GlassLogoContainer(size: 100, logoSize: 70),
-              const SizedBox(height: 20),
+              AnimatedScale(
+                scale: 1.0,
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeOut,
+                child: AnimatedOpacity(
+                  opacity: 1.0,
+                  duration: const Duration(milliseconds: 800),
+                  child: const GlassLogoContainer(size: 100, logoSize: 70),
+                ),
+              ),
+              const SizedBox(height: 24),
               const Text(
                 'WaveMart',
                 style: TextStyle(

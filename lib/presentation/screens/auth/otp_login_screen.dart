@@ -107,7 +107,7 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
 
                   // Logo with glassmorphism
                   const GlassLogoContainer(size: 90, logoSize: 65),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 24),
 
                   // Title
                   const Text(
