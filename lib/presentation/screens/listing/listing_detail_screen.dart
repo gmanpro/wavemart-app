@@ -266,20 +266,24 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
               const SizedBox(height: 8),
               Text(
                 message,
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.navy500),
+                style:
+                    AppTextStyles.bodyMedium.copyWith(color: AppColors.navy500),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: () {
-                  ref.read(listingDetailProvider.notifier).loadListing(widget.listingId);
+                  ref
+                      .read(listingDetailProvider.notifier)
+                      .loadListing(widget.listingId);
                 },
                 icon: const Icon(Icons.refresh, size: 18),
                 label: const Text('Try Again'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.navy950,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -307,7 +311,8 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
               const SizedBox(height: 8),
               Text(
                 'This property may have been removed',
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.navy500),
+                style:
+                    AppTextStyles.bodyMedium.copyWith(color: AppColors.navy500),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -386,7 +391,8 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
       return Container(
         color: AppColors.navy100,
         child: const Center(
-          child: Icon(Icons.image_not_supported, size: 64, color: AppColors.navy400),
+          child: Icon(Icons.image_not_supported,
+              size: 64, color: AppColors.navy400),
         ),
       );
     }
@@ -470,10 +476,8 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
           _buildBadge('FOR SALE', AppColors.emerald600)
         else
           _buildBadge('FOR RENT', AppColors.wave600),
-        if (listing.isFeatured)
-          _buildBadge('FEATURED', AppColors.wave500),
-        if (listing.isNew)
-          _buildBadge('NEW', Colors.amber[700]!),
+        if (listing.isFeatured) _buildBadge('FEATURED', AppColors.wave500),
+        if (listing.isNew) _buildBadge('NEW', Colors.amber[700]!),
       ],
     );
   }
@@ -524,24 +528,78 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
   Widget _buildKeyFeatures(Listing listing) {
     final features = <Widget>[];
 
-    if (listing.totalSquareMeters != null) {
+    // For houses: show rooms
+    if (listing.propertyType == PropertyType.house) {
+      if ((listing.bedrooms ?? 0) > 0) {
+        features.add(_buildFeatureChip(
+          icon: Icons.bed,
+          label: '${listing.bedrooms} Bedrooms',
+        ));
+      }
+      if ((listing.bathrooms ?? 0) > 0) {
+        features.add(_buildFeatureChip(
+          icon: Icons.bathtub,
+          label: '${listing.bathrooms} Bathrooms',
+        ));
+      }
+      if ((listing.salons ?? 0) > 0) {
+        features.add(_buildFeatureChip(
+          icon: Icons.weekend,
+          label: '${listing.salons} Salons',
+        ));
+      }
+    }
+
+    // Square meters
+    if (listing.totalSquareMeters != null && listing.totalSquareMeters! > 0) {
       features.add(_buildFeatureChip(
         icon: Icons.square_foot,
         label: '${listing.totalSquareMeters!.toInt()} m²',
       ));
     }
+
+    // Facing direction
     if (listing.facingDirection != null) {
       features.add(_buildFeatureChip(
         icon: Icons.compass_calibration,
         label: listing.facingDirection!,
       ));
     }
+
+    // Holding type
     if (listing.holdingType != null) {
       features.add(_buildFeatureChip(
         icon: Icons.folder_copy,
         label: listing.holdingType!,
       ));
     }
+
+    // Image count
+    if ((listing.imageCount ?? 0) > 1) {
+      features.add(_buildFeatureChip(
+        icon: Icons.photo_library,
+        label: '${listing.imageCount} Photos',
+      ));
+    }
+
+    // Date posted
+    final daysOld = DateTime.now().difference(listing.createdAt).inDays;
+    String dateText;
+    if (daysOld == 0) {
+      dateText = 'Today';
+    } else if (daysOld == 1) {
+      dateText = 'Yesterday';
+    } else if (daysOld < 7) {
+      dateText = '$daysOld days ago';
+    } else if (daysOld < 30) {
+      dateText = '${(daysOld / 7).floor()} weeks ago';
+    } else {
+      dateText = '${(daysOld / 30).floor()} months ago';
+    }
+    features.add(_buildFeatureChip(
+      icon: Icons.access_time,
+      label: dateText,
+    ));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -553,7 +611,10 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
           runSpacing: 8,
           children: features.isNotEmpty
               ? features
-              : [Text('No key features specified', style: AppTextStyles.caption)],
+              : [
+                  Text('No key features specified',
+                      style: AppTextStyles.caption)
+                ],
         ),
       ],
     );
@@ -604,14 +665,42 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
   Widget _buildPropertyDetails(Listing listing) {
     final details = <Map<String, String>>[];
 
+    if (listing.propertyType == PropertyType.land) {
+      // For land: front area and side area
+      if ((listing.frontAreaSqm ?? 0) > 0) {
+        details.add({
+          'label': 'Front Area',
+          'value': '${listing.frontAreaSqm!.toInt()} m²'
+        });
+      }
+      if ((listing.sideAreaSqm ?? 0) > 0) {
+        details.add({
+          'label': 'Side Area',
+          'value': '${listing.sideAreaSqm!.toInt()} m²'
+        });
+      }
+    }
+
     if (listing.useType != null) {
       details.add({'label': 'Use Type', 'value': listing.useType!});
+    }
+    if (listing.holdingType != null) {
+      details.add({'label': 'Holding Type', 'value': listing.holdingType!});
+    }
+    if (listing.facingDirection != null) {
+      details.add({'label': 'Facing', 'value': listing.facingDirection!});
     }
     if (listing.priceRevisionPossible) {
       details.add({'label': 'Price', 'value': 'Negotiable'});
     }
     if (listing.hasDebtOrEncumbrance) {
-      details.add({'label': 'Encumbrance', 'value': 'Yes'});
+      final debtAmount = listing.debtAmount;
+      final amount =
+          debtAmount != null ? ' Yes (${debtAmount.toInt()} ETB)' : ' Yes';
+      details.add({'label': 'Encumbrance', 'value': amount});
+    }
+    if (listing.videoLink != null && listing.videoLink!.isNotEmpty) {
+      details.add({'label': 'Video Tour', 'value': 'Available'});
     }
 
     if (details.isEmpty) return const SizedBox.shrink();
@@ -674,9 +763,8 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
       return;
     }
 
-    final success = await ref
-        .read(favoritesProvider.notifier)
-        .toggleFavorite(listingId);
+    final success =
+        await ref.read(favoritesProvider.notifier).toggleFavorite(listingId);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
