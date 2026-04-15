@@ -106,7 +106,11 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
 
   Widget _buildBody() {
     if (_isLoading && _myListings.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: 5,
+        itemBuilder: (_, __) => const PropertyListingCard(isLoading: true),
+      );
     }
 
     if (_errorMessage != null && _myListings.isEmpty) {
@@ -139,8 +143,8 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
         itemBuilder: (context, index) {
           if (index >= _myListings.length) {
             return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: CircularProgressIndicator()),
+              padding: EdgeInsets.only(bottom: 16),
+              child: PropertyListingCard(isLoading: true),
             );
           }
 

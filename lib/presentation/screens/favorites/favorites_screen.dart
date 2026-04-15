@@ -29,7 +29,8 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
 
   Future<void> _removeFavorite(int listingId) async {
     setState(() => _togglingFavorites.add(listingId));
-    final success = await ref.read(favoritesProvider.notifier).toggleFavorite(listingId);
+    final success =
+        await ref.read(favoritesProvider.notifier).toggleFavorite(listingId);
     if (mounted) {
       setState(() => _togglingFavorites.remove(listingId));
       if (success) {
@@ -115,7 +116,8 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => ListingDetailScreen(listingId: listing.id),
+                      builder: (_) =>
+                          ListingDetailScreen(listingId: listing.id),
                     ),
                   );
                 },
@@ -125,7 +127,9 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                 top: 12,
                 right: 12,
                 child: GestureDetector(
-                  onTap: _isToggling(listing.id) ? null : () => _removeFavorite(listing.id),
+                  onTap: _isToggling(listing.id)
+                      ? null
+                      : () => _removeFavorite(listing.id),
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -138,10 +142,12 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                             height: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : const Icon(Icons.close, size: 18, color: Colors.white),
+                        : const Icon(Icons.close,
+                            size: 18, color: Colors.white),
                   ),
                 ),
               ),
@@ -157,46 +163,9 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
       padding: const EdgeInsets.all(16),
       itemCount: count,
       itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.zinc200),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: AspectRatio(
-                    aspectRatio: 4 / 3,
-                    child: Container(color: AppColors.zinc200),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(height: 20, width: 120, color: AppColors.zinc200),
-                      const SizedBox(height: 10),
-                      Container(height: 16, width: double.infinity, color: AppColors.zinc200),
-                      const SizedBox(height: 8),
-                      Container(height: 14, width: 180, color: AppColors.zinc200),
-                      const SizedBox(height: 14),
-                      Row(children: [
-                        Container(height: 20, width: 60, color: AppColors.zinc200),
-                        const SizedBox(width: 8),
-                        Container(height: 20, width: 45, color: AppColors.zinc200),
-                      ]),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+        return const Padding(
+          padding: EdgeInsets.only(bottom: 16),
+          child: PropertyListingCard(isLoading: true),
         );
       },
     );

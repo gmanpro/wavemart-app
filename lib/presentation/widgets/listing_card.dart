@@ -127,11 +127,31 @@ class PropertyListingCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   // Title skeleton
                   Container(
                     height: 16,
                     width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  // Description line 1
+                  Container(
+                    height: 14,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Description line 2
+                  Container(
+                    height: 14,
+                    width: 150,
                     decoration: BoxDecoration(
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(4),
@@ -147,11 +167,23 @@ class PropertyListingCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  // Features skeleton
+                  const SizedBox(height: 6),
+                  // Date posted
+                  Container(
+                    height: 12,
+                    width: 70,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Features skeleton (3 chips for house)
                   Row(
                     children: [
-                      _skeletonChip(60),
+                      _skeletonChip(55),
+                      const SizedBox(width: 8),
+                      _skeletonChip(55),
                       const SizedBox(width: 8),
                       _skeletonChip(45),
                     ],
@@ -167,11 +199,11 @@ class PropertyListingCard extends StatelessWidget {
 
   Widget _skeletonChip(double width) {
     return Container(
-      height: 20,
+      height: 22,
       width: width,
       decoration: BoxDecoration(
         color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(11),
       ),
     );
   }
@@ -488,6 +520,7 @@ class FeaturedListingCard extends StatelessWidget {
   final bool isFavorite;
   final VoidCallback? onFavorite;
   final bool isTogglingFavorite;
+  final bool isLoading;
 
   const FeaturedListingCard({
     super.key,
@@ -496,10 +529,13 @@ class FeaturedListingCard extends StatelessWidget {
     this.isFavorite = false,
     this.onFavorite,
     this.isTogglingFavorite = false,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) return _buildSkeleton();
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -823,6 +859,129 @@ class FeaturedListingCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSkeleton() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.zinc200),
+        boxShadow: AppColors.shadowMd,
+      ),
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[200]!,
+        highlightColor: Colors.grey[100]!,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image skeleton (left, fixed width)
+            Container(
+              width: 130,
+              height: 120,
+              color: Colors.grey[300],
+            ),
+            // Content skeleton (right)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Badges
+                    Row(
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          width: 60,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    // Price
+                    Container(
+                      height: 18,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Title
+                    Container(
+                      height: 14,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Description
+                    Container(
+                      height: 12,
+                      width: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Location
+                    Container(
+                      height: 12,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Features (2 chips)
+                    Row(
+                      children: [
+                        Container(
+                          width: 45,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          width: 40,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
