@@ -423,54 +423,69 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   }
 
   Widget _buildOtpInput() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(6, (index) {
-        return Padding(
-          padding: EdgeInsets.only(right: index < 5 ? 10 : 0),
-          child: SizedBox(
-            width: 52,
-            height: 56,
-            child: TextField(
-              controller: _otpControllers[index],
-              focusNode: _otpFocusNodes[index],
-              textAlign: TextAlign.center,
-              keyboardType: TextInputType.number,
-              maxLength: 1,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.navy900,
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmall = screenWidth < 360;
+    final fieldWidth = isSmall ? 42.0 : 48.0;
+    final fieldHeight = isSmall ? 50.0 : 54.0;
+    final gap = isSmall ? 6.0 : 8.0;
+    final fontSize = isSmall ? 20.0 : 22.0;
+    final borderRadius = isSmall ? 10.0 : 12.0;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(6, (index) {
+          return Padding(
+            padding: EdgeInsets.only(right: index < 5 ? gap : 0),
+            child: SizedBox(
+              width: fieldWidth,
+              height: fieldHeight,
+              child: TextField(
+                controller: _otpControllers[index],
+                focusNode: _otpFocusNodes[index],
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                maxLength: 1,
+                style: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.navy900,
+                ),
+                decoration: InputDecoration(
+                  counterText: '',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(borderRadius),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: AppColors.zinc50,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(borderRadius),
+                    borderSide: const BorderSide(color: AppColors.zinc200),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(borderRadius),
+                    borderSide:
+                        const BorderSide(color: AppColors.wave500, width: 2),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: isSmall ? 12 : 14,
+                  ),
+                ),
+                onChanged: (value) {
+                  if (value.isNotEmpty && index < 5) {
+                    _otpFocusNodes[index + 1].requestFocus();
+                  } else if (value.isNotEmpty && index == 5) {
+                    FocusScope.of(context).unfocus();
+                  }
+                },
               ),
-              decoration: InputDecoration(
-                counterText: '',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: AppColors.zinc50,
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: AppColors.zinc200),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide:
-                      const BorderSide(color: AppColors.wave500, width: 2),
-                ),
-              ),
-              onChanged: (value) {
-                if (value.isNotEmpty && index < 5) {
-                  _otpFocusNodes[index + 1].requestFocus();
-                } else if (value.isNotEmpty && index == 5) {
-                  FocusScope.of(context).unfocus();
-                }
-              },
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 
