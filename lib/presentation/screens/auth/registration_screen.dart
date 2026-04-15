@@ -29,6 +29,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   String? _selectedGender = 'Male';
   bool _isOtpSent = false;
   bool _isLoading = false;
+  bool _hasUserData = false;
   int _resendCountdown = 0;
   Timer? _countdownTimer;
 
@@ -38,6 +39,16 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(authStateProvider.notifier).clearError();
     });
+    // Listen for user input
+    _firstNameController.addListener(_markDataEntered);
+    _lastNameController.addListener(_markDataEntered);
+    _phoneController.addListener(_markDataEntered);
+  }
+
+  void _markDataEntered() {
+    if (!_hasUserData) {
+      setState(() => _hasUserData = true);
+    }
   }
 
   @override
@@ -246,28 +257,38 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   }
 
   void _showCancelDialog() {
+    // If no data entered, just go back without asking
+    if (!_hasUserData && !_isOtpSent) {
+      Navigator.pop(context);
+      return;
+    }
+
+    // Show compact confirmation dialog
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Cancel Registration'),
-          content: const Text('Are you sure you want to cancel? Your progress will be lost.'),
+          contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          content: const Text(
+            'Cancel registration?',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('No, Continue', style: TextStyle(color: AppColors.wave600)),
+              child: const Text('No'),
             ),
             TextButton(
               onPressed: () {
                 _countdownTimer?.cancel();
-                // Reset auth state so login shows phone input, not OTP
                 ref.read(authStateProvider.notifier).resetState();
-                Navigator.pop(context); // Close dialog
-                Navigator.pop(context); // Go back to login
+                Navigator.pop(context);
+                Navigator.pop(context);
               },
-              child: const Text('Yes, Cancel', style: TextStyle(color: AppColors.error)),
+              style: TextButton.styleFrom(foregroundColor: AppColors.error),
+              child: const Text('Yes'),
             ),
           ],
         );
