@@ -51,7 +51,9 @@ class ProfileScreen extends ConsumerWidget {
                   subtitle: profileState.user?.isKycVerified == true
                       ? 'Verified'
                       : 'Required',
-                  badge: profileState.user?.isKycVerified == true ? null : 'Required',
+                  badge: profileState.user?.isKycVerified == true
+                      ? null
+                      : 'Required',
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -415,8 +417,8 @@ class ProfileScreen extends ConsumerWidget {
                 );
               }
             },
-            child: const Text('Logout',
-                style: TextStyle(color: AppColors.error)),
+            child:
+                const Text('Logout', style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),

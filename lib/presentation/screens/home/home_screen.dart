@@ -11,6 +11,7 @@ import '../search/search_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../listing/listing_detail_screen.dart';
 import '../profile/edit_profile_screen.dart';
+import '../auth/otp_login_screen.dart';
 import '../../../data/models/listing.dart';
 
 /// Home Screen - Modern premium header with glassmorphism & animations
@@ -21,7 +22,8 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStateMixin {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   final Set<int> _togglingFavorites = {};
   late AnimationController _headerAnimationController;
@@ -63,7 +65,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         !state.isLoading &&
         !state.isLoadingMore &&
         state.hasMore) {
-      ref.read(listingsProvider.notifier).loadListings(page: state.currentPage + 1);
+      ref
+          .read(listingsProvider.notifier)
+          .loadListings(page: state.currentPage + 1);
     }
   }
 
@@ -119,7 +123,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                 ),
                 onProfileTap: () => _showProfileModal(context, ref, authState),
                 onNotificationsTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const NotificationsScreen()),
                 ),
               ),
             ),
@@ -145,13 +150,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
     );
   }
 
-  void _showProfileModal(BuildContext context, WidgetRef ref, AuthState authState) {
+  void _showProfileModal(
+      BuildContext context, WidgetRef ref, AuthState authState) {
     final user = authState.user;
     final profileState = ref.read(profileProvider);
     final stats = profileState.stats;
-    final initials = user?.initials.isNotEmpty == true ? user!.initials : (user?.firstName?.substring(0, 1).toUpperCase() ?? '?');
-    final fullName = user?.fullName.isNotEmpty == true ? user!.fullName : 'User';
-    final phone = user?.phoneNumber.isNotEmpty == true ? user!.phoneNumber : (user?.email ?? 'N/A');
+    final initials = user?.initials.isNotEmpty == true
+        ? user!.initials
+        : (user?.firstName?.substring(0, 1).toUpperCase() ?? '?');
+    final fullName =
+        user?.fullName.isNotEmpty == true ? user!.fullName : 'User';
+    final phone = user?.phoneNumber.isNotEmpty == true
+        ? user!.phoneNumber
+        : (user?.email ?? 'N/A');
 
     showModalBottomSheet(
       context: context,
@@ -295,6 +306,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                       onTap: () async {
                         Navigator.pop(ctx);
                         await ref.read(authStateProvider.notifier).logout();
+                        if (mounted) {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (_) => const OtpLoginScreen()),
+                            (route) => false,
+                          );
+                        }
                       },
                     ),
                   ],
@@ -396,7 +414,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
               ),
               const SizedBox(height: 4),
               Text(
-                title == 'Featured Listings' ? 'Premium properties' : 'Recently added',
+                title == 'Featured Listings'
+                    ? 'Premium properties'
+                    : 'Recently added',
                 style: TextStyle(
                   fontSize: 13,
                   color: AppColors.navy400,
@@ -436,13 +456,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
           itemCount: 3,
           itemBuilder: (context, index) => const Padding(
             padding: EdgeInsets.only(right: 16),
-            child: SizedBox(width: 280, child: PropertyListingCard(isLoading: true)),
+            child: SizedBox(
+                width: 280, child: PropertyListingCard(isLoading: true)),
           ),
         ),
       );
     }
     if (state.listings.isEmpty) {
-      return const SizedBox(height: 80, child: Center(child: Text("No featured listings available")));
+      return const SizedBox(
+          height: 80,
+          child: Center(child: Text("No featured listings available")));
     }
     return SizedBox(
       height: 180,
@@ -463,7 +486,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                 isTogglingFavorite: _isToggling(listing.id),
                 onFavorite: () => _toggleFavorite(listing.id),
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => ListingDetailScreen(listingId: listing.id)),
+                  MaterialPageRoute(
+                      builder: (_) =>
+                          ListingDetailScreen(listingId: listing.id)),
                 ),
               ),
             ),
@@ -479,13 +504,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
         sliver: SliverList(
           delegate: SliverChildListDelegate([
-            for (int i = 0; i < 3; i++) const PropertyListingCard(isLoading: true),
+            for (int i = 0; i < 3; i++)
+              const PropertyListingCard(isLoading: true),
           ]),
         ),
       );
     }
     if (state.listings.isEmpty) {
-      return const SliverFillRemaining(child: Center(child: Text("No latest listings available")));
+      return const SliverFillRemaining(
+          child: Center(child: Text("No latest listings available")));
     }
     return SliverPadding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
@@ -508,7 +535,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStat
                 isTogglingFavorite: _isToggling(listing.id),
                 onFavorite: () => _toggleFavorite(listing.id),
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => ListingDetailScreen(listingId: listing.id)),
+                  MaterialPageRoute(
+                      builder: (_) =>
+                          ListingDetailScreen(listingId: listing.id)),
                 ),
               ),
             );
@@ -537,7 +566,8 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
   });
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     final user = authState.user;
     final userFirstName = user?.firstName ?? 'WaveMart';
     final userInitials = _getInitials(user?.firstName, user?.lastName);
@@ -800,6 +830,6 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(_HeaderDelegate oldDelegate) {
     return oldDelegate.authState != authState ||
-           oldDelegate.unreadCountAsync != unreadCountAsync;
+        oldDelegate.unreadCountAsync != unreadCountAsync;
   }
 }
