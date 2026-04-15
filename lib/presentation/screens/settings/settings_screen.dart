@@ -4,11 +4,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/auth_provider.dart';
 import '../kyc/kyc_verification_screen.dart';
 import '../subscriptions/subscription_plans_screen.dart';
 import '../listing/my_listings_screen.dart';
 import '../payments/payment_history_screen.dart';
 import '../help/help_center_screen.dart';
+import '../auth/otp_login_screen.dart';
 
 /// Settings Screen - App settings and support (no profile/nav)
 class SettingsScreen extends ConsumerWidget {
@@ -78,7 +80,9 @@ class SettingsScreen extends ConsumerWidget {
                   subtitle: profileState.user?.isKycVerified == true
                       ? 'Verified'
                       : 'Required',
-                  badge: profileState.user?.isKycVerified == true ? null : 'Required',
+                  badge: profileState.user?.isKycVerified == true
+                      ? null
+                      : 'Required',
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -90,7 +94,6 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-
             _buildMenuSection(
               title: 'Support',
               items: [
@@ -121,7 +124,6 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-
             _buildMenuSection(
               title: 'Preferences',
               items: [
@@ -131,19 +133,35 @@ class SettingsScreen extends ConsumerWidget {
                   subtitle: 'English',
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Language settings coming soon')),
+                      const SnackBar(
+                          content: Text('Language settings coming soon')),
                     );
                   },
                 ),
                 _MenuItemData(
                   icon: Icons.privacy_tip_outlined,
                   title: 'Privacy Policy',
-                  onTap: () => _openWebPage(context, 'https://wavemart.et/privacy', 'Privacy Policy'),
+                  onTap: () => _openWebPage(
+                      context, 'https://wavemart.et/privacy', 'Privacy Policy'),
                 ),
                 _MenuItemData(
                   icon: Icons.description_outlined,
                   title: 'Terms of Service',
-                  onTap: () => _openWebPage(context, 'https://wavemart.et/terms', 'Terms of Service'),
+                  onTap: () => _openWebPage(
+                      context, 'https://wavemart.et/terms', 'Terms of Service'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _buildMenuSection(
+              title: 'Account',
+              items: [
+                _MenuItemData(
+                  icon: Icons.logout,
+                  title: 'Logout',
+                  subtitle: 'Sign out of your account',
+                  textColor: AppColors.error,
+                  onTap: () => _showLogoutConfirmation(context, ref),
                 ),
               ],
             ),
@@ -154,7 +172,39 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _openWebPage(BuildContext context, String url, String title) async {
+  Future<void> _showLogoutConfirmation(
+      BuildContext context, WidgetRef ref) async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await ref.read(authStateProvider.notifier).logout();
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const OtpLoginScreen()),
+                  (route) => false,
+                );
+              }
+            },
+            child:
+                const Text('Logout', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openWebPage(
+      BuildContext context, String url, String title) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -193,7 +243,8 @@ class SettingsScreen extends ConsumerWidget {
             children: items.asMap().entries.map((entry) {
               final index = entry.key;
               final item = entry.value;
-              return _buildMenuItem(item, showDivider: index < items.length - 1);
+              return _buildMenuItem(item,
+                  showDivider: index < items.length - 1);
             }).toList(),
           ),
         ),
@@ -215,13 +266,14 @@ class SettingsScreen extends ConsumerWidget {
             child: Icon(
               item.icon,
               size: 20,
-              color: AppColors.navy600,
+              color: item.textColor ?? AppColors.navy600,
             ),
           ),
           title: Text(
             item.title,
             style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.w500,
+              color: item.textColor,
             ),
           ),
           subtitle: item.subtitle != null
@@ -232,7 +284,8 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               if (item.badge != null) ...[
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: AppColors.wave100,
                     borderRadius: BorderRadius.circular(10),
@@ -265,6 +318,7 @@ class _MenuItemData {
   final String title;
   final String? subtitle;
   final String? badge;
+  final Color? textColor;
   final VoidCallback onTap;
 
   _MenuItemData({
@@ -272,6 +326,7 @@ class _MenuItemData {
     required this.title,
     this.subtitle,
     this.badge,
+    this.textColor,
     required this.onTap,
   });
 }
