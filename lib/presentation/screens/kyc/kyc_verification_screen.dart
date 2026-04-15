@@ -18,7 +18,7 @@ class KycVerificationScreen extends ConsumerStatefulWidget {
 }
 
 class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen> {
-  String? _documentType;
+  String? _documentType = 'national_id';
   File? _frontImage;
   File? _backImage;
   File? _selfieImage;
@@ -71,6 +71,13 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen> {
   }
 
   void _showImagePickerOptions(String type) {
+    // For selfies, always open camera directly
+    if (type == 'selfie') {
+      _pickImage(ImageSource.camera, type);
+      return;
+    }
+
+    // For document images, show picker options
     showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
