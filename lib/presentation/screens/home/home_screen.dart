@@ -10,6 +10,8 @@ import '../../widgets/listing_card.dart';
 import '../search/search_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../listing/listing_detail_screen.dart';
+import '../listing/my_listings_screen.dart';
+import '../favorites/favorites_screen.dart';
 import '../profile/edit_profile_screen.dart';
 import '../auth/otp_login_screen.dart';
 import '../../../data/models/listing.dart';
@@ -264,16 +266,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         _buildModalStatItem(
                           value: stats?.totalListings.toString() ?? '0',
                           label: 'Listings',
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            _navigateToMyListings();
+                          },
                         ),
                         const SizedBox(width: 12),
                         _buildModalStatItem(
                           value: stats?.totalFavorites.toString() ?? '0',
                           label: 'Favorites',
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            _navigateToFavorites();
+                          },
                         ),
                         const SizedBox(width: 12),
                         _buildModalStatItem(
-                          value: stats?.unreadMessages.toString() ?? '0',
-                          label: 'Messages',
+                          value: user?.isKycVerified == true
+                              ? 'Verified'
+                              : 'Pending',
+                          label: 'KYC Status',
+                          valueColor: user?.isKycVerified == true
+                              ? AppColors.emerald600
+                              : AppColors.warning,
                         ),
                       ],
                     ),
@@ -325,35 +340,55 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildModalStatItem({required String value, required String label}) {
+  void _navigateToMyListings() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const MyListingsScreen()),
+    );
+  }
+
+  void _navigateToFavorites() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const FavoritesScreen()),
+    );
+  }
+
+  Widget _buildModalStatItem({
+    required String value,
+    required String label,
+    Color? valueColor,
+    VoidCallback? onTap,
+  }) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: AppColors.zinc50,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.zinc200),
-        ),
-        child: Column(
-          children: [
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.wave600,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: onTap != null ? AppColors.zinc50 : AppColors.zinc50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.zinc200),
+          ),
+          child: Column(
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: valueColor ?? AppColors.wave600,
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11,
-                color: AppColors.navy400,
-                fontWeight: FontWeight.w500,
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.navy400,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
