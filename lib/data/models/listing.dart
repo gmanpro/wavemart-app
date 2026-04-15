@@ -27,7 +27,9 @@ PropertyType _parsePropertyType(dynamic value) {
   if (value == null) return PropertyType.house;
   final str = value.toString();
   // Extract class name from full namespace like 'App\Models\House'
-  final className = str.contains('\\') ? str.split('\\').last.toLowerCase() : str.toLowerCase();
+  final className = str.contains('\\')
+      ? str.split('\\').last.toLowerCase()
+      : str.toLowerCase();
   if (className == 'house') return PropertyType.house;
   if (className == 'land') return PropertyType.land;
   return PropertyType.house;
@@ -83,6 +85,10 @@ class Listing extends ChangeNotifier {
   final String? sitePlanImageLink;
   final String? holdingType;
   final String? description;
+  final int? bedrooms;
+  final int? bathrooms;
+  final int? salons;
+  final int? imageCount;
   final List<ImageModel> images;
   final Address? address;
   final DateTime createdAt;
@@ -116,6 +122,10 @@ class Listing extends ChangeNotifier {
     this.sitePlanImageLink,
     this.holdingType,
     this.description,
+    this.bedrooms,
+    this.bathrooms,
+    this.salons,
+    this.imageCount,
     this.images = const [],
     this.address,
     required this.createdAt,
@@ -126,9 +136,8 @@ class Listing extends ChangeNotifier {
     // Images may be directly on listing or nested under property
     List<ImageModel> images = [];
     if (json['images'] is List) {
-      images = (json['images'] as List)
-          .map((e) => ImageModel.fromJson(e))
-          .toList();
+      images =
+          (json['images'] as List).map((e) => ImageModel.fromJson(e)).toList();
     }
     final property = json['property'];
     if (property is Map && property['images'] is List) {
@@ -175,6 +184,15 @@ class Listing extends ChangeNotifier {
       holdingType: json['holding_type'],
       description: json['description'] ??
           (property is Map ? property['description'] : null),
+      bedrooms:
+          _safeInt(property is Map ? property['bedrooms'] : json['bedrooms']),
+      bathrooms:
+          _safeInt(property is Map ? property['bathrooms'] : json['bathrooms']),
+      salons: _safeInt(property is Map ? property['salons'] : json['salons']),
+      imageCount: images.isNotEmpty
+          ? images.length
+          : _safeInt(json['image_count'] ??
+              (property is Map ? property['image_count'] : 0)),
       images: images,
       address: (json['address'] is Map)
           ? Address.fromJson(json['address'] as Map<String, dynamic>)
@@ -217,6 +235,10 @@ class Listing extends ChangeNotifier {
       'site_plan_image_link': sitePlanImageLink,
       'holding_type': holdingType,
       'description': description,
+      'bedrooms': bedrooms,
+      'bathrooms': bathrooms,
+      'salons': salons,
+      'image_count': imageCount,
       'images': images.map((e) => e.toJson()).toList(),
       'address': address?.toJson(),
       'created_at': createdAt.toIso8601String(),
@@ -255,7 +277,8 @@ class Listing extends ChangeNotifier {
   }
 
   bool get isFeaturedActive {
-    return isFeatured && (featuredUntil == null || featuredUntil!.isAfter(DateTime.now()));
+    return isFeatured &&
+        (featuredUntil == null || featuredUntil!.isAfter(DateTime.now()));
   }
 
   @override

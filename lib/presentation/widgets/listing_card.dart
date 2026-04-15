@@ -60,8 +60,16 @@ class PropertyListingCard extends StatelessWidget {
                   _buildTitle(),
                   const SizedBox(height: 4),
 
+                  // Description
+                  _buildDescription(),
+                  const SizedBox(height: 8),
+
                   // Location
                   _buildLocation(),
+                  const SizedBox(height: 6),
+
+                  // Date Posted
+                  _buildDatePosted(),
                   const SizedBox(height: 12),
 
                   // Features Row
@@ -92,13 +100,15 @@ class PropertyListingCard extends StatelessWidget {
           children: [
             // Image skeleton
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
               child: AspectRatio(
                 aspectRatio: 4 / 3,
                 child: Container(
                   color: Colors.grey[300],
                   child: Center(
-                    child: Icon(Icons.home_rounded, size: 40, color: Colors.grey[400]),
+                    child: Icon(Icons.home_rounded,
+                        size: 40, color: Colors.grey[400]),
                   ),
                 ),
               ),
@@ -238,7 +248,8 @@ class PropertyListingCard extends StatelessWidget {
                         height: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : Icon(
@@ -246,6 +257,33 @@ class PropertyListingCard extends StatelessWidget {
                         size: 18,
                         color: Colors.white,
                       ),
+              ),
+            ),
+          ),
+
+        // Image Count Badge
+        if ((listing?.imageCount ?? 0) > 1)
+          Positioned(
+            top: 12,
+            right: 48,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.photo_library,
+                      size: 12, color: Colors.white),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${listing?.imageCount ?? 0}',
+                    style:
+                        AppTextStyles.labelSmall.copyWith(color: Colors.white),
+                  ),
+                ],
               ),
             ),
           ),
@@ -320,6 +358,19 @@ class PropertyListingCard extends StatelessWidget {
     );
   }
 
+  Widget _buildDescription() {
+    final description = listing?.description;
+    if (description == null || description.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Text(
+      description,
+      style: AppTextStyles.bodySmall.copyWith(color: AppColors.zinc600),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
   Widget _buildLocation() {
     final location = listing?.address?.shortAddress ??
         listing?.address?.region ??
@@ -344,13 +395,54 @@ class PropertyListingCard extends StatelessWidget {
     );
   }
 
+  Widget _buildDatePosted() {
+    final date = listing?.createdAt;
+    if (date == null) return const SizedBox.shrink();
+    final daysOld = DateTime.now().difference(date).inDays;
+    String dateText;
+    if (daysOld == 0) {
+      dateText = 'Today';
+    } else if (daysOld == 1) {
+      dateText = 'Yesterday';
+    } else if (daysOld < 7) {
+      dateText = '$daysOld days ago';
+    } else if (daysOld < 30) {
+      dateText = '${(daysOld / 7).floor()} weeks ago';
+    } else {
+      dateText = '${(daysOld / 30).floor()} months ago';
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.access_time, size: 12, color: AppColors.zinc400),
+        const SizedBox(width: 4),
+        Text(
+          dateText,
+          style: AppTextStyles.caption.copyWith(color: AppColors.zinc500),
+        ),
+      ],
+    );
+  }
+
   Widget _buildFeatures() {
+    final isHouse = listing?.propertyType == PropertyType.house;
     return Row(
       children: [
-        _buildFeatureChip(
-          Icons.square_foot_outlined,
-          '${listing?.totalSquareMeters?.toInt() ?? 0} m²',
-        ),
+        // For houses: bedrooms, bathrooms, salons
+        if (isHouse) ...[
+          if ((listing?.bedrooms ?? 0) > 0)
+            _buildFeatureChip(Icons.bed_outlined, '${listing?.bedrooms}'),
+          if ((listing?.bathrooms ?? 0) > 0)
+            _buildFeatureChip(Icons.bathtub_outlined, '${listing?.bathrooms}'),
+          if ((listing?.salons ?? 0) > 0)
+            _buildFeatureChip(Icons.weekend_outlined, '${listing?.salons}'),
+        ] else ...[
+          // For land: square meters
+          _buildFeatureChip(
+            Icons.square_foot_outlined,
+            '${listing?.totalSquareMeters?.toInt() ?? 0} m²',
+          ),
+        ],
         const SizedBox(width: 8),
         _buildFeatureChip(
           Icons.sell_outlined,
@@ -443,8 +535,16 @@ class FeaturedListingCard extends StatelessWidget {
                     _buildTitle(),
                     const SizedBox(height: 4),
 
+                    // Description
+                    _buildDescription(),
+                    const SizedBox(height: 4),
+
                     // Location
                     _buildLocation(),
+                    const SizedBox(height: 4),
+
+                    // Date Posted
+                    _buildDatePosted(),
                     const Spacer(),
 
                     // Features Row
@@ -515,7 +615,8 @@ class FeaturedListingCard extends StatelessWidget {
                           height: 14,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : Icon(
@@ -564,12 +665,9 @@ class FeaturedListingCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        if (listing.isNew)
-          _buildBadge('NEW', AppColors.emerald500),
-        if (listing.isNew && listing.isFeatured)
-          const SizedBox(width: 4),
-        if (listing.isFeatured)
-          _buildBadge('FEATURED', AppColors.wave500),
+        if (listing.isNew) _buildBadge('NEW', AppColors.emerald500),
+        if (listing.isNew && listing.isFeatured) const SizedBox(width: 4),
+        if (listing.isFeatured) _buildBadge('FEATURED', AppColors.wave500),
       ],
     );
   }
@@ -615,6 +713,53 @@ class FeaturedListingCard extends StatelessWidget {
     );
   }
 
+  Widget _buildDescription() {
+    final description = listing.description;
+    if (description == null || description.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Text(
+      description,
+      style: AppTextStyles.bodySmall.copyWith(
+        fontSize: 11,
+        color: AppColors.zinc600,
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget _buildDatePosted() {
+    final date = listing.createdAt;
+    final daysOld = DateTime.now().difference(date).inDays;
+    String dateText;
+    if (daysOld == 0) {
+      dateText = 'Today';
+    } else if (daysOld == 1) {
+      dateText = 'Yesterday';
+    } else if (daysOld < 7) {
+      dateText = '$daysOld days ago';
+    } else if (daysOld < 30) {
+      dateText = '${(daysOld / 7).floor()} weeks ago';
+    } else {
+      dateText = '${(daysOld / 30).floor()} months ago';
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.access_time, size: 10, color: AppColors.zinc400),
+        const SizedBox(width: 3),
+        Text(
+          dateText,
+          style: AppTextStyles.caption.copyWith(
+            fontSize: 10,
+            color: AppColors.zinc500,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildLocation() {
     return Row(
       children: [
@@ -641,12 +786,20 @@ class FeaturedListingCard extends StatelessWidget {
   }
 
   Widget _buildFeatures() {
+    final isHouse = listing.propertyType == PropertyType.house;
     return Row(
       children: [
-        _buildFeatureChip(
-          Icons.square_foot_outlined,
-          '${listing.totalSquareMeters?.toInt() ?? 0} m²',
-        ),
+        if (isHouse) ...[
+          if ((listing.bedrooms ?? 0) > 0)
+            _buildFeatureChip(Icons.bed_outlined, '${listing.bedrooms}'),
+          if ((listing.bathrooms ?? 0) > 0)
+            _buildFeatureChip(Icons.bathtub_outlined, '${listing.bathrooms}'),
+        ] else ...[
+          _buildFeatureChip(
+            Icons.square_foot_outlined,
+            '${listing.totalSquareMeters?.toInt() ?? 0} m²',
+          ),
+        ],
         const SizedBox(width: 4),
         _buildFeatureChip(
           Icons.sell_outlined,
