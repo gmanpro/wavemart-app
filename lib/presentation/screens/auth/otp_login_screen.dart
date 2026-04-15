@@ -7,7 +7,6 @@ import '../../../../core/theme/text_styles.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/wave_button.dart';
 import '../../widgets/common/app_logo.dart';
-import 'registration_screen.dart';
 import '../navigation/main_navigation_shell.dart';
 
 /// Modern OTP Login Screen with 60-second countdown
@@ -166,8 +165,6 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
                             isFullWidth: true,
                             onPressed: authState.isLoading ? null : _sendOtp,
                           ),
-                          const SizedBox(height: 16),
-                          _buildRegisterLink(),
                         ],
 
                         // Step 2: OTP Input
@@ -326,37 +323,6 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
           fontSize: 15,
         ),
       ),
-    );
-  }
-
-  Widget _buildRegisterLink() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Don\'t have an account? ',
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.navy600,
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const RegistrationScreen(),
-              ),
-            );
-          },
-          child: const Text(
-            'Register',
-            style: TextStyle(
-              color: AppColors.wave600,
-              fontWeight: FontWeight.w600,
-              fontSize: 15,
-            ),
-          ),
-        ),
-      ],
     );
   }
 

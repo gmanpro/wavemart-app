@@ -236,8 +236,8 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Login Link
-                  _buildLoginLink(),
+                  // Login Link (only show before OTP is sent)
+                  if (!_isOtpSent) _buildLoginLink(),
                 ],
               ),
             ),
