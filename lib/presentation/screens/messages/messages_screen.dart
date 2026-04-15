@@ -27,7 +27,8 @@ class MessagesScreen extends ConsumerStatefulWidget {
   ConsumerState<MessagesScreen> createState() => _MessagesScreenState();
 }
 
-class _MessagesScreenState extends ConsumerState<MessagesScreen> with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
+class _MessagesScreenState extends ConsumerState<MessagesScreen>
+    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -112,7 +113,8 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> with WidgetsBin
       return WaveEmptyState(
         icon: Icons.chat_bubble_outline_rounded,
         title: 'No Messages Yet',
-        subtitle: 'Start a conversation about a property by tapping the message icon on a listing',
+        subtitle:
+            'Start a conversation about a property by tapping the message icon on a listing',
         actionLabel: 'Browse Properties',
         onAction: () {
           // Navigate to home tab (index 0)
@@ -146,7 +148,9 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> with WidgetsBin
             onTap: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => ChatScreen(conversationId: conversation.id, conversation: conversation),
+                  builder: (_) => ChatScreen(
+                      conversationId: conversation.id,
+                      conversation: conversation),
                 ),
               );
               // Refresh conversations after returning to update unread badges
@@ -177,7 +181,11 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> with WidgetsBin
             ),
           ),
           title: Container(height: 16, width: 140, color: AppColors.zinc200),
-          subtitle: Container(height: 12, width: 200, color: AppColors.zinc200, margin: const EdgeInsets.only(top: 8)),
+          subtitle: Container(
+              height: 12,
+              width: 200,
+              color: AppColors.zinc200,
+              margin: const EdgeInsets.only(top: 8)),
           trailing: Container(height: 12, width: 40, color: AppColors.zinc200),
         );
       },
@@ -205,14 +213,17 @@ class _ConversationTile extends ConsumerWidget {
     final displayName = conversation.getDisplayTitle(currentUserId);
 
     // Check if this is a property-related conversation
-    final isAssetChat = conversation.isAssetChat || conversation.listingId != null;
+    final isAssetChat =
+        conversation.isAssetChat || conversation.listingId != null;
     final listingTitle = conversation.listingTitle;
 
-    final hasUnread = conversation.unreadCount != null && conversation.unreadCount! > 0;
+    final hasUnread =
+        conversation.unreadCount != null && conversation.unreadCount! > 0;
 
     // Format "You: " prefix for own messages - use lastMessageSenderId for accuracy
     String previewText = conversation.previewText;
-    if (conversation.lastMessage != null && conversation.lastMessage!.isNotEmpty) {
+    if (conversation.lastMessage != null &&
+        conversation.lastMessage!.isNotEmpty) {
       final isOwnLastMessage = conversation.isLastMessageFromMe(currentUserId);
       if (isOwnLastMessage) {
         previewText = 'You: $previewText';
@@ -259,7 +270,9 @@ class _ConversationTile extends ConsumerWidget {
                 constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
                 child: Center(
                   child: Text(
-                    conversation.unreadCount! > 99 ? '99+' : '${conversation.unreadCount}',
+                    conversation.unreadCount! > 99
+                        ? '99+'
+                        : '${conversation.unreadCount}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 9,
@@ -288,7 +301,8 @@ class _ConversationTile extends ConsumerWidget {
             Expanded(
               child: Text(
                 listingTitle ?? 'Property',
-                style: AppTextStyles.bodySmall.copyWith(color: AppColors.zinc500),
+                style:
+                    AppTextStyles.bodySmall.copyWith(color: AppColors.zinc500),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -335,7 +349,8 @@ class ChatScreen extends ConsumerStatefulWidget {
   final int conversationId;
   final msg.Conversation conversation;
 
-  const ChatScreen({super.key, required this.conversationId, required this.conversation});
+  const ChatScreen(
+      {super.key, required this.conversationId, required this.conversation});
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -345,6 +360,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _listScrollController = ScrollController();
   bool _isSending = false;
+  bool _hasScrolledToUnread = false;
 
   @override
   void dispose() {
@@ -360,7 +376,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     setState(() => _isSending = true);
     _messageController.clear();
 
-    final success = await ref.read(chatMessagesProvider(widget.conversationId).notifier).sendMessage(text);
+    final success = await ref
+        .read(chatMessagesProvider(widget.conversationId).notifier)
+        .sendMessage(text);
 
     if (mounted) {
       setState(() => _isSending = false);
@@ -368,7 +386,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         _scrollToBottom();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to send message'), backgroundColor: AppColors.error),
+          const SnackBar(
+              content: Text('Failed to send message'),
+              backgroundColor: AppColors.error),
         );
       }
     }
@@ -384,6 +404,91 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         );
       }
     });
+  }
+
+  void _scrollToFirstUnread(List<msg.Message> messages, int currentUserId) {
+    if (_hasScrolledToUnread || messages.isEmpty) return;
+
+    // Find index of first unread message (not from me, not read)
+    int firstUnreadIndex = -1;
+    for (int i = 0; i < messages.length; i++) {
+      final msg = messages[i];
+      if (msg.senderId != currentUserId && !msg.isRead && msg.readAt == null) {
+        firstUnreadIndex = i;
+        break;
+      }
+    }
+
+    _hasScrolledToUnread = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_listScrollController.hasClients) return;
+
+      if (firstUnreadIndex >= 0) {
+        // Scroll to the unread message
+        final double offset = firstUnreadIndex * 80.0;
+        _listScrollController.animateTo(
+          offset.clamp(0, _listScrollController.position.maxScrollExtent),
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeOut,
+        );
+      } else {
+        // No unread - scroll to bottom
+        _scrollToBottom();
+      }
+    });
+  }
+
+  Widget _buildMessagesList(List<msg.Message> messages, int currentUserId) {
+    // Trigger scroll to first unread on first build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToFirstUnread(messages, currentUserId);
+    });
+
+    // Find first unread index for divider
+    int firstUnreadIndex = -1;
+    for (int i = 0; i < messages.length; i++) {
+      final msg = messages[i];
+      if (msg.senderId != currentUserId && !msg.isRead && msg.readAt == null) {
+        firstUnreadIndex = i;
+        break;
+      }
+    }
+
+    return ListView.builder(
+      controller: _listScrollController,
+      padding: const EdgeInsets.all(12),
+      itemCount: messages.length,
+      itemBuilder: (context, index) {
+        // Add unread divider
+        if (index == firstUnreadIndex && firstUnreadIndex >= 0) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.wave100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'New messages',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.wave700,
+                  ),
+                ),
+              ),
+              _MessageBubble(message: messages[index]),
+            ],
+          );
+        }
+        return _MessageBubble(message: messages[index]);
+      },
+    );
   }
 
   @override
@@ -404,8 +509,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-            Text(subtitle, style: const TextStyle(fontSize: 11, color: Colors.white70)),
+            Text(title,
+                style:
+                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+            Text(subtitle,
+                style: const TextStyle(fontSize: 11, color: Colors.white70)),
           ],
         ),
       ),
@@ -419,7 +527,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ? WaveErrorBanner(
                         message: chatState.errorMessage!,
                         onRetry: () {
-                          ref.read(chatMessagesProvider(widget.conversationId).notifier).loadMessages();
+                          ref
+                              .read(chatMessagesProvider(widget.conversationId)
+                                  .notifier)
+                              .loadMessages();
                         },
                       )
                     : chatState.messages.isEmpty
@@ -427,20 +538,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.chat_bubble_outline, size: 64, color: AppColors.navy300),
+                                Icon(Icons.chat_bubble_outline,
+                                    size: 64, color: AppColors.navy300),
                                 const SizedBox(height: 16),
-                                Text('No messages yet', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.navy500)),
+                                Text('No messages yet',
+                                    style: AppTextStyles.bodyLarge
+                                        .copyWith(color: AppColors.navy500)),
                               ],
                             ),
                           )
-                        : ListView.builder(
-                            controller: _listScrollController,
-                            padding: const EdgeInsets.all(12),
-                            itemCount: chatState.messages.length,
-                            itemBuilder: (context, index) {
-                              return _MessageBubble(message: chatState.messages[index]);
-                            },
-                          ),
+                        : _buildMessagesList(chatState.messages, currentUserId),
           ),
 
           // Message input
@@ -467,7 +574,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                       ),
                       maxLines: null,
                       textCapitalization: TextCapitalization.sentences,
@@ -485,7 +593,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           ? const SizedBox(
                               width: 20,
                               height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white)),
                             )
                           : const Icon(Icons.send, color: Colors.white),
                       onPressed: _isSending ? null : _sendMessage,
@@ -511,7 +622,8 @@ Widget _buildMessagesSkeleton() {
       return Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: Row(
-          mainAxisAlignment: isLeft ? MainAxisAlignment.start : MainAxisAlignment.end,
+          mainAxisAlignment:
+              isLeft ? MainAxisAlignment.start : MainAxisAlignment.end,
           children: [
             if (isLeft) ...[
               Container(
@@ -572,7 +684,8 @@ class _MessageBubble extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        mainAxisAlignment: isOwn ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isOwn ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           // Avatar for incoming messages
@@ -619,7 +732,8 @@ class _MessageBubble extends ConsumerWidget {
                 ],
               ),
               child: Column(
-                crossAxisAlignment: isOwn ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    isOwn ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 children: [
                   Text(
                     message.body,
@@ -635,7 +749,9 @@ class _MessageBubble extends ConsumerWidget {
                       Text(
                         message.displayTime,
                         style: TextStyle(
-                          color: isOwn ? Colors.white.withOpacity(0.7) : AppColors.zinc400,
+                          color: isOwn
+                              ? Colors.white.withOpacity(0.7)
+                              : AppColors.zinc400,
                           fontSize: 10,
                         ),
                       ),
