@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_colors.dart';
 
-/// Shared app logo widget used across splash, login, and registration screens
+/// Shared app logo widget using the actual app launcher icon
 class AppLogo extends StatelessWidget {
   final double size;
 
@@ -28,11 +27,12 @@ class AppLogo extends StatelessWidget {
           ),
         ],
       ),
-      child: Center(
-        child: Icon(
-          Icons.home_rounded,
+      child: Padding(
+        padding: EdgeInsets.all(size * 0.18),
+        child: Image.asset(
+          'assets/images/app_icon.png',
+          fit: BoxFit.contain,
           color: Colors.white,
-          size: size * 0.5,
         ),
       ),
     );
