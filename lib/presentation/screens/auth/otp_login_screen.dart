@@ -198,14 +198,6 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-
-                  // Loading indicator
-                  if (authState.isLoading) ...[
-                    const SizedBox(height: 24),
-                    const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  ],
                 ],
               ),
             ),

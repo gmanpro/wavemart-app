@@ -238,14 +238,6 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
                   // Login Link
                   _buildLoginLink(),
-
-                  // Loading indicator
-                  if (_isLoading) ...[
-                    const SizedBox(height: 24),
-                    const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  ],
                 ],
               ),
             ),
