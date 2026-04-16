@@ -52,66 +52,24 @@ class PropertyListingCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Price skeleton
-                  Container(
-                    height: 22,
-                    width: 130,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
+                  // Price
+                  _buildPrice(),
                   const SizedBox(height: 8),
-                  // Description line 1
-                  Container(
-                    height: 14,
-                    width: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  // Description line 2
-                  Container(
-                    height: 14,
-                    width: 150,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
+
+                  // Description
+                  _buildDescription(),
                   const SizedBox(height: 8),
-                  // Location skeleton
-                  Container(
-                    height: 14,
-                    width: 180,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
+
+                  // Location
+                  _buildLocation(),
                   const SizedBox(height: 6),
-                  // Date posted
-                  Container(
-                    height: 12,
-                    width: 70,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
+
+                  // Date Posted
+                  _buildDatePosted(),
                   const SizedBox(height: 12),
-                  // Features skeleton (3 chips for house)
-                  Row(
-                    children: [
-                      _skeletonChip(55),
-                      const SizedBox(width: 8),
-                      _skeletonChip(55),
-                      const SizedBox(width: 8),
-                      _skeletonChip(45),
-                    ],
-                  ),
+
+                  // Features Row
+                  _buildFeatures(),
                 ],
               ),
             ),
