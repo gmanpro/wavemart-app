@@ -15,6 +15,7 @@ import '../favorites/favorites_screen.dart';
 import '../profile/edit_profile_screen.dart';
 import '../auth/otp_login_screen.dart';
 import '../../../data/models/listing.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Home Screen - Modern premium header with glassmorphism & animations
 class HomeScreen extends ConsumerStatefulWidget {
@@ -137,9 +138,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   position: _slideAnimation,
                   child: Column(
                     children: [
-                      _buildSectionHeader("Featured Listings"),
+                      _buildSectionHeader(context,
+                          AppLocalizations.of(context).listingsFeatured),
                       _buildFeaturedListings(featuredState),
-                      _buildSectionHeader("Latest Listings"),
+                      _buildSectionHeader(
+                          context, AppLocalizations.of(context).listingsTitle),
                     ],
                   ),
                 ),
@@ -428,28 +431,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 28, 20, 16),
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 title,
-                style: AppTextStyles.title.copyWith(
-                  fontSize: 20,
+                style: const TextStyle(
+                  fontSize: 18,
                   fontWeight: FontWeight.w700,
+                  color: AppColors.navy950,
                   letterSpacing: -0.3,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                title == 'Featured Listings'
+                title == AppLocalizations.of(context).listingsFeatured
                     ? 'Premium properties'
                     : 'Recently added',
                 style: TextStyle(
@@ -503,9 +506,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       );
     }
     if (state.listings.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
           height: 80,
-          child: Center(child: Text("No featured listings available")));
+          child: Center(
+              child: Text(AppLocalizations.of(context).listingsNoResults)));
     }
     return SizedBox(
       height: 180,
@@ -551,8 +555,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       );
     }
     if (state.listings.isEmpty) {
-      return const SliverFillRemaining(
-          child: Center(child: Text("No latest listings available")));
+      return SliverFillRemaining(
+          child: Center(
+              child: Text(AppLocalizations.of(context).listingsNoResults)));
     }
     return SliverPadding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),

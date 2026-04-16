@@ -6,6 +6,7 @@ import '../../providers/app_providers.dart';
 import '../../widgets/listing_card.dart';
 import '../../widgets/common/wave_common_widgets.dart';
 import '../listing/listing_detail_screen.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Favorites Screen - Wired to favoritesProvider
 class FavoritesScreen extends ConsumerStatefulWidget {
@@ -35,8 +36,8 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
       setState(() => _togglingFavorites.remove(listingId));
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Property removed from saved'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).favoritesRemoved),
             backgroundColor: AppColors.wave500,
           ),
         );
@@ -52,7 +53,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Saved Properties'),
+        title: Text(AppLocalizations.of(context).favoritesTitle),
         actions: [
           if (state.favorites.isNotEmpty)
             Padding(
@@ -90,8 +91,8 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
     if (state.favorites.isEmpty) {
       return WaveEmptyState(
         icon: Icons.favorite_border,
-        title: 'No Saved Properties',
-        subtitle: 'Start saving properties you like to see them here',
+        title: AppLocalizations.of(context).favoritesEmpty,
+        subtitle: AppLocalizations.of(context).favoritesEmptySubtitle,
         actionLabel: 'Browse Properties',
         onAction: () {
           // Navigate to home tab (index 0)

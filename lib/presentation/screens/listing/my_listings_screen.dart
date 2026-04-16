@@ -6,6 +6,7 @@ import '../../widgets/common/wave_common_widgets.dart';
 import '../../widgets/listing_card.dart';
 import '../listing/listing_detail_screen.dart';
 import '../listing/create_listing_screen.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// My Listings Screen - Shows user's own listings
 class MyListingsScreen extends ConsumerStatefulWidget {
@@ -84,7 +85,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Listings'),
+        title: Text(AppLocalizations.of(context).profileMyListings),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
@@ -96,7 +97,7 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
                 _loadMyListings();
               }
             },
-            tooltip: 'Create Listing',
+            tooltip: AppLocalizations.of(context).listingsCreate,
           ),
         ],
       ),
@@ -123,9 +124,9 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     if (_myListings.isEmpty) {
       return WaveEmptyState(
         icon: Icons.home_outlined,
-        title: 'No Listings Yet',
+        title: AppLocalizations.of(context).listingsNoResults,
         subtitle: 'Create your first listing to get started',
-        actionLabel: 'Create Listing',
+        actionLabel: AppLocalizations.of(context).listingsCreate,
         onAction: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const CreateListingScreen()),

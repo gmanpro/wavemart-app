@@ -20,6 +20,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileState = ref.watch(profileProvider);
+    final localeCode = ref.watch(localeProvider).locale?.languageCode;
 
     if (profileState.isLoading && profileState.user == null) {
       ref.read(profileProvider.notifier).loadProfile();
@@ -131,8 +132,7 @@ class SettingsScreen extends ConsumerWidget {
                 _MenuItemData(
                   icon: Icons.language,
                   title: AppLocalizations.of(context).settingsLanguage,
-                  subtitle: _getCurrentLanguageName(
-                      ref.watch(localeProvider).locale?.languageCode),
+                  subtitle: _getCurrentLanguageName(localeCode),
                   onTap: () => _showLanguageSelectionDialog(context, ref),
                 ),
                 _MenuItemData(

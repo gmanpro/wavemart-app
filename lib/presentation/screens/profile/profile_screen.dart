@@ -8,6 +8,7 @@ import '../../widgets/common/wave_common_widgets.dart';
 import '../auth/otp_login_screen.dart';
 import '../kyc/kyc_verification_screen.dart';
 import 'edit_profile_screen.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Profile Screen - Only profile-related content (personal info, KYC, stats)
 class ProfileScreen extends ConsumerWidget {
@@ -24,7 +25,7 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Profile'),
+        title: Text(AppLocalizations.of(context).profileTitle),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -47,7 +48,7 @@ class ProfileScreen extends ConsumerWidget {
               items: [
                 _MenuItemData(
                   icon: Icons.verified_user_outlined,
-                  title: 'KYC Verification',
+                  title: AppLocalizations.of(context).profileKyc,
                   subtitle: profileState.user?.isKycVerified == true
                       ? 'Verified'
                       : 'Required',
@@ -64,7 +65,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 _MenuItemData(
                   icon: Icons.edit_outlined,
-                  title: 'Edit Profile',
+                  title: AppLocalizations.of(context).profileEdit,
                   subtitle: 'Update your information',
                   onTap: () async {
                     final result = await Navigator.of(context).push(
@@ -87,7 +88,7 @@ class ProfileScreen extends ConsumerWidget {
               child: OutlinedButton.icon(
                 onPressed: () => _showLogoutDialog(context, ref),
                 icon: const Icon(Icons.logout, size: 20),
-                label: const Text('Logout'),
+                label: Text(AppLocalizations.of(context).authLogout),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.error,
                   side: const BorderSide(color: AppColors.error),
