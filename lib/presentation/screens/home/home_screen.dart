@@ -492,7 +492,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           itemBuilder: (context, index) => const Padding(
             padding: EdgeInsets.only(right: 16),
             child: SizedBox(
-                width: 280, child: PropertyListingCard(isLoading: true)),
+              width: 280,
+              child: FeaturedListingCard(
+                listing: null,
+                isLoading: true,
+              ),
+            ),
           ),
         ),
       );

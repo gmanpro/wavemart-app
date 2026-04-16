@@ -102,7 +102,7 @@ class Payment {
       'currency': currency,
       'status': status.toString().split('.').last,
       'payment_method': paymentMethod,
-      'chapa_transaction_id':/chapaTransactionId,
+      'chapa_transaction_id': chapaTransactionId,
       'callback_url': callbackUrl,
       'return_url': returnUrl,
       'metadata': metadata,

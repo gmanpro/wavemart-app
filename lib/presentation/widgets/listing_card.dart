@@ -511,7 +511,7 @@ class PropertyListingCard extends StatelessWidget {
 /// Featured Listing Card - Horizontal layout with image on the left
 /// Designed for the home screen featured section with modern elegant styling
 class FeaturedListingCard extends StatelessWidget {
-  final Listing listing;
+  final Listing? listing;
   final VoidCallback? onTap;
   final bool isFavorite;
   final VoidCallback? onFavorite;
@@ -520,7 +520,7 @@ class FeaturedListingCard extends StatelessWidget {
 
   const FeaturedListingCard({
     super.key,
-    required this.listing,
+    this.listing,
     this.onTap,
     this.isFavorite = false,
     this.onFavorite,
@@ -530,7 +530,7 @@ class FeaturedListingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) return _buildSkeleton();
+    if (isLoading || listing == null) return _buildSkeleton();
 
     return GestureDetector(
       onTap: onTap,
@@ -675,7 +675,7 @@ class FeaturedListingCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                listing.propertyType == PropertyType.house
+                listing?.propertyType == PropertyType.house
                     ? Icons.home
                     : Icons.landscape,
                 size: 12,
@@ -683,7 +683,7 @@ class FeaturedListingCard extends StatelessWidget {
               ),
               const SizedBox(width: 3),
               Text(
-                listing.propertyType == PropertyType.house ? 'House' : 'Land',
+                listing?.propertyType == PropertyType.house ? 'House' : 'Land',
                 style: AppTextStyles.labelSmall.copyWith(
                   color: Colors.white,
                   fontSize: 9,
@@ -693,9 +693,11 @@ class FeaturedListingCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        if (listing.isNew) _buildBadge('NEW', AppColors.emerald500),
-        if (listing.isNew && listing.isFeatured) const SizedBox(width: 4),
-        if (listing.isFeatured) _buildBadge('FEATURED', AppColors.wave500),
+        if (listing?.isNew == true) _buildBadge('NEW', AppColors.emerald500),
+        if (listing?.isNew == true && listing?.isFeatured == true)
+          const SizedBox(width: 4),
+        if (listing?.isFeatured == true)
+          _buildBadge('FEATURED', AppColors.wave500),
       ],
     );
   }
@@ -719,7 +721,7 @@ class FeaturedListingCard extends StatelessWidget {
 
   Widget _buildPrice() {
     return Text(
-      listing.displayPrice,
+      listing?.displayPrice ?? 'Price on Request',
       style: AppTextStyles.priceMedium.copyWith(
         fontSize: 17,
         fontWeight: FontWeight.w700,
@@ -731,7 +733,7 @@ class FeaturedListingCard extends StatelessWidget {
 
   Widget _buildTitle() {
     return Text(
-      listing.title,
+      listing?.title ?? 'Property Listing',
       style: AppTextStyles.titleSmall.copyWith(
         fontSize: 14,
         fontWeight: FontWeight.w600,
@@ -742,7 +744,7 @@ class FeaturedListingCard extends StatelessWidget {
   }
 
   Widget _buildDescription() {
-    final description = listing.description;
+    final description = listing?.description;
     if (description == null || description.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -758,7 +760,8 @@ class FeaturedListingCard extends StatelessWidget {
   }
 
   Widget _buildDatePosted() {
-    final date = listing.createdAt;
+    final date = listing?.createdAt;
+    if (date == null) return const SizedBox.shrink();
     final daysOld = DateTime.now().difference(date).inDays;
     String dateText;
     if (daysOld == 0) {
@@ -799,8 +802,8 @@ class FeaturedListingCard extends StatelessWidget {
         const SizedBox(width: 3),
         Expanded(
           child: Text(
-            listing.address?.shortAddress ??
-                listing.address?.region ??
+            listing?.address?.shortAddress ??
+                listing?.address?.region ??
                 'Unknown Location',
             style: AppTextStyles.bodySmall.copyWith(
               fontSize: 11,
@@ -814,24 +817,24 @@ class FeaturedListingCard extends StatelessWidget {
   }
 
   Widget _buildFeatures() {
-    final isHouse = listing.propertyType == PropertyType.house;
+    final isHouse = listing?.propertyType == PropertyType.house;
     return Row(
       children: [
         if (isHouse) ...[
-          if ((listing.bedrooms ?? 0) > 0)
-            _buildFeatureChip(Icons.bed_outlined, '${listing.bedrooms}'),
-          if ((listing.bathrooms ?? 0) > 0)
-            _buildFeatureChip(Icons.bathtub_outlined, '${listing.bathrooms}'),
+          if ((listing?.bedrooms ?? 0) > 0)
+            _buildFeatureChip(Icons.bed_outlined, '${listing?.bedrooms}'),
+          if ((listing?.bathrooms ?? 0) > 0)
+            _buildFeatureChip(Icons.bathtub_outlined, '${listing?.bathrooms}'),
         ] else ...[
           _buildFeatureChip(
             Icons.square_foot_outlined,
-            '${listing.totalSquareMeters?.toInt() ?? 0} m²',
+            '${listing?.totalSquareMeters?.toInt() ?? 0} m²',
           ),
         ],
         const SizedBox(width: 4),
         _buildFeatureChip(
           Icons.sell_outlined,
-          listing.listingType == ListingType.sale ? 'Sale' : 'Rent',
+          listing?.listingType == ListingType.sale ? 'Sale' : 'Rent',
         ),
       ],
     );
