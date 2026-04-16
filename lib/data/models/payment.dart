@@ -52,11 +52,13 @@ class Payment {
       userId: json['user_id'] ?? 0,
       transactionReference: json['transaction_reference'] ?? '',
       paymentType: PaymentType.values.firstWhere(
-        (e) => e.toString().split('.').last == (json['payment_type'] ?? 'subscription'),
+        (e) =>
+            e.toString().split('.').last ==
+            (json['payment_type'] ?? 'subscription'),
         orElse: () => PaymentType.subscription,
       ),
       relatedId: json['related_id'],
-      amount: json['amount']?.toDouble() ?? 0.0,
+      amount: _parseAmount(json['amount']),
       currency: json['currency'] ?? 'ETB',
       status: PaymentStatus.values.firstWhere(
         (e) => e.toString().split('.').last == (json['status'] ?? 'pending'),
@@ -66,7 +68,9 @@ class Payment {
       chapaTransactionId: json['chapa_transaction_id'],
       callbackUrl: json['callback_url'],
       returnUrl: json['return_url'],
-      metadata: json['metadata'] != null ? Map<String, dynamic>.from(json['metadata']) : null,
+      metadata: json['metadata'] != null
+          ? Map<String, dynamic>.from(json['metadata'])
+          : null,
       paidAt: json['paid_at'] != null ? DateTime.parse(json['paid_at']) : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
@@ -76,6 +80,15 @@ class Payment {
           : null,
       user: json['user'] != null ? User.fromJson(json['user']) : null,
     );
+  }
+
+  /// Parse amount from various types (String, num, double)
+  static double _parseAmount(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
   }
 
   Map<String, dynamic> toJson() {
@@ -89,7 +102,7 @@ class Payment {
       'currency': currency,
       'status': status.toString().split('.').last,
       'payment_method': paymentMethod,
-      'chapa_transaction_id': chapaTransactionId,
+      'chapa_transaction_id':/chapaTransactionId,
       'callback_url': callbackUrl,
       'return_url': returnUrl,
       'metadata': metadata,

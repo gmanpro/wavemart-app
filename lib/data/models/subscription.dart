@@ -34,7 +34,7 @@ class SubscriptionPlan {
       name: json['name'] ?? '',
       slug: json['slug'] ?? '',
       description: json['description'],
-      price: json['price']?.toDouble() ?? 0.0,
+      price: _parseDouble(json['price']),
       durationMonths: json['duration_months'] ?? 1,
       maxListings: json['max_listings'] ?? 1,
       maxFeaturedListings: json['max_featured_listings'],
@@ -47,6 +47,15 @@ class SubscriptionPlan {
           ? DateTime.parse(json['updated_at'])
           : null,
     );
+  }
+
+  /// Parse double from various types (String, num, double)
+  static double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
   }
 
   String get displayPrice => '${price.toStringAsFixed(0)} ETB';
@@ -95,22 +104,20 @@ class Subscription {
       startsAt: json['starts_at'] != null
           ? DateTime.parse(json['starts_at'])
           : DateTime.now(),
-      endsAt: json['ends_at'] != null
-          ? DateTime.parse(json['ends_at'])
-          : null,
+      endsAt: json['ends_at'] != null ? DateTime.parse(json['ends_at']) : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'])
           : null,
-      plan: json['plan'] != null
-          ? SubscriptionPlan.fromJson(json['plan'])
-          : null,
+      plan:
+          json['plan'] != null ? SubscriptionPlan.fromJson(json['plan']) : null,
     );
   }
 
-  bool get isActive => status == 'active' && (endsAt == null || endsAt!.isAfter(DateTime.now()));
+  bool get isActive =>
+      status == 'active' && (endsAt == null || endsAt!.isAfter(DateTime.now()));
   bool get isExpired => endsAt != null && endsAt!.isBefore(DateTime.now());
 
   int get daysRemaining {

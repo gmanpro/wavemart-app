@@ -598,7 +598,7 @@ class FeaturedListingCard extends StatelessWidget {
             // Main Image
             Positioned.fill(
               child: CachedNetworkImage(
-                imageUrl: listing.mainImageUrl,
+                imageUrl: listing?.mainImageUrl ?? '',
                 fit: BoxFit.cover,
                 placeholder: (_, __) => Shimmer.fromColors(
                   baseColor: Colors.grey[200]!,
