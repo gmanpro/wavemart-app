@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/services/favorite_service.dart';
 import '../../data/services/profile_service.dart';
@@ -26,14 +28,17 @@ final isConnectedProvider = StreamProvider<bool>((ref) {
 });
 
 /// Favorite Provider
-final favoriteServiceProvider = Provider<FavoriteService>((ref) => FavoriteService());
-final favoritesProvider = StateNotifierProvider<FavoritesNotifier, FavoritesState>((ref) {
+final favoriteServiceProvider =
+    Provider<FavoriteService>((ref) => FavoriteService());
+final favoritesProvider =
+    StateNotifierProvider<FavoritesNotifier, FavoritesState>((ref) {
   return FavoritesNotifier(ref.watch(favoriteServiceProvider));
 });
 
 class FavoritesNotifier extends StateNotifier<FavoritesState> {
   final FavoriteService _favoriteService;
-  FavoritesNotifier(this._favoriteService) : super(const FavoritesState.initial());
+  FavoritesNotifier(this._favoriteService)
+      : super(const FavoritesState.initial());
 
   Future<void> loadFavorites({int page = 1}) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
@@ -62,10 +67,24 @@ class FavoritesState {
   final List<dynamic> favorites;
   final int total;
   final String? errorMessage;
-  const FavoritesState({required this.isLoading, this.favorites = const [], this.total = 0, this.errorMessage});
-  const FavoritesState.initial() : isLoading = true, favorites = const [], total = 0, errorMessage = null;
-  const FavoritesState.loaded({required this.favorites, this.total = 0}) : isLoading = false, errorMessage = null;
-  FavoritesState copyWith({bool? isLoading, List<dynamic>? favorites, int? total, String? errorMessage}) {
+  const FavoritesState(
+      {required this.isLoading,
+      this.favorites = const [],
+      this.total = 0,
+      this.errorMessage});
+  const FavoritesState.initial()
+      : isLoading = true,
+        favorites = const [],
+        total = 0,
+        errorMessage = null;
+  const FavoritesState.loaded({required this.favorites, this.total = 0})
+      : isLoading = false,
+        errorMessage = null;
+  FavoritesState copyWith(
+      {bool? isLoading,
+      List<dynamic>? favorites,
+      int? total,
+      String? errorMessage}) {
     return FavoritesState(
       isLoading: isLoading ?? this.isLoading,
       favorites: favorites ?? this.favorites,
@@ -76,8 +95,10 @@ class FavoritesState {
 }
 
 /// Profile Provider
-final profileServiceProvider = Provider<ProfileService>((ref) => ProfileService());
-final profileProvider = StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
+final profileServiceProvider =
+    Provider<ProfileService>((ref) => ProfileService());
+final profileProvider =
+    StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
   return ProfileNotifier(ref.watch(profileServiceProvider));
 });
 
@@ -112,17 +133,34 @@ class ProfileState {
   final dynamic user;
   final ProfileStats? stats;
   final String? errorMessage;
-  const ProfileState({required this.isLoading, this.user, this.stats, this.errorMessage});
-  const ProfileState.initial() : isLoading = true, user = null, stats = null, errorMessage = null;
-  const ProfileState.loaded(this.user, {this.stats}) : isLoading = false, errorMessage = null;
-  ProfileState copyWith({bool? isLoading, dynamic user, ProfileStats? stats, String? errorMessage}) {
-    return ProfileState(isLoading: isLoading ?? this.isLoading, user: user ?? this.user, stats: stats ?? this.stats, errorMessage: errorMessage);
+  const ProfileState(
+      {required this.isLoading, this.user, this.stats, this.errorMessage});
+  const ProfileState.initial()
+      : isLoading = true,
+        user = null,
+        stats = null,
+        errorMessage = null;
+  const ProfileState.loaded(this.user, {this.stats})
+      : isLoading = false,
+        errorMessage = null;
+  ProfileState copyWith(
+      {bool? isLoading,
+      dynamic user,
+      ProfileStats? stats,
+      String? errorMessage}) {
+    return ProfileState(
+        isLoading: isLoading ?? this.isLoading,
+        user: user ?? this.user,
+        stats: stats ?? this.stats,
+        errorMessage: errorMessage);
   }
 }
 
 /// Notification Provider
-final notificationServiceProvider = Provider<NotificationService>((ref) => NotificationService());
-final notificationsProvider = StateNotifierProvider<NotificationNotifier, NotificationState>((ref) {
+final notificationServiceProvider =
+    Provider<NotificationService>((ref) => NotificationService());
+final notificationsProvider =
+    StateNotifierProvider<NotificationNotifier, NotificationState>((ref) {
   return NotificationNotifier(ref.watch(notificationServiceProvider));
 });
 final unreadCountProvider = StreamProvider<int>((ref) async* {
@@ -136,14 +174,18 @@ final unreadCountProvider = StreamProvider<int>((ref) async* {
 
 class NotificationNotifier extends StateNotifier<NotificationState> {
   final NotificationService _notificationService;
-  NotificationNotifier(this._notificationService) : super(const NotificationState.initial());
+  NotificationNotifier(this._notificationService)
+      : super(const NotificationState.initial());
 
   Future<void> loadNotifications({int page = 1}) async {
     if (page == 1) state = state.copyWith(isLoading: true, errorMessage: null);
     final response = await _notificationService.getNotifications(page: page);
     if (response.success) {
-      final newListings = page == 1 ? response.notifications : [...state.notifications, ...response.notifications];
-      state = NotificationState.loaded(notifications: newListings, total: response.total ?? 0);
+      final newListings = page == 1
+          ? response.notifications
+          : [...state.notifications, ...response.notifications];
+      state = NotificationState.loaded(
+          notifications: newListings, total: response.total ?? 0);
     } else {
       state = state.copyWith(isLoading: false, errorMessage: response.message);
     }
@@ -151,12 +193,17 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
 
   Future<void> markAsRead(int id) async {
     await _notificationService.markAsRead(id);
-    state = state.copyWith(notifications: state.notifications.map((n) => n.id == id ? n.copyWith(isRead: true) : n).toList());
+    state = state.copyWith(
+        notifications: state.notifications
+            .map((n) => n.id == id ? n.copyWith(isRead: true) : n)
+            .toList());
   }
 
   Future<void> markAllAsRead() async {
     await _notificationService.markAllAsRead();
-    state = state.copyWith(notifications: state.notifications.map((n) => n.copyWith(isRead: true)).toList());
+    state = state.copyWith(
+        notifications:
+            state.notifications.map((n) => n.copyWith(isRead: true)).toList());
   }
 }
 
@@ -165,17 +212,37 @@ class NotificationState {
   final List<dynamic> notifications;
   final int total;
   final String? errorMessage;
-  const NotificationState({required this.isLoading, this.notifications = const [], this.total = 0, this.errorMessage});
-  const NotificationState.initial() : isLoading = true, notifications = const [], total = 0, errorMessage = null;
-  const NotificationState.loaded({required this.notifications, this.total = 0}) : isLoading = false, errorMessage = null;
-  NotificationState copyWith({bool? isLoading, List<dynamic>? notifications, int? total, String? errorMessage}) {
-    return NotificationState(isLoading: isLoading ?? this.isLoading, notifications: notifications ?? this.notifications, total: total ?? this.total, errorMessage: errorMessage);
+  const NotificationState(
+      {required this.isLoading,
+      this.notifications = const [],
+      this.total = 0,
+      this.errorMessage});
+  const NotificationState.initial()
+      : isLoading = true,
+        notifications = const [],
+        total = 0,
+        errorMessage = null;
+  const NotificationState.loaded({required this.notifications, this.total = 0})
+      : isLoading = false,
+        errorMessage = null;
+  NotificationState copyWith(
+      {bool? isLoading,
+      List<dynamic>? notifications,
+      int? total,
+      String? errorMessage}) {
+    return NotificationState(
+        isLoading: isLoading ?? this.isLoading,
+        notifications: notifications ?? this.notifications,
+        total: total ?? this.total,
+        errorMessage: errorMessage);
   }
 }
 
 /// Message Provider
-final messageServiceProvider = Provider<MessageService>((ref) => MessageService());
-final conversationsProvider = StateNotifierProvider<ConversationsNotifier, ConversationsState>((ref) {
+final messageServiceProvider =
+    Provider<MessageService>((ref) => MessageService());
+final conversationsProvider =
+    StateNotifierProvider<ConversationsNotifier, ConversationsState>((ref) {
   return ConversationsNotifier(ref.watch(messageServiceProvider));
 });
 
@@ -203,27 +270,33 @@ final unreadMessagesCountProvider = StreamProvider<int>((ref) async* {
 
 class ConversationsNotifier extends StateNotifier<ConversationsState> {
   final MessageService _messageService;
-  ConversationsNotifier(this._messageService) : super(const ConversationsState.initial());
+  ConversationsNotifier(this._messageService)
+      : super(const ConversationsState.initial());
 
   Future<void> loadConversations({int page = 1, int? currentUserId}) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
-    final response = await _messageService.getConversations(page: page, currentUserId: currentUserId);
+    final response = await _messageService.getConversations(
+        page: page, currentUserId: currentUserId);
     if (response.success) {
-      state = ConversationsState.loaded(conversations: response.conversations, total: response.total ?? 0);
+      state = ConversationsState.loaded(
+          conversations: response.conversations, total: response.total ?? 0);
     } else {
       if (state.conversations.isEmpty) {
         state = const ConversationsState.loaded(conversations: [], total: 0);
       } else {
-        state = state.copyWith(isLoading: false, errorMessage: response.message);
+        state =
+            state.copyWith(isLoading: false, errorMessage: response.message);
       }
     }
   }
 
   /// Refresh conversations list (e.g., after reading a message)
   Future<void> refreshConversations({int? currentUserId}) async {
-    final response = await _messageService.getConversations(page: 1, currentUserId: currentUserId);
+    final response = await _messageService.getConversations(
+        page: 1, currentUserId: currentUserId);
     if (response.success) {
-      state = ConversationsState.loaded(conversations: response.conversations, total: response.total ?? 0);
+      state = ConversationsState.loaded(
+          conversations: response.conversations, total: response.total ?? 0);
     }
   }
 }
@@ -233,17 +306,38 @@ class ConversationsState {
   final List<dynamic> conversations;
   final int total;
   final String? errorMessage;
-  const ConversationsState({required this.isLoading, this.conversations = const [], this.total = 0, this.errorMessage});
-  const ConversationsState.initial() : isLoading = true, conversations = const [], total = 0, errorMessage = null;
-  const ConversationsState.loaded({required this.conversations, this.total = 0}) : isLoading = false, errorMessage = null;
-  ConversationsState copyWith({bool? isLoading, List<dynamic>? conversations, int? total, String? errorMessage}) {
-    return ConversationsState(isLoading: isLoading ?? this.isLoading, conversations: conversations ?? this.conversations, total: total ?? this.total, errorMessage: errorMessage);
+  const ConversationsState(
+      {required this.isLoading,
+      this.conversations = const [],
+      this.total = 0,
+      this.errorMessage});
+  const ConversationsState.initial()
+      : isLoading = true,
+        conversations = const [],
+        total = 0,
+        errorMessage = null;
+  const ConversationsState.loaded({required this.conversations, this.total = 0})
+      : isLoading = false,
+        errorMessage = null;
+  ConversationsState copyWith(
+      {bool? isLoading,
+      List<dynamic>? conversations,
+      int? total,
+      String? errorMessage}) {
+    return ConversationsState(
+        isLoading: isLoading ?? this.isLoading,
+        conversations: conversations ?? this.conversations,
+        total: total ?? this.total,
+        errorMessage: errorMessage);
   }
 }
 
 /// Chat Messages Provider - manages messages within a single conversation
-final chatMessagesProvider = StateNotifierProvider.family<ChatMessagesNotifier, ChatMessagesState, int>((ref, conversationId) {
-  return ChatMessagesNotifier(ref.watch(messageServiceProvider), conversationId);
+final chatMessagesProvider =
+    StateNotifierProvider.family<ChatMessagesNotifier, ChatMessagesState, int>(
+        (ref, conversationId) {
+  return ChatMessagesNotifier(
+      ref.watch(messageServiceProvider), conversationId);
 });
 
 class ChatMessagesNotifier extends StateNotifier<ChatMessagesState> {
@@ -259,7 +353,8 @@ class ChatMessagesNotifier extends StateNotifier<ChatMessagesState> {
 
   void _startPolling() {
     _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) => _pollNewMessages());
+    _pollTimer =
+        Timer.periodic(const Duration(seconds: 5), (_) => _pollNewMessages());
   }
 
   Future<void> loadMessages({int page = 1}) async {
@@ -298,7 +393,8 @@ class ChatMessagesNotifier extends StateNotifier<ChatMessagesState> {
         after: lastMessage.createdAt,
       );
       if (response.success && response.messages.isNotEmpty) {
-        state = state.copyWith(messages: [...state.messages, ...response.messages]);
+        state =
+            state.copyWith(messages: [...state.messages, ...response.messages]);
       }
     } catch (_) {
       // Silently ignore polling errors
@@ -364,20 +460,24 @@ class ChatMessagesState {
 }
 
 /// Payment Provider
-final paymentServiceProvider = Provider<PaymentService>((ref) => PaymentService());
-final paymentHistoryProvider = StateNotifierProvider<PaymentHistoryNotifier, PaymentHistoryState>((ref) {
+final paymentServiceProvider =
+    Provider<PaymentService>((ref) => PaymentService());
+final paymentHistoryProvider =
+    StateNotifierProvider<PaymentHistoryNotifier, PaymentHistoryState>((ref) {
   return PaymentHistoryNotifier(ref.watch(paymentServiceProvider));
 });
 
 class PaymentHistoryNotifier extends StateNotifier<PaymentHistoryState> {
   final PaymentService _paymentService;
-  PaymentHistoryNotifier(this._paymentService) : super(const PaymentHistoryState.initial());
+  PaymentHistoryNotifier(this._paymentService)
+      : super(const PaymentHistoryState.initial());
 
   Future<void> loadPayments({int page = 1}) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     final response = await _paymentService.getPaymentHistory(page: page);
     if (response.success) {
-      state = PaymentHistoryState.loaded(payments: response.payments, total: response.total ?? 0);
+      state = PaymentHistoryState.loaded(
+          payments: response.payments, total: response.total ?? 0);
     } else {
       state = state.copyWith(isLoading: false, errorMessage: response.message);
     }
@@ -389,26 +489,48 @@ class PaymentHistoryState {
   final List<dynamic> payments;
   final int total;
   final String? errorMessage;
-  const PaymentHistoryState({required this.isLoading, this.payments = const [], this.total = 0, this.errorMessage});
-  const PaymentHistoryState.initial() : isLoading = true, payments = const [], total = 0, errorMessage = null;
-  const PaymentHistoryState.loaded({required this.payments, this.total = 0}) : isLoading = false, errorMessage = null;
-  PaymentHistoryState copyWith({bool? isLoading, List<dynamic>? payments, int? total, String? errorMessage}) {
-    return PaymentHistoryState(isLoading: isLoading ?? this.isLoading, payments: payments ?? this.payments, total: total ?? this.total, errorMessage: errorMessage);
+  const PaymentHistoryState(
+      {required this.isLoading,
+      this.payments = const [],
+      this.total = 0,
+      this.errorMessage});
+  const PaymentHistoryState.initial()
+      : isLoading = true,
+        payments = const [],
+        total = 0,
+        errorMessage = null;
+  const PaymentHistoryState.loaded({required this.payments, this.total = 0})
+      : isLoading = false,
+        errorMessage = null;
+  PaymentHistoryState copyWith(
+      {bool? isLoading,
+      List<dynamic>? payments,
+      int? total,
+      String? errorMessage}) {
+    return PaymentHistoryState(
+        isLoading: isLoading ?? this.isLoading,
+        payments: payments ?? this.payments,
+        total: total ?? this.total,
+        errorMessage: errorMessage);
   }
 }
 
 /// Subscription Provider
-final subscriptionServiceProvider = Provider<SubscriptionServiceApi>((ref) => SubscriptionServiceApi());
+final subscriptionServiceProvider =
+    Provider<SubscriptionServiceApi>((ref) => SubscriptionServiceApi());
 final subscriptionPlansProvider = FutureProvider((ref) async {
   return ref.watch(subscriptionServiceProvider).getPlans();
 });
-final currentSubscriptionProvider = StateNotifierProvider<CurrentSubscriptionNotifier, CurrentSubscriptionState>((ref) {
+final currentSubscriptionProvider = StateNotifierProvider<
+    CurrentSubscriptionNotifier, CurrentSubscriptionState>((ref) {
   return CurrentSubscriptionNotifier(ref.watch(subscriptionServiceProvider));
 });
 
-class CurrentSubscriptionNotifier extends StateNotifier<CurrentSubscriptionState> {
+class CurrentSubscriptionNotifier
+    extends StateNotifier<CurrentSubscriptionState> {
   final SubscriptionServiceApi _subscriptionService;
-  CurrentSubscriptionNotifier(this._subscriptionService) : super(const CurrentSubscriptionState.initial());
+  CurrentSubscriptionNotifier(this._subscriptionService)
+      : super(const CurrentSubscriptionState.initial());
 
   Future<void> loadCurrentSubscription() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
@@ -431,17 +553,43 @@ class CurrentSubscriptionState {
   final bool canCreateListing;
   final bool canFeatureListing;
   final String? errorMessage;
-  const CurrentSubscriptionState({required this.isLoading, this.subscription, this.canCreateListing = true, this.canFeatureListing = true, this.errorMessage});
-  const CurrentSubscriptionState.initial() : isLoading = true, subscription = null, canCreateListing = true, canFeatureListing = true, errorMessage = null;
-  const CurrentSubscriptionState.loaded({this.subscription, this.canCreateListing = true, this.canFeatureListing = true}) : isLoading = false, errorMessage = null;
-  CurrentSubscriptionState copyWith({bool? isLoading, dynamic subscription, bool? canCreateListing, bool? canFeatureListing, String? errorMessage}) {
-    return CurrentSubscriptionState(isLoading: isLoading ?? this.isLoading, subscription: subscription ?? this.subscription, canCreateListing: canCreateListing ?? this.canCreateListing, canFeatureListing: canFeatureListing ?? this.canFeatureListing, errorMessage: errorMessage);
+  const CurrentSubscriptionState(
+      {required this.isLoading,
+      this.subscription,
+      this.canCreateListing = true,
+      this.canFeatureListing = true,
+      this.errorMessage});
+  const CurrentSubscriptionState.initial()
+      : isLoading = true,
+        subscription = null,
+        canCreateListing = true,
+        canFeatureListing = true,
+        errorMessage = null;
+  const CurrentSubscriptionState.loaded(
+      {this.subscription,
+      this.canCreateListing = true,
+      this.canFeatureListing = true})
+      : isLoading = false,
+        errorMessage = null;
+  CurrentSubscriptionState copyWith(
+      {bool? isLoading,
+      dynamic subscription,
+      bool? canCreateListing,
+      bool? canFeatureListing,
+      String? errorMessage}) {
+    return CurrentSubscriptionState(
+        isLoading: isLoading ?? this.isLoading,
+        subscription: subscription ?? this.subscription,
+        canCreateListing: canCreateListing ?? this.canCreateListing,
+        canFeatureListing: canFeatureListing ?? this.canFeatureListing,
+        errorMessage: errorMessage);
   }
 }
 
 /// KYC Provider
 final kycServiceProvider = Provider<KycService>((ref) => KycService());
-final kycStatusProvider = StateNotifierProvider<KycStatusNotifier, KycStatusState>((ref) {
+final kycStatusProvider =
+    StateNotifierProvider<KycStatusNotifier, KycStatusState>((ref) {
   return KycStatusNotifier(ref.watch(kycServiceProvider));
 });
 
@@ -471,11 +619,41 @@ class KycStatusState {
   final String? rejectionReason;
   final String? submittedAt;
   final String? errorMessage;
-  const KycStatusState({required this.isLoading, this.status = 'none', this.isVerified = false, this.rejectionReason, this.submittedAt, this.errorMessage});
-  const KycStatusState.initial() : isLoading = true, status = 'none', isVerified = false, rejectionReason = null, submittedAt = null, errorMessage = null;
-  const KycStatusState.loaded({this.status = 'none', this.isVerified = false, this.rejectionReason, this.submittedAt}) : isLoading = false, errorMessage = null;
-  KycStatusState copyWith({bool? isLoading, String? status, bool? isVerified, String? rejectionReason, String? submittedAt, String? errorMessage}) {
-    return KycStatusState(isLoading: isLoading ?? this.isLoading, status: status ?? this.status, isVerified: isVerified ?? this.isVerified, rejectionReason: rejectionReason ?? this.rejectionReason, submittedAt: submittedAt ?? this.submittedAt, errorMessage: errorMessage);
+  const KycStatusState(
+      {required this.isLoading,
+      this.status = 'none',
+      this.isVerified = false,
+      this.rejectionReason,
+      this.submittedAt,
+      this.errorMessage});
+  const KycStatusState.initial()
+      : isLoading = true,
+        status = 'none',
+        isVerified = false,
+        rejectionReason = null,
+        submittedAt = null,
+        errorMessage = null;
+  const KycStatusState.loaded(
+      {this.status = 'none',
+      this.isVerified = false,
+      this.rejectionReason,
+      this.submittedAt})
+      : isLoading = false,
+        errorMessage = null;
+  KycStatusState copyWith(
+      {bool? isLoading,
+      String? status,
+      bool? isVerified,
+      String? rejectionReason,
+      String? submittedAt,
+      String? errorMessage}) {
+    return KycStatusState(
+        isLoading: isLoading ?? this.isLoading,
+        status: status ?? this.status,
+        isVerified: isVerified ?? this.isVerified,
+        rejectionReason: rejectionReason ?? this.rejectionReason,
+        submittedAt: submittedAt ?? this.submittedAt,
+        errorMessage: errorMessage);
   }
 
   bool get isPending => status == 'pending';
@@ -485,14 +663,17 @@ class KycStatusState {
 }
 
 /// Conference Provider
-final conferenceServiceProvider = Provider<ConferenceService>((ref) => ConferenceService());
-final conferencesProvider = StateNotifierProvider<ConferencesNotifier, ConferencesState>((ref) {
+final conferenceServiceProvider =
+    Provider<ConferenceService>((ref) => ConferenceService());
+final conferencesProvider =
+    StateNotifierProvider<ConferencesNotifier, ConferencesState>((ref) {
   return ConferencesNotifier(ref.watch(conferenceServiceProvider));
 });
 
 class ConferencesNotifier extends StateNotifier<ConferencesState> {
   final ConferenceService _conferenceService;
-  ConferencesNotifier(this._conferenceService) : super(const ConferencesState.initial());
+  ConferencesNotifier(this._conferenceService)
+      : super(const ConferencesState.initial());
 
   Future<void> loadConferences() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
@@ -509,36 +690,53 @@ class ConferencesState {
   final bool isLoading;
   final List<dynamic> conferences;
   final String? errorMessage;
-  const ConferencesState({required this.isLoading, this.conferences = const [], this.errorMessage});
-  const ConferencesState.initial() : isLoading = true, conferences = const [], errorMessage = null;
-  const ConferencesState.loaded({required this.conferences}) : isLoading = false, errorMessage = null;
-  ConferencesState copyWith({bool? isLoading, List<dynamic>? conferences, String? errorMessage}) {
-    return ConferencesState(isLoading: isLoading ?? this.isLoading, conferences: conferences ?? this.conferences, errorMessage: errorMessage);
+  const ConferencesState(
+      {required this.isLoading,
+      this.conferences = const [],
+      this.errorMessage});
+  const ConferencesState.initial()
+      : isLoading = true,
+        conferences = const [],
+        errorMessage = null;
+  const ConferencesState.loaded({required this.conferences})
+      : isLoading = false,
+        errorMessage = null;
+  ConferencesState copyWith(
+      {bool? isLoading, List<dynamic>? conferences, String? errorMessage}) {
+    return ConferencesState(
+        isLoading: isLoading ?? this.isLoading,
+        conferences: conferences ?? this.conferences,
+        errorMessage: errorMessage);
   }
 }
 
 /// Interest Provider
-final interestServiceProvider = Provider<InterestService>((ref) => InterestService());
-final myInterestsProvider = StateNotifierProvider<MyInterestsNotifier, MyInterestsState>((ref) {
+final interestServiceProvider =
+    Provider<InterestService>((ref) => InterestService());
+final myInterestsProvider =
+    StateNotifierProvider<MyInterestsNotifier, MyInterestsState>((ref) {
   return MyInterestsNotifier(ref.watch(interestServiceProvider));
 });
 
 class MyInterestsNotifier extends StateNotifier<MyInterestsState> {
   final InterestService _interestService;
-  MyInterestsNotifier(this._interestService) : super(const MyInterestsState.initial());
+  MyInterestsNotifier(this._interestService)
+      : super(const MyInterestsState.initial());
 
   Future<void> loadInterests({int page = 1}) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     final response = await _interestService.getMyInterests(page: page);
     if (response.success) {
-      state = MyInterestsState.loaded(interests: response.interests, total: response.total ?? 0);
+      state = MyInterestsState.loaded(
+          interests: response.interests, total: response.total ?? 0);
     } else {
       state = state.copyWith(isLoading: false, errorMessage: response.message);
     }
   }
 
   Future<bool> expressInterest(int listingId, {String? message}) async {
-    final response = await _interestService.expressInterest(listingId: listingId, message: message);
+    final response = await _interestService.expressInterest(
+        listingId: listingId, message: message);
     if (response.success) await loadInterests();
     return response.success;
   }
@@ -549,25 +747,121 @@ class MyInterestsState {
   final List<dynamic> interests;
   final int total;
   final String? errorMessage;
-  const MyInterestsState({required this.isLoading, this.interests = const [], this.total = 0, this.errorMessage});
-  const MyInterestsState.initial() : isLoading = true, interests = const [], total = 0, errorMessage = null;
-  const MyInterestsState.loaded({required this.interests, this.total = 0}) : isLoading = false, errorMessage = null;
-  MyInterestsState copyWith({bool? isLoading, List<dynamic>? interests, int? total, String? errorMessage}) {
-    return MyInterestsState(isLoading: isLoading ?? this.isLoading, interests: interests ?? this.interests, total: total ?? this.total, errorMessage: errorMessage);
+  const MyInterestsState(
+      {required this.isLoading,
+      this.interests = const [],
+      this.total = 0,
+      this.errorMessage});
+  const MyInterestsState.initial()
+      : isLoading = true,
+        interests = const [],
+        total = 0,
+        errorMessage = null;
+  const MyInterestsState.loaded({required this.interests, this.total = 0})
+      : isLoading = false,
+        errorMessage = null;
+  MyInterestsState copyWith(
+      {bool? isLoading,
+      List<dynamic>? interests,
+      int? total,
+      String? errorMessage}) {
+    return MyInterestsState(
+        isLoading: isLoading ?? this.isLoading,
+        interests: interests ?? this.interests,
+        total: total ?? this.total,
+        errorMessage: errorMessage);
   }
 }
 
 /// Address Provider
-final addressServiceProvider = Provider<AddressService>((ref) => AddressService());
+final addressServiceProvider =
+    Provider<AddressService>((ref) => AddressService());
 final regionsProvider = FutureProvider((ref) async {
   return ref.watch(addressServiceProvider).getRegions();
 });
 final zonesProvider = FutureProvider.family((ref, String region) async {
   return ref.watch(addressServiceProvider).getZones(region: region);
 });
-final woredasProvider = FutureProvider.family((ref, Map<String, String> params) async {
-  return ref.watch(addressServiceProvider).getWoredas(region: params['region']!, zone: params['zone']!);
+final woredasProvider =
+    FutureProvider.family((ref, Map<String, String> params) async {
+  return ref
+      .watch(addressServiceProvider)
+      .getWoredas(region: params['region']!, zone: params['zone']!);
 });
-final kebelesProvider = FutureProvider.family((ref, Map<String, String> params) async {
-  return ref.watch(addressServiceProvider).getKebeles(region: params['region']!, zone: params['zone']!, woreda: params['woreda']!);
+final kebelesProvider =
+    FutureProvider.family((ref, Map<String, String> params) async {
+  return ref.watch(addressServiceProvider).getKebeles(
+      region: params['region']!,
+      zone: params['zone']!,
+      woreda: params['woreda']!);
 });
+
+/// Locale Provider
+final localeProvider =
+    StateNotifierProvider<LocaleNotifier, LocaleState>((ref) {
+  return LocaleNotifier();
+});
+
+class LocaleNotifier extends StateNotifier<LocaleState> {
+  LocaleNotifier() : super(const LocaleState.initial()) {
+    _loadSavedLocale();
+  }
+
+  Future<void> _loadSavedLocale() async {
+    // Load from Hive
+    final box = await Hive.openBox('app_preferences');
+    final savedLocale = box.get('locale');
+
+    if (savedLocale != null) {
+      state = LocaleState.loaded(locale: Locale(savedLocale));
+    } else {
+      // Use system locale or default to English
+      final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
+      final supportedLocales = const ['en', 'am', 'ti'];
+
+      if (supportedLocales.contains(systemLocale.languageCode)) {
+        state = LocaleState.loaded(locale: systemLocale);
+      } else {
+        state = const LocaleState.loaded(locale: Locale('en'));
+      }
+    }
+  }
+
+  Future<void> setLocale(Locale locale) async {
+    state = state.copyWith(isLoading: true);
+
+    final box = await Hive.openBox('app_preferences');
+    await box.put('locale', locale.languageCode);
+
+    state = LocaleState.loaded(locale: locale);
+  }
+}
+
+class LocaleState {
+  final bool isLoading;
+  final Locale? locale;
+  final String? errorMessage;
+
+  const LocaleState({
+    required this.isLoading,
+    this.locale,
+    this.errorMessage,
+  });
+
+  const LocaleState.initial() : this(isLoading: true);
+  const LocaleState.loaded({required this.locale})
+      : isLoading = false,
+        errorMessage = null;
+
+  LocaleState copyWith({
+    bool? isLoading,
+    Locale? locale,
+    String? errorMessage,
+  }) {
+    return LocaleState(
+      isLoading: isLoading ?? this.isLoading,
+      locale: locale ?? this.locale,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
+}

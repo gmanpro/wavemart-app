@@ -2,11 +2,14 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'core/theme/app_theme.dart';
+import 'presentation/providers/app_providers.dart';
 import 'presentation/screens/splash/splash_screen.dart';
+import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +17,7 @@ void main() async {
   // Initialize Hive for draft persistence
   await Hive.initFlutter();
   await Hive.openBox('listing_drafts');
+  await Hive.openBox('app_preferences');
 
   // Disable google_fonts runtime fetching - fonts are bundled locally
   GoogleFonts.config.allowRuntimeFetching = false;
@@ -55,13 +59,15 @@ void main() async {
   );
 }
 
-class WaveMartApp extends StatelessWidget {
+class WaveMartApp extends ConsumerWidget {
   const WaveMartApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final localeState = ref.watch(localeProvider);
+
     return MaterialApp(
-      title: 'WaveMart',
+      title: 'WaveMart', // App name doesn't need localization at this level
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: const SplashScreen(),
@@ -71,7 +77,18 @@ class WaveMartApp extends StatelessWidget {
         }
         return child;
       },
-      locale: const Locale('en'),
+      locale: localeState.locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('am'),
+        Locale('ti'),
+      ],
     );
   }
 }

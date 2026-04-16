@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/auth_provider.dart';
 import '../kyc/kyc_verification_screen.dart';
@@ -26,7 +27,7 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(AppLocalizations.of(context).settingsTitle),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -125,18 +126,14 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             _buildMenuSection(
-              title: 'Preferences',
+              title: AppLocalizations.of(context).settingsPreferences,
               items: [
                 _MenuItemData(
                   icon: Icons.language,
-                  title: 'Language',
-                  subtitle: 'English',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Language settings coming soon')),
-                    );
-                  },
+                  title: AppLocalizations.of(context).settingsLanguage,
+                  subtitle: _getCurrentLanguageName(
+                      ref.watch(localeProvider).locale?.languageCode),
+                  onTap: () => _showLanguageSelectionDialog(context, ref),
                 ),
                 _MenuItemData(
                   icon: Icons.privacy_tip_outlined,
@@ -311,6 +308,97 @@ class SettingsScreen extends ConsumerWidget {
       ],
     );
   }
+}
+
+/// Get current language display name
+String _getCurrentLanguageName(String? languageCode) {
+  switch (languageCode) {
+    case 'am':
+      return 'አማርኛ (Amharic)';
+    case 'ti':
+      return 'ትግርኛ (Tigrinya)';
+    default:
+      return 'English';
+  }
+}
+
+/// Show language selection dialog
+void _showLanguageSelectionDialog(BuildContext context, WidgetRef ref) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) => Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context).languageTitle,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 24),
+          _buildLanguageOption(
+            context,
+            ref,
+            languageCode: 'en',
+            languageName:
+                '🇺🇸 ${AppLocalizations.of(context).languageEnglish}',
+          ),
+          _buildLanguageOption(
+            context,
+            ref,
+            languageCode: 'am',
+            languageName:
+                '🇪🇹 ${AppLocalizations.of(context).languageAmharic}',
+          ),
+          _buildLanguageOption(
+            context,
+            ref,
+            languageCode: 'ti',
+            languageName:
+                '🇪🇹 ${AppLocalizations.of(context).languageTigrinya}',
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    ),
+  );
+}
+
+/// Build single language option
+Widget _buildLanguageOption(
+  BuildContext context,
+  WidgetRef ref, {
+  required String languageCode,
+  required String languageName,
+}) {
+  final currentLocale = ref.watch(localeProvider).locale?.languageCode;
+  final isSelected = currentLocale == languageCode;
+
+  return ListTile(
+    onTap: () async {
+      await ref.read(localeProvider.notifier).setLocale(Locale(languageCode));
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).languageChanged),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    },
+    leading: isSelected
+        ? const Icon(Icons.check_circle, color: AppColors.wave500)
+        : const Icon(Icons.radio_button_unchecked),
+    title: Text(languageName),
+  );
 }
 
 class _MenuItemData {
