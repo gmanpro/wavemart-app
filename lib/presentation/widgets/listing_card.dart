@@ -870,10 +870,14 @@ class FeaturedListingCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image skeleton (left, fixed width)
-            Container(
-              width: 130,
-              height: 120,
-              color: Colors.grey[300],
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.horizontal(left: Radius.circular(16)),
+              child: Container(
+                width: 130,
+                height: 140,
+                color: Colors.grey[300],
+              ),
             ),
             // Content skeleton (right)
             Expanded(
@@ -944,7 +948,7 @@ class FeaturedListingCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const Spacer(),
                     // Features (2 chips)
                     Row(
                       children: [
