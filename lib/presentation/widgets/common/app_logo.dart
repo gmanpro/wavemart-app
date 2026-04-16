@@ -15,8 +15,8 @@ class AppLogo extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.white.withOpacity(0.9),
-            Colors.white.withOpacity(0.6)
+            Colors.white.withOpacity(0.95),
+            Colors.white.withOpacity(0.8)
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -24,7 +24,7 @@ class AppLogo extends StatelessWidget {
         borderRadius: BorderRadius.circular(size * 0.24),
         boxShadow: [
           BoxShadow(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withOpacity(0.3),
             blurRadius: size * 0.2,
             spreadRadius: size * 0.02,
           ),
@@ -35,7 +35,7 @@ class AppLogo extends StatelessWidget {
         child: Image.asset(
           'assets/images/app_icon.png',
           fit: BoxFit.contain,
-          color: Colors.white,
+          color: AppColors.navy500,
         ),
       ),
     );
@@ -57,27 +57,20 @@ class GlassLogoContainer extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(size * 0.24),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           width: size,
           height: size,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withOpacity(0.35),
-                Colors.white.withOpacity(0.25),
-              ],
-            ),
+            color: AppColors.navy500,
             borderRadius: BorderRadius.circular(size * 0.24),
             border: Border.all(
-              color: Colors.white.withOpacity(0.2),
+              color: AppColors.navy400.withOpacity(0.3),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withOpacity(0.15),
+                color: AppColors.navy700.withOpacity(0.3),
                 blurRadius: 20,
                 spreadRadius: 2,
               ),

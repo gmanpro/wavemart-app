@@ -46,34 +46,72 @@ class PropertyListingCard extends StatelessWidget {
             // Image Section
             _buildImageSection(),
 
-            // Content Section
+// Content Section
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Price
-                  _buildPrice(),
+                  // Price skeleton
+                  Container(
+                    height: 22,
+                    width: 130,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
                   const SizedBox(height: 8),
-
-                  // Title
-                  _buildTitle(),
+                  // Description line 1
+                  Container(
+                    height: 14,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
                   const SizedBox(height: 4),
-
-                  // Description
-                  _buildDescription(),
+                  // Description line 2
+                  Container(
+                    height: 14,
+                    width: 150,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
                   const SizedBox(height: 8),
-
-                  // Location
-                  _buildLocation(),
+                  // Location skeleton
+                  Container(
+                    height: 14,
+                    width: 180,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
                   const SizedBox(height: 6),
-
-                  // Date Posted
-                  _buildDatePosted(),
+                  // Date posted
+                  Container(
+                    height: 12,
+                    width: 70,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
                   const SizedBox(height: 12),
-
-                  // Features Row
-                  _buildFeatures(),
+                  // Features skeleton (3 chips for house)
+                  Row(
+                    children: [
+                      _skeletonChip(55),
+                      const SizedBox(width: 8),
+                      _skeletonChip(55),
+                      const SizedBox(width: 8),
+                      _skeletonChip(45),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -567,10 +605,6 @@ class FeaturedListingCard extends StatelessWidget {
                     _buildPrice(),
                     const SizedBox(height: 4),
 
-                    // Title
-                    _buildTitle(),
-                    const SizedBox(height: 4),
-
                     // Description
                     _buildDescription(),
                     const SizedBox(height: 4),
@@ -922,18 +956,8 @@ class FeaturedListingCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    // Title
-                    Container(
-                      height: 14,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    // Description
+                    const SizedBox(height: 8),
+                    // Description line
                     Container(
                       height: 12,
                       width: 120,
@@ -942,7 +966,7 @@ class FeaturedListingCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     // Location
                     Container(
                       height: 12,
@@ -953,6 +977,16 @@ class FeaturedListingCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
+                    // Date posted
+                    Container(
+                      height: 10,
+                      width: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     // Features (2 chips)
                     Row(
                       children: [

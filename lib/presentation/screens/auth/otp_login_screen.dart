@@ -242,67 +242,65 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
   Widget _buildOtpInput() {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmall = screenWidth < 360;
-    final fieldWidth = isSmall ? 42.0 : 48.0;
-    final fieldHeight = isSmall ? 50.0 : 54.0;
-    final gap = isSmall ? 6.0 : 8.0;
-    final fontSize = isSmall ? 20.0 : 22.0;
-    final borderRadius = isSmall ? 10.0 : 12.0;
+    final fieldWidth = isSmall ? 38.0 : 42.0;
+    final fieldHeight = isSmall ? 46.0 : 50.0;
+    final gap = isSmall ? 3.0 : 4.0;
+    final fontSize = isSmall ? 18.0 : 20.0;
+    final borderRadius = isSmall ? 8.0 : 10.0;
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(6, (index) {
-          return Padding(
-            padding: EdgeInsets.only(right: index < 5 ? gap : 0),
-            child: SizedBox(
-              width: fieldWidth,
-              height: fieldHeight,
-              child: TextField(
-                controller: _otpControllers[index],
-                focusNode: _otpFocusNodes[index],
-                textAlign: TextAlign.center,
-                keyboardType: TextInputType.number,
-                maxLength: 1,
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.navy900,
-                ),
-                decoration: InputDecoration(
-                  counterText: '',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(borderRadius),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: AppColors.zinc50,
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(borderRadius),
-                    borderSide: const BorderSide(color: AppColors.zinc200),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(borderRadius),
-                    borderSide:
-                        const BorderSide(color: AppColors.wave500, width: 2),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: isSmall ? 12 : 14,
-                  ),
-                ),
-                onChanged: (value) {
-                  if (value.isNotEmpty && index < 5) {
-                    _otpFocusNodes[index + 1].requestFocus();
-                  } else if (value.isNotEmpty && index == 5) {
-                    FocusScope.of(context).unfocus();
-                  }
-                },
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(6, (index) {
+        return Padding(
+          padding: EdgeInsets.only(right: index < 5 ? gap : 0),
+          child: SizedBox(
+            width: fieldWidth,
+            height: fieldHeight,
+            child: TextField(
+              controller: _otpControllers[index],
+              focusNode: _otpFocusNodes[index],
+              textAlign: TextAlign.center,
+              keyboardType: TextInputType.number,
+              maxLength: 1,
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy900,
               ),
+              decoration: InputDecoration(
+                counterText: '',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(borderRadius),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: AppColors.zinc50,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(borderRadius),
+                  borderSide: const BorderSide(color: AppColors.zinc200),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(borderRadius),
+                  borderSide:
+                      const BorderSide(color: AppColors.wave500, width: 2),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 2,
+                  vertical: isSmall ? 10 : 12,
+                ),
+              ),
+              onChanged: (value) {
+                if (value.isNotEmpty && index < 5) {
+                  _otpFocusNodes[index + 1].requestFocus();
+                } else if (value.isNotEmpty && index == 5) {
+                  FocusScope.of(context).unfocus();
+                }
+              },
             ),
-          );
-        }),
-      ),
+          ),
+        );
+      }),
     );
   }
 

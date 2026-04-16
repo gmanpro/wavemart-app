@@ -176,17 +176,17 @@ class SettingsScreen extends ConsumerWidget {
       BuildContext context, WidgetRef ref) async {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Logout'),
         content: const Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               await ref.read(authStateProvider.notifier).logout();
               if (context.mounted) {
                 Navigator.of(context).pushAndRemoveUntil(
