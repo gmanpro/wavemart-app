@@ -241,44 +241,50 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
 
   Widget _buildOtpInput() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(6, (index) {
-        return SizedBox(
-          width: 48,
-          child: TextField(
-            controller: _otpControllers[index],
-            focusNode: _otpFocusNodes[index],
-            textAlign: TextAlign.center,
-            keyboardType: TextInputType.number,
-            maxLength: 1,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.navy900,
+        return Padding(
+          padding: EdgeInsets.only(right: index < 5 ? 10 : 0),
+          child: SizedBox(
+            width: 52,
+            height: 56,
+            child: TextField(
+              controller: _otpControllers[index],
+              focusNode: _otpFocusNodes[index],
+              textAlign: TextAlign.center,
+              keyboardType: TextInputType.number,
+              maxLength: 1,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy900,
+              ),
+              decoration: InputDecoration(
+                counterText: '',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: AppColors.zinc50,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: AppColors.zinc200),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide:
+                      const BorderSide(color: AppColors.wave500, width: 2),
+                ),
+              ),
+              onChanged: (value) {
+                if (value.isNotEmpty && index < 5) {
+                  _otpFocusNodes[index + 1].requestFocus();
+                } else if (value.isNotEmpty && index == 5) {
+                  FocusScope.of(context).unfocus();
+                }
+              },
             ),
-            decoration: InputDecoration(
-              counterText: '',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: AppColors.zinc50,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.zinc200),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    const BorderSide(color: AppColors.wave500, width: 2),
-              ),
-            ),
-            onChanged: (value) {
-              if (value.isNotEmpty && index < 5) {
-                _otpFocusNodes[index + 1].requestFocus();
-              }
-            },
           ),
         );
       }),
