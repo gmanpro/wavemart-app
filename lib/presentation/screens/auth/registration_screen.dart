@@ -23,8 +23,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final List<TextEditingController> _otpControllers =
       List.generate(6, (_) => TextEditingController());
-  final List<FocusNode> _otpFocusNodes =
-      List.generate(6, (_) => FocusNode());
+  final List<FocusNode> _otpFocusNodes = List.generate(6, (_) => FocusNode());
 
   String? _selectedGender = 'Male';
   bool _isOtpSent = false;
@@ -99,159 +98,159 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
         _showCancelDialog();
       },
       child: Scaffold(
-      body: Container(
-        constraints: const BoxConstraints.expand(),
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0A416B), // Navy from SVG
-              Color(0xFF0A355C),
-              Color(0xFF18996C), // Green accent
-            ],
-            stops: [0.0, 0.6, 1.0],
+        body: Container(
+          constraints: const BoxConstraints.expand(),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF0A416B), // Navy from SVG
+                Color(0xFF0A355C),
+                Color(0xFF18996C), // Green accent
+              ],
+              stops: [0.0, 0.6, 1.0],
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                const SizedBox(height: 24),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  const SizedBox(height: 24),
 
-                // Back button + Logo row
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: _showCancelDialog,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back_ios,
-                          color: Colors.white,
-                          size: 18,
+                  // Back button + Logo row
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: _showCancelDialog,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_ios,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                         ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Logo with glassmorphism
+                  const GlassLogoContainer(size: 72, logoSize: 52),
+                  const SizedBox(height: 18),
+
+                  // Title
+                  Text(
+                    'Create Your Account',
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Join Ethiopia\'s Premier Real Estate Marketplace',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white.withOpacity(0.7),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+
+                  // White card container
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        // Step 1: Registration Form
+                        if (!_isOtpSent) ...[
+                          _buildSectionTitle('Personal Information'),
+                          const SizedBox(height: 20),
+                          _buildNameInputs(),
+                          const SizedBox(height: 16),
+                          _buildPhoneInput(),
+                          const SizedBox(height: 16),
+                          _buildGenderSelection(),
+                          const SizedBox(height: 24),
+                          WaveButton(
+                            text: 'Continue',
+                            icon: Icons.arrow_forward_rounded,
+                            isLoading: _isLoading,
+                            isFullWidth: true,
+                            onPressed: _isLoading ? null : _sendRegistrationOtp,
+                          ),
+                        ],
+
+                        // Step 2: OTP Verification
+                        if (_isOtpSent) ...[
+                          _buildSectionTitle('Verify Your Phone'),
+                          const SizedBox(height: 8),
+                          Text(
+                            'We sent a 6-digit code to ${_phoneController.text}',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.zinc500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          _buildOtpInput(),
+                          const SizedBox(height: 24),
+                          WaveButton(
+                            text: 'Verify & Create Account',
+                            icon: Icons.check_circle_rounded,
+                            isLoading: _isLoading,
+                            isFullWidth: true,
+                            onPressed: _isLoading ? null : _verifyAndRegister,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildResendOtp(),
+                        ],
+
+                        // Error Message
+                        if (authState.errorMessage != null) ...[
+                          const SizedBox(height: 16),
+                          _buildInlineError(authState.errorMessage!),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Login Link
+                  _buildLoginLink(),
+
+                  // Loading indicator
+                  if (_isLoading) ...[
+                    const SizedBox(height: 24),
+                    const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   ],
-                ),
-                const SizedBox(height: 16),
-
-                // Logo
-                const AppLogo(size: 90),
-                const SizedBox(height: 24),
-
-                // Title
-                Text(
-                  'Create Your Account',
-                  style: const TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Join Ethiopia\'s Premier Real Estate Marketplace',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withOpacity(0.7),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-
-                // White card container
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      // Step 1: Registration Form
-                      if (!_isOtpSent) ...[
-                        _buildSectionTitle('Personal Information'),
-                        const SizedBox(height: 20),
-                        _buildNameInputs(),
-                        const SizedBox(height: 16),
-                        _buildPhoneInput(),
-                        const SizedBox(height: 16),
-                        _buildGenderSelection(),
-                        const SizedBox(height: 24),
-                        WaveButton(
-                          text: 'Continue',
-                          icon: Icons.arrow_forward_rounded,
-                          isLoading: _isLoading,
-                          isFullWidth: true,
-                          onPressed: _isLoading ? null : _sendRegistrationOtp,
-                        ),
-                      ],
-
-                      // Step 2: OTP Verification
-                      if (_isOtpSent) ...[
-                        _buildSectionTitle('Verify Your Phone'),
-                        const SizedBox(height: 8),
-                        Text(
-                          'We sent a 6-digit code to ${_phoneController.text}',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.zinc500,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 24),
-                        _buildOtpInput(),
-                        const SizedBox(height: 24),
-                        WaveButton(
-                          text: 'Verify & Create Account',
-                          icon: Icons.check_circle_rounded,
-                          isLoading: _isLoading,
-                          isFullWidth: true,
-                          onPressed: _isLoading ? null : _verifyAndRegister,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildResendOtp(),
-                      ],
-
-                      // Error Message
-                      if (authState.errorMessage != null) ...[
-                        const SizedBox(height: 16),
-                        _buildInlineError(authState.errorMessage!),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Login Link
-                _buildLoginLink(),
-
-                // Loading indicator
-                if (_isLoading) ...[
-                  const SizedBox(height: 24),
-                  const CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
                 ],
-              ],
+              ),
             ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -357,7 +356,8 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
           hintStyle: const TextStyle(color: AppColors.zinc400, fontSize: 14),
           prefixIcon: Icon(icon, color: AppColors.navy600, size: 20),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
         keyboardType: keyboardType,
         style: const TextStyle(fontSize: 15),
@@ -461,7 +461,8 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.wave500, width: 2),
+                borderSide:
+                    const BorderSide(color: AppColors.wave500, width: 2),
               ),
             ),
             onChanged: (value) {
@@ -573,11 +574,11 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
     try {
       final response = await ref.read(authStateProvider.notifier).register(
-        firstName: _firstNameController.text.trim(),
-        lastName: _lastNameController.text.trim(),
-        phoneNumber: _phoneController.text.trim(),
-        gender: _selectedGender!,
-      );
+            firstName: _firstNameController.text.trim(),
+            lastName: _lastNameController.text.trim(),
+            phoneNumber: _phoneController.text.trim(),
+            gender: _selectedGender!,
+          );
 
       if (response.success) {
         setState(() {
@@ -604,12 +605,12 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
     try {
       final response = await ref.read(authStateProvider.notifier).register(
-        firstName: _firstNameController.text.trim(),
-        lastName: _lastNameController.text.trim(),
-        phoneNumber: _phoneController.text.trim(),
-        gender: _selectedGender!,
-        otpCode: otp,
-      );
+            firstName: _firstNameController.text.trim(),
+            lastName: _lastNameController.text.trim(),
+            phoneNumber: _phoneController.text.trim(),
+            gender: _selectedGender!,
+            otpCode: otp,
+          );
 
       if (response.success && mounted) {
         setState(() => _isLoading = false);

@@ -22,8 +22,7 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final List<TextEditingController> _otpControllers =
       List.generate(6, (_) => TextEditingController());
-  final List<FocusNode> _otpFocusNodes =
-      List.generate(6, (_) => FocusNode());
+  final List<FocusNode> _otpFocusNodes = List.generate(6, (_) => FocusNode());
 
   int _resendCountdown = 0;
   Timer? _countdownTimer;
@@ -104,11 +103,11 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
 
-                  // Logo
-                  const AppLogo(size: 100),
-                  const SizedBox(height: 32),
+                  // Logo with glassmorphism
+                  const GlassLogoContainer(size: 90, logoSize: 65),
+                  const SizedBox(height: 28),
 
                   // Title
                   const Text(
@@ -279,7 +278,8 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.wave500, width: 2),
+                borderSide:
+                    const BorderSide(color: AppColors.wave500, width: 2),
               ),
             ),
             onChanged: (value) {
@@ -420,7 +420,7 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
     }
 
     final response = await ref.read(authStateProvider.notifier).login(otp);
-    
+
     if (mounted && response.success) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const MainNavigationShell()),
@@ -429,8 +429,7 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
   }
 
   Future<void> _resendOtp() async {
-    final response =
-        await ref.read(authStateProvider.notifier).resendOtp();
+    final response = await ref.read(authStateProvider.notifier).resendOtp();
     if (mounted) {
       if (response.success) {
         _startCountdown();
