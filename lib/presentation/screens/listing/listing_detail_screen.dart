@@ -701,14 +701,14 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
           debtAmount != null ? ' Yes (${debtAmount.toInt()} ETB)' : ' Yes';
       details.add({'label': 'Encumbrance', 'value': amount});
     }
-    bool hasVideo = listing.videoLink != null && listing.videoLink!.isNotEmpty;
+    bool hasVideo = listing.videoUrl != null && listing.videoUrl!.isNotEmpty;
 
     if (details.isEmpty && !hasVideo) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (hasVideo) _buildVideoTourSection(listing.videoLink!),
+        if (hasVideo) _buildVideoTourSection(listing.videoUrl!),
         Text('Property Details', style: AppTextStyles.title),
         const SizedBox(height: 12),
         Container(

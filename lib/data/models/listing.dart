@@ -82,6 +82,16 @@ class Listing extends ChangeNotifier {
   final String? debtEncumbranceFileLink;
   final bool priceRevisionPossible;
   final String? videoLink;
+
+  /// Returns the full video URL by prepending base URL if needed
+  String? get videoUrl {
+    if (videoLink == null || videoLink!.isEmpty) return null;
+    // If already a full URL, return as-is
+    if (videoLink!.startsWith('http')) return videoLink;
+    // Otherwise, prepend the base URL
+    return 'https://wavemart.et/$videoLink';
+  }
+
   final String? sitePlanImageLink;
   final String? holdingType;
   final String? description;
