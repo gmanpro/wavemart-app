@@ -8,6 +8,7 @@ import '../../providers/app_providers.dart';
 import '../../widgets/common/wave_common_widgets.dart';
 import '../listing/listing_detail_screen.dart';
 import '../messages/messages_screen.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Notifications Screen - Wired to notificationsProvider
 class NotificationsScreen extends ConsumerStatefulWidget {
@@ -56,15 +57,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(AppLocalizations.of(context).settingsNotifications),
         actions: [
           // Mark all as read
           if (state.notifications.any((n) => !n.isRead))
             TextButton(
               onPressed: () {
-                ref
-                    .read(notificationsProvider.notifier)
-                    .markAllAsRead();
+                ref.read(notificationsProvider.notifier).markAllAsRead();
               },
               child: Text(
                 'Mark all read',
@@ -149,7 +148,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         if (notification.relatedId != null) {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => ListingDetailScreen(listingId: notification.relatedId!),
+              builder: (_) =>
+                  ListingDetailScreen(listingId: notification.relatedId!),
             ),
           );
         }
@@ -164,7 +164,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         if (notification.relatedId != null) {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => ListingDetailScreen(listingId: notification.relatedId!),
+              builder: (_) =>
+                  ListingDetailScreen(listingId: notification.relatedId!),
             ),
           );
         }
@@ -240,23 +241,21 @@ class _NotificationTile extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: notification.isRead
-                  ? AppColors.navy50
-                  : AppColors.wave100,
+              color: notification.isRead ? AppColors.navy50 : AppColors.wave100,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               notification.icon,
               size: 24,
-              color: notification.isRead
-                  ? AppColors.navy400
-                  : AppColors.wave600,
+              color:
+                  notification.isRead ? AppColors.navy400 : AppColors.wave600,
             ),
           ),
           title: Text(
             notification.title,
             style: TextStyle(
-              fontWeight: notification.isRead ? FontWeight.normal : FontWeight.w600,
+              fontWeight:
+                  notification.isRead ? FontWeight.normal : FontWeight.w600,
               fontSize: 14,
             ),
             maxLines: 1,

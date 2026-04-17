@@ -7,6 +7,7 @@ import '../../../../core/theme/text_styles.dart';
 import '../../../../data/services/kyc_service.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/common/wave_button.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// KYC Verification Screen
 class KycVerificationScreen extends ConsumerStatefulWidget {
@@ -164,7 +165,7 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('KYC Verification'),
+        title: Text(AppLocalizations.of(context).profileKyc),
       ),
       body: kycState.isLoading && kycState.status == 'none'
           ? const Center(child: CircularProgressIndicator())

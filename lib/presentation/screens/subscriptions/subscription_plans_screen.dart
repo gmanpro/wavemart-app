@@ -8,6 +8,7 @@ import '../../../../data/services/payment_service.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/common/wave_button.dart';
 import '../../widgets/common/wave_common_widgets.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Subscription Plans Screen
 class SubscriptionPlansScreen extends ConsumerStatefulWidget {
@@ -38,7 +39,7 @@ class _SubscriptionPlansScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Subscription Plans'),
+        title: Text(AppLocalizations.of(context).subscriptionsTitle),
       ),
       body: plansAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -49,7 +50,9 @@ class _SubscriptionPlansScreenState
         data: (plans) => RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(subscriptionPlansProvider);
-            await ref.read(currentSubscriptionProvider.notifier).loadCurrentSubscription();
+            await ref
+                .read(currentSubscriptionProvider.notifier)
+                .loadCurrentSubscription();
           },
           child: _buildBody(plans, currentSub),
         ),
@@ -66,7 +69,8 @@ class _SubscriptionPlansScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Current subscription banner
-          if (currentSub.subscription != null && currentSub.subscription.isActive)
+          if (currentSub.subscription != null &&
+              currentSub.subscription.isActive)
             _buildCurrentSubscriptionBanner(currentSub),
 
           const SizedBox(height: 8),
@@ -192,7 +196,9 @@ class _SubscriptionPlansScreenState
                 backgroundColor: AppColors.success,
               ),
             );
-            ref.read(currentSubscriptionProvider.notifier).loadCurrentSubscription();
+            ref
+                .read(currentSubscriptionProvider.notifier)
+                .loadCurrentSubscription();
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -235,7 +241,8 @@ class _SubscriptionPlansScreenState
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Complete payment in your browser. Return here after payment.'),
+                content: Text(
+                    'Complete payment in your browser. Return here after payment.'),
                 backgroundColor: AppColors.wave500,
               ),
             );
@@ -258,7 +265,9 @@ class _SubscriptionPlansScreenState
           relatedId: plan.id,
         );
 
-        if (mounted && paymentResponse.success && paymentResponse.checkoutUrl != null) {
+        if (mounted &&
+            paymentResponse.success &&
+            paymentResponse.checkoutUrl != null) {
           final uri = Uri.parse(paymentResponse.checkoutUrl!);
           if (await canLaunchUrl(uri)) {
             await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -344,7 +353,8 @@ class _PlanCard extends StatelessWidget {
                   : isPopular
                       ? AppColors.wave50
                       : Colors.transparent,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
               children: [
