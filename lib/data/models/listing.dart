@@ -88,8 +88,8 @@ class Listing extends ChangeNotifier {
     if (videoLink == null || videoLink!.isEmpty) return null;
     // If already a full URL, return as-is
     if (videoLink!.startsWith('http')) return videoLink;
-    // Otherwise, prepend the base URL
-    return 'https://wavemart.et/$videoLink';
+    // Otherwise, prepend the base URL with /storage path
+    return 'https://wavemart.et/storage/$videoLink';
   }
 
   final String? sitePlanImageLink;
