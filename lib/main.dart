@@ -83,6 +83,9 @@ class WaveMartApp extends ConsumerWidget {
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
+        _TigrinyaMaterialLocalizationsDelegate(),
+        _TigrinyaWidgetsLocalizationsDelegate(),
+        _TigrinyaCupertinoLocalizationsDelegate(),
       ],
       supportedLocales: const [
         Locale('en'),
@@ -91,4 +94,52 @@ class WaveMartApp extends ConsumerWidget {
       ],
     );
   }
+}
+
+/// Fallback delegate to provide Amharic Material localizations for Tigrinya
+class _TigrinyaMaterialLocalizationsDelegate
+    extends LocalizationsDelegate<MaterialLocalizations> {
+  const _TigrinyaMaterialLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'ti';
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) =>
+      GlobalMaterialLocalizations.delegate.load(const Locale('am'));
+
+  @override
+  bool shouldReload(_TigrinyaMaterialLocalizationsDelegate old) => false;
+}
+
+/// Fallback delegate to provide Amharic Widgets localizations for Tigrinya
+class _TigrinyaWidgetsLocalizationsDelegate
+    extends LocalizationsDelegate<WidgetsLocalizations> {
+  const _TigrinyaWidgetsLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'ti';
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) =>
+      GlobalWidgetsLocalizations.delegate.load(const Locale('am'));
+
+  @override
+  bool shouldReload(_TigrinyaWidgetsLocalizationsDelegate old) => false;
+}
+
+/// Fallback delegate to provide Amharic Cupertino localizations for Tigrinya
+class _TigrinyaCupertinoLocalizationsDelegate
+    extends LocalizationsDelegate<CupertinoLocalizations> {
+  const _TigrinyaCupertinoLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'ti';
+
+  @override
+  Future<CupertinoLocalizations> load(Locale locale) =>
+      GlobalCupertinoLocalizations.delegate.load(const Locale('am'));
+
+  @override
+  bool shouldReload(_TigrinyaCupertinoLocalizationsDelegate old) => false;
 }

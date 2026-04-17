@@ -11,6 +11,8 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
+      fontFamily: 'Inter',
+      fontFamilyFallback: const ['Inter', 'Outfit', 'sans-serif'],
       
       // Color Scheme
       colorScheme: const ColorScheme.light(
