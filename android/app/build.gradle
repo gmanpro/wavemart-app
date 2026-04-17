@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace "et.wavemart.app"
-    compileSdk 35
+    compileSdk 36
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -44,7 +44,7 @@ android {
     defaultConfig {
         applicationId "et.wavemart.app"
         minSdkVersion flutter.minSdkVersion  // Required for multidex support
-        targetSdk 35
+        targetSdk 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true  // Enable multidex for apps with over 64K methods
