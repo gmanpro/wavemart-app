@@ -9,6 +9,7 @@ import '../../widgets/common/wave_button.dart';
 import '../../widgets/common/app_logo.dart';
 import 'registration_screen.dart';
 import '../navigation/main_navigation_shell.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Modern OTP Login Screen with 60-second countdown
 class OtpLoginScreen extends ConsumerStatefulWidget {
@@ -155,12 +156,13 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
 
                         // Step 1: Phone Input
                         if (!authState.otpSent) ...[
-                          _buildSectionTitle('Enter Your Phone Number'),
+                          _buildSectionTitle(
+                              AppLocalizations.of(context).authEnterPhone),
                           const SizedBox(height: 16),
                           _buildPhoneInput(),
                           const SizedBox(height: 20),
                           WaveButton(
-                            text: 'Continue',
+                            text: AppLocalizations.of(context).authSendOtp,
                             icon: Icons.arrow_forward_rounded,
                             isLoading: authState.isLoading,
                             isFullWidth: true,
@@ -172,7 +174,8 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
 
                         // Step 2: OTP Input
                         if (authState.otpSent) ...[
-                          _buildSectionTitle('Enter Verification Code'),
+                          _buildSectionTitle(
+                              AppLocalizations.of(context).authEnterOtp),
                           const SizedBox(height: 8),
                           Text(
                             'We sent a 6-digit code to ${authState.phoneNumber}',
@@ -185,7 +188,7 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
                           _buildOtpInput(),
                           const SizedBox(height: 20),
                           WaveButton(
-                            text: 'Verify & Continue',
+                            text: AppLocalizations.of(context).authVerifyOtp,
                             icon: Icons.check_circle_rounded,
                             isLoading: authState.isLoading,
                             isFullWidth: true,
@@ -316,8 +319,8 @@ class _OtpLoginScreenState extends ConsumerState<OtpLoginScreen> {
 
     return TextButton(
       onPressed: _resendOtp,
-      child: const Text(
-        'Resend Code',
+      child: Text(
+        AppLocalizations.of(context).authResendOtp,
         style: TextStyle(
           color: AppColors.wave600,
           fontWeight: FontWeight.w600,

@@ -7,12 +7,14 @@ import '../favorites/favorites_screen.dart';
 import '../messages/messages_screen.dart';
 import '../settings/settings_screen.dart';
 import '../listing/create_listing_screen.dart';
+import '../../../l10n/app_localizations.dart';
 
 class MainNavigationShell extends ConsumerStatefulWidget {
   const MainNavigationShell({super.key});
 
   @override
-  ConsumerState<MainNavigationShell> createState() => _MainNavigationShellState();
+  ConsumerState<MainNavigationShell> createState() =>
+      _MainNavigationShellState();
 }
 
 class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
@@ -60,7 +62,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
             Icon(Icons.add, color: AppColors.navy900, size: 30),
             const SizedBox(height: 2),
             Text(
-              "List",
+              AppLocalizations.of(context).listingsCreate,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -81,8 +83,10 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(Icons.home_rounded, "Home", 0),
-              _buildNavItem(Icons.favorite_rounded, "Saved", 1),
+              _buildNavItem(
+                  Icons.home_rounded, AppLocalizations.of(context).navHome, 0),
+              _buildNavItem(Icons.favorite_rounded,
+                  AppLocalizations.of(context).navFavorites, 1),
               const SizedBox(width: 48), // Space for FAB notch
               _buildMessagesNavItem(unreadMsgCount),
               _buildSettingsNavItem(context),
@@ -135,7 +139,8 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
               Badge(
                 label: Text(
                   '$unreadCount',
-                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 10, fontWeight: FontWeight.bold),
                 ),
                 backgroundColor: AppColors.wave500,
                 textColor: Colors.white,
@@ -153,7 +158,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
               ),
             const SizedBox(height: 4),
             Text(
-              "Messages",
+              AppLocalizations.of(context).navProfile,
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
@@ -183,7 +188,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
             ),
             const SizedBox(height: 4),
             Text(
-              "Settings",
+              AppLocalizations.of(context).navSettings,
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,

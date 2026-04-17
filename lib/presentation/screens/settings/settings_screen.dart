@@ -324,6 +324,8 @@ String _getCurrentLanguageName(String? languageCode) {
 
 /// Show language selection dialog
 void _showLanguageSelectionDialog(BuildContext context, WidgetRef ref) {
+  final currentLocale = ref.read(localeProvider).locale?.languageCode ?? 'en';
+
   showModalBottomSheet(
     context: context,
     shape: const RoundedRectangleBorder(
@@ -349,6 +351,7 @@ void _showLanguageSelectionDialog(BuildContext context, WidgetRef ref) {
             languageCode: 'en',
             languageName:
                 '🇺🇸 ${AppLocalizations.of(context).languageEnglish}',
+            currentLocale: currentLocale,
           ),
           _buildLanguageOption(
             context,
@@ -356,6 +359,7 @@ void _showLanguageSelectionDialog(BuildContext context, WidgetRef ref) {
             languageCode: 'am',
             languageName:
                 '🇪🇹 ${AppLocalizations.of(context).languageAmharic}',
+            currentLocale: currentLocale,
           ),
           _buildLanguageOption(
             context,
@@ -363,6 +367,7 @@ void _showLanguageSelectionDialog(BuildContext context, WidgetRef ref) {
             languageCode: 'ti',
             languageName:
                 '🇪🇹 ${AppLocalizations.of(context).languageTigrinya}',
+            currentLocale: currentLocale,
           ),
           const SizedBox(height: 16),
         ],
@@ -377,8 +382,8 @@ Widget _buildLanguageOption(
   WidgetRef ref, {
   required String languageCode,
   required String languageName,
+  required String currentLocale,
 }) {
-  final currentLocale = ref.watch(localeProvider).locale?.languageCode;
   final isSelected = currentLocale == languageCode;
 
   return ListTile(
@@ -386,12 +391,6 @@ Widget _buildLanguageOption(
       await ref.read(localeProvider.notifier).setLocale(Locale(languageCode));
       if (context.mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).languageChanged),
-            backgroundColor: AppColors.success,
-          ),
-        );
       }
     },
     leading: isSelected
