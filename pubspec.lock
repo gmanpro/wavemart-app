@@ -49,6 +49,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.1"
+  av_player:
+    dependency: "direct main"
+    description:
+      name: av_player
+      sha256: "9b448920810c855cb91b42d480be480d143aa25ba4bf89036bfad5f1411eb8ef"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0"
   boolean_selector:
     dependency: transitive
     description:
