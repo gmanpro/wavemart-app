@@ -172,6 +172,12 @@ abstract class AppLocalizations {
   /// **'Please try again'**
   String get commonRetryMessage;
 
+  /// No description provided for @commonComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get commonComingSoon;
+
   /// No description provided for @navHome.
   ///
   /// In en, this message translates to:
@@ -202,17 +208,623 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get navProfile;
 
+  /// No description provided for @navMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get navMessages;
+
   /// No description provided for @navSettings.
   ///
   /// In en, this message translates to:
   /// **'Settings'**
   String get navSettings;
 
+  /// No description provided for @homeGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, {name}'**
+  String homeGreeting(Object name);
+
+  /// No description provided for @homeDiscover.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover your perfect property'**
+  String get homeDiscover;
+
+  /// No description provided for @homeFeaturedPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium properties'**
+  String get homeFeaturedPremium;
+
+  /// No description provided for @homeLatestRecently.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently added'**
+  String get homeLatestRecently;
+
+  /// No description provided for @homeViewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View All'**
+  String get homeViewAll;
+
+  /// No description provided for @profileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileTitle;
+
+  /// No description provided for @profileEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get profileEdit;
+
+  /// No description provided for @profileEditSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update your information'**
+  String get profileEditSubtitle;
+
+  /// No description provided for @profileMyListings.
+  ///
+  /// In en, this message translates to:
+  /// **'My Listings'**
+  String get profileMyListings;
+
+  /// No description provided for @profileFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get profileFavorites;
+
+  /// No description provided for @profileMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get profileMessages;
+
+  /// No description provided for @profilePayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment History'**
+  String get profilePayments;
+
+  /// No description provided for @profileKyc.
+  ///
+  /// In en, this message translates to:
+  /// **'KYC Verification'**
+  String get profileKyc;
+
+  /// No description provided for @profileSubscriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions'**
+  String get profileSubscriptions;
+
+  /// No description provided for @profileHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Help Center'**
+  String get profileHelp;
+
+  /// No description provided for @profileNotLoggedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Logged In'**
+  String get profileNotLoggedIn;
+
+  /// No description provided for @profileLoginPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in to view your profile'**
+  String get profileLoginPrompt;
+
+  /// No description provided for @profileVerificationPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get profileVerificationPhone;
+
+  /// No description provided for @profileVerificationKyc.
+  ///
+  /// In en, this message translates to:
+  /// **'KYC'**
+  String get profileVerificationKyc;
+
+  /// No description provided for @profileStatsListings.
+  ///
+  /// In en, this message translates to:
+  /// **'Listings'**
+  String get profileStatsListings;
+
+  /// No description provided for @profileStatsMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get profileStatsMessages;
+
+  /// No description provided for @profileStatsFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get profileStatsFavorites;
+
+  /// No description provided for @profileKycStatusVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get profileKycStatusVerified;
+
+  /// No description provided for @profileKycStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get profileKycStatusPending;
+
+  /// No description provided for @profileKycStatusRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get profileKycStatusRequired;
+
+  /// No description provided for @searchFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get searchFilters;
+
+  /// No description provided for @searchPropertyType.
+  ///
+  /// In en, this message translates to:
+  /// **'Property Type'**
+  String get searchPropertyType;
+
+  /// No description provided for @searchListingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Listing Status'**
+  String get searchListingStatus;
+
+  /// No description provided for @searchPriceRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Price Range'**
+  String get searchPriceRange;
+
+  /// No description provided for @searchSortBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort By'**
+  String get searchSortBy;
+
+  /// No description provided for @searchApplyFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Filters'**
+  String get searchApplyFilters;
+
+  /// No description provided for @searchReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get searchReset;
+
+  /// No description provided for @searchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by location...'**
+  String get searchPlaceholder;
+
+  /// No description provided for @searchClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All'**
+  String get searchClearAll;
+
+  /// No description provided for @searchFindProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Find Your Perfect Property'**
+  String get searchFindProperty;
+
+  /// No description provided for @searchWelcomeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by location, filter by type and status to discover amazing properties'**
+  String get searchWelcomeSubtitle;
+
+  /// No description provided for @searchPopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular Searches'**
+  String get searchPopular;
+
+  /// No description provided for @searchUnder5M.
+  ///
+  /// In en, this message translates to:
+  /// **'💰 Under 5M'**
+  String get searchUnder5M;
+
+  /// No description provided for @search5M10M.
+  ///
+  /// In en, this message translates to:
+  /// **'💎 5M - 10M'**
+  String get search5M10M;
+
+  /// No description provided for @search10M50M.
+  ///
+  /// In en, this message translates to:
+  /// **'🏆 10M - 50M'**
+  String get search10M50M;
+
+  /// No description provided for @search50M100M.
+  ///
+  /// In en, this message translates to:
+  /// **'👑 50M - 100M'**
+  String get search50M100M;
+
+  /// No description provided for @search100MPlus.
+  ///
+  /// In en, this message translates to:
+  /// **'✨ 100M+'**
+  String get search100MPlus;
+
+  /// No description provided for @searchNoResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Properties Found'**
+  String get searchNoResultsTitle;
+
+  /// No description provided for @searchNoResultsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting your search or filters to find more results'**
+  String get searchNoResultsSubtitle;
+
+  /// No description provided for @searchFoundCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} properties found'**
+  String searchFoundCount(Object count);
+
+  /// No description provided for @searchSortNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'🆕 Newest'**
+  String get searchSortNewest;
+
+  /// No description provided for @searchSortOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'📅 Oldest'**
+  String get searchSortOldest;
+
+  /// No description provided for @searchSortPriceLow.
+  ///
+  /// In en, this message translates to:
+  /// **'💰 Price ↑'**
+  String get searchSortPriceLow;
+
+  /// No description provided for @searchSortPriceHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'💎 Price ↓'**
+  String get searchSortPriceHigh;
+
+  /// No description provided for @searchFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get searchFilterAll;
+
+  /// No description provided for @searchFilterAny.
+  ///
+  /// In en, this message translates to:
+  /// **'Any'**
+  String get searchFilterAny;
+
+  /// No description provided for @listingNew.
+  ///
+  /// In en, this message translates to:
+  /// **'NEW'**
+  String get listingNew;
+
+  /// No description provided for @listingFeatured.
+  ///
+  /// In en, this message translates to:
+  /// **'FEATURED'**
+  String get listingFeatured;
+
+  /// No description provided for @listingHouse.
+  ///
+  /// In en, this message translates to:
+  /// **'🏠 House'**
+  String get listingHouse;
+
+  /// No description provided for @listingLand.
+  ///
+  /// In en, this message translates to:
+  /// **'🌄 Land'**
+  String get listingLand;
+
+  /// No description provided for @listingHouses.
+  ///
+  /// In en, this message translates to:
+  /// **'🏠 Houses'**
+  String get listingHouses;
+
+  /// No description provided for @listingLands.
+  ///
+  /// In en, this message translates to:
+  /// **'🌄 Lands'**
+  String get listingLands;
+
+  /// No description provided for @listingPriceOnRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Price on Request'**
+  String get listingPriceOnRequest;
+
+  /// No description provided for @listingUnknownLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Location'**
+  String get listingUnknownLocation;
+
+  /// No description provided for @listingToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get listingToday;
+
+  /// No description provided for @listingYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get listingYesterday;
+
+  /// No description provided for @listingDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days ago'**
+  String listingDaysAgo(Object count);
+
+  /// No description provided for @listingWeeksAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} weeks ago'**
+  String listingWeeksAgo(Object count);
+
+  /// No description provided for @listingMonthsAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} months ago'**
+  String listingMonthsAgo(Object count);
+
+  /// No description provided for @listingSale.
+  ///
+  /// In en, this message translates to:
+  /// **'💰 Sale'**
+  String get listingSale;
+
+  /// No description provided for @listingRent.
+  ///
+  /// In en, this message translates to:
+  /// **'🔑 Rent'**
+  String get listingRent;
+
+  /// No description provided for @listingForSale.
+  ///
+  /// In en, this message translates to:
+  /// **'💰 For Sale'**
+  String get listingForSale;
+
+  /// No description provided for @listingForRent.
+  ///
+  /// In en, this message translates to:
+  /// **'🔑 For Rent'**
+  String get listingForRent;
+
+  /// No description provided for @listingUnitM2.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} m²'**
+  String listingUnitM2(Object count);
+
+  /// No description provided for @listingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Listings'**
+  String get listingsTitle;
+
+  /// No description provided for @listingsCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Listing'**
+  String get listingsCreate;
+
+  /// No description provided for @listingsFeatured.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured'**
+  String get listingsFeatured;
+
+  /// No description provided for @listingsNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No listings found'**
+  String get listingsNoResults;
+
+  /// No description provided for @listingsDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Property Details'**
+  String get listingsDetails;
+
+  /// No description provided for @listingsKeyFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Key Features'**
+  String get listingsKeyFeatures;
+
+  /// No description provided for @listingsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get listingsDescription;
+
+  /// No description provided for @favoritesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get favoritesTitle;
+
+  /// No description provided for @favoritesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No favorites yet'**
+  String get favoritesEmpty;
+
+  /// No description provided for @favoritesEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start adding properties to your favorites'**
+  String get favoritesEmptySubtitle;
+
+  /// No description provided for @favoritesRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favorites'**
+  String get favoritesRemove;
+
+  /// No description provided for @favoritesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to favorites'**
+  String get favoritesAdded;
+
+  /// No description provided for @favoritesRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from favorites'**
+  String get favoritesRemoved;
+
+  /// No description provided for @messagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get messagesTitle;
+
+  /// No description provided for @messagesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet'**
+  String get messagesEmpty;
+
+  /// No description provided for @messagesTypeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message...'**
+  String get messagesTypeMessage;
+
+  /// No description provided for @messagesSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get messagesSend;
+
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:
   /// **'Settings'**
   String get settingsTitle;
+
+  /// No description provided for @settingsSectionAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'My Account'**
+  String get settingsSectionAccount;
+
+  /// No description provided for @settingsSectionSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get settingsSectionSupport;
+
+  /// No description provided for @settingsSectionAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get settingsSectionAuth;
+
+  /// No description provided for @settingsMyListingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your properties'**
+  String get settingsMyListingsSubtitle;
+
+  /// No description provided for @settingsSubscriptionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View your plans'**
+  String get settingsSubscriptionsSubtitle;
+
+  /// No description provided for @settingsPaymentsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction history'**
+  String get settingsPaymentsSubtitle;
+
+  /// No description provided for @settingsKycVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get settingsKycVerified;
+
+  /// No description provided for @settingsKycRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get settingsKycRequired;
+
+  /// No description provided for @settingsHelpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'FAQs and guides'**
+  String get settingsHelpSubtitle;
+
+  /// No description provided for @settingsContactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Support'**
+  String get settingsContactSupport;
+
+  /// No description provided for @settingsContactSupportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get in touch'**
+  String get settingsContactSupportSubtitle;
+
+  /// No description provided for @settingsPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get settingsPrivacyPolicy;
+
+  /// No description provided for @settingsTermsOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get settingsTermsOfService;
+
+  /// No description provided for @settingsWebOpenError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open {title}'**
+  String settingsWebOpenError(Object title);
 
   /// No description provided for @settingsPreferences.
   ///
@@ -382,60 +994,6 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to logout?'**
   String get authLogoutConfirm;
 
-  /// No description provided for @profileTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Profile'**
-  String get profileTitle;
-
-  /// No description provided for @profileEdit.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Profile'**
-  String get profileEdit;
-
-  /// No description provided for @profileMyListings.
-  ///
-  /// In en, this message translates to:
-  /// **'My Listings'**
-  String get profileMyListings;
-
-  /// No description provided for @profileFavorites.
-  ///
-  /// In en, this message translates to:
-  /// **'Favorites'**
-  String get profileFavorites;
-
-  /// No description provided for @profileMessages.
-  ///
-  /// In en, this message translates to:
-  /// **'Messages'**
-  String get profileMessages;
-
-  /// No description provided for @profilePayments.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment History'**
-  String get profilePayments;
-
-  /// No description provided for @profileKyc.
-  ///
-  /// In en, this message translates to:
-  /// **'KYC Verification'**
-  String get profileKyc;
-
-  /// No description provided for @profileSubscriptions.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscriptions'**
-  String get profileSubscriptions;
-
-  /// No description provided for @profileHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Help Center'**
-  String get profileHelp;
-
   /// No description provided for @subscriptionsTitle.
   ///
   /// In en, this message translates to:
@@ -483,186 +1041,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select Plan'**
   String get subscriptionsSelectPlan;
-
-  /// No description provided for @listingsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Listings'**
-  String get listingsTitle;
-
-  /// No description provided for @listingsHouses.
-  ///
-  /// In en, this message translates to:
-  /// **'Houses'**
-  String get listingsHouses;
-
-  /// No description provided for @listingsLands.
-  ///
-  /// In en, this message translates to:
-  /// **'Lands'**
-  String get listingsLands;
-
-  /// No description provided for @listingsForSale.
-  ///
-  /// In en, this message translates to:
-  /// **'For Sale'**
-  String get listingsForSale;
-
-  /// No description provided for @listingsForRent.
-  ///
-  /// In en, this message translates to:
-  /// **'For Rent'**
-  String get listingsForRent;
-
-  /// No description provided for @listingsCreate.
-  ///
-  /// In en, this message translates to:
-  /// **'Create Listing'**
-  String get listingsCreate;
-
-  /// No description provided for @listingsFeatured.
-  ///
-  /// In en, this message translates to:
-  /// **'Featured'**
-  String get listingsFeatured;
-
-  /// No description provided for @listingsSimilar.
-  ///
-  /// In en, this message translates to:
-  /// **'Similar Listings'**
-  String get listingsSimilar;
-
-  /// No description provided for @listingsNoResults.
-  ///
-  /// In en, this message translates to:
-  /// **'No listings found'**
-  String get listingsNoResults;
-
-  /// No description provided for @listingsDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'Property Details'**
-  String get listingsDetails;
-
-  /// No description provided for @listingsKeyFeatures.
-  ///
-  /// In en, this message translates to:
-  /// **'Key Features'**
-  String get listingsKeyFeatures;
-
-  /// No description provided for @listingsDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Description'**
-  String get listingsDescription;
-
-  /// No description provided for @searchFilters.
-  ///
-  /// In en, this message translates to:
-  /// **'Filters'**
-  String get searchFilters;
-
-  /// No description provided for @searchPropertyType.
-  ///
-  /// In en, this message translates to:
-  /// **'Property Type'**
-  String get searchPropertyType;
-
-  /// No description provided for @searchListingStatus.
-  ///
-  /// In en, this message translates to:
-  /// **'Listing Status'**
-  String get searchListingStatus;
-
-  /// No description provided for @searchPriceRange.
-  ///
-  /// In en, this message translates to:
-  /// **'Price Range'**
-  String get searchPriceRange;
-
-  /// No description provided for @searchSortBy.
-  ///
-  /// In en, this message translates to:
-  /// **'Sort By'**
-  String get searchSortBy;
-
-  /// No description provided for @searchApplyFilters.
-  ///
-  /// In en, this message translates to:
-  /// **'Apply Filters'**
-  String get searchApplyFilters;
-
-  /// No description provided for @searchReset.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset'**
-  String get searchReset;
-
-  /// No description provided for @favoritesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Favorites'**
-  String get favoritesTitle;
-
-  /// No description provided for @favoritesEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No favorites yet'**
-  String get favoritesEmpty;
-
-  /// No description provided for @favoritesEmptySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Start adding properties to your favorites'**
-  String get favoritesEmptySubtitle;
-
-  /// No description provided for @favoritesRemove.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove from favorites'**
-  String get favoritesRemove;
-
-  /// No description provided for @favoritesAdded.
-  ///
-  /// In en, this message translates to:
-  /// **'Added to favorites'**
-  String get favoritesAdded;
-
-  /// No description provided for @favoritesRemoved.
-  ///
-  /// In en, this message translates to:
-  /// **'Removed from favorites'**
-  String get favoritesRemoved;
-
-  /// No description provided for @messagesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Messages'**
-  String get messagesTitle;
-
-  /// No description provided for @messagesEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No messages yet'**
-  String get messagesEmpty;
-
-  /// No description provided for @messagesTypeMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Type a message...'**
-  String get messagesTypeMessage;
-
-  /// No description provided for @messagesSend.
-  ///
-  /// In en, this message translates to:
-  /// **'Send'**
-  String get messagesSend;
-
-  /// No description provided for @commonComingSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Coming soon'**
-  String get commonComingSoon;
 }
 
 class _AppLocalizationsDelegate

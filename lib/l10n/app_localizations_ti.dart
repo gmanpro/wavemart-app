@@ -12,58 +12,378 @@ class AppLocalizationsTi extends AppLocalizations {
   String get appTitle => 'ዌቭማርት';
 
   @override
-  String get commonOk => 'ሽልዎ';
+  String get commonOk => 'እሺ';
 
   @override
-  String get commonCancel => 'መልእኽቲ';
+  String get commonCancel => 'ይሰረዝ';
 
   @override
-  String get commonSave => 'ኣቕምጥ';
+  String get commonSave => 'ዓቅብ';
 
   @override
-  String get commonDelete => 'ጥፍአ';
+  String get commonDelete => 'ሰርዝ';
 
   @override
-  String get commonEdit => 'ቕይሩ';
+  String get commonEdit => 'ኣዐሪ';
 
   @override
-  String get commonRetry => 'ድሕሪኡ ሕመም';
+  String get commonRetry => 'ደጊምካ ፈትን';
 
   @override
-  String get commonLoading => 'በመንፍዕ ዘይኮነ...';
+  String get commonLoading => 'ይፅዕን ኣሎ...';
 
   @override
-  String get commonError => 'ሕጋዊ ጸገም';
+  String get commonError => 'ጌጋ';
 
   @override
-  String get commonSuccess => 'ትሕቲኹ';
+  String get commonSuccess => 'ተሳኪዑ';
 
   @override
-  String get commonNoData => 'እቲ መረጻ ዘይብሉ';
+  String get commonNoData => 'ዝተረኽበ መረዳእታ የለን';
 
   @override
-  String get commonRetryMessage => 'ብሕጉስ ድሕሪኡ ሕመም';
+  String get commonRetryMessage => 'በጃኹም ደጊምኩም ፈትኑ';
 
   @override
-  String get navHome => 'መንበር';
+  String get commonComingSoon => 'ብቀረባ እዋን ክመጽእ እዩ';
 
   @override
-  String get navListings => 'ምልካዋት';
+  String get navHome => 'መበገሲ';
 
   @override
-  String get navSearch => 'ድሊል';
+  String get navListings => 'ንብረታት';
 
   @override
-  String get navFavorites => 'ንጽቢታት';
+  String get navSearch => 'ደለይ';
 
   @override
-  String get navProfile => 'ፕሮፋይል';
+  String get navFavorites => 'ዝተመርፁ';
 
   @override
-  String get navSettings => 'ቅንብራት';
+  String get navProfile => 'መገለጺ';
 
   @override
-  String get settingsTitle => 'ቅንብራት';
+  String get navMessages => 'መልእኽታት';
+
+  @override
+  String get navSettings => 'ቅጥዒታት';
+
+  @override
+  String homeGreeting(Object name) {
+    return 'ሰላም፣ $name';
+  }
+
+  @override
+  String get homeDiscover => 'ዝበለጸ ንብረትኩም ኣብዚ ረኸቡ';
+
+  @override
+  String get homeFeaturedPremium => 'ፍሉያት ንብረታት';
+
+  @override
+  String get homeLatestRecently => 'ብቀረባ ዝወጹ';
+
+  @override
+  String get homeViewAll => 'ኹሉ ተዓዘብ';
+
+  @override
+  String get profileTitle => 'መገለጺ';
+
+  @override
+  String get profileEdit => 'መገለጺ ኣዐሪ';
+
+  @override
+  String get profileEditSubtitle => 'ሓበሬታኹም ኣሐድሱ';
+
+  @override
+  String get profileMyListings => 'ናተይ ንብረታት';
+
+  @override
+  String get profileFavorites => 'ዝተመርፁ';
+
+  @override
+  String get profileMessages => 'መልእኽታት';
+
+  @override
+  String get profilePayments => 'ታሪኽ ክፍሊት';
+
+  @override
+  String get profileKyc => 'መረጋገጺ መንነት (KYC)';
+
+  @override
+  String get profileSubscriptions => 'ናይ ኣባልነት ትልምታት';
+
+  @override
+  String get profileHelp => 'መእከሊ ሓገዝ';
+
+  @override
+  String get profileNotLoggedIn => 'ኣይኣተኹምን';
+
+  @override
+  String get profileLoginPrompt => 'በጃኹም መገለጺኹም ንምርኣይ እተዉ';
+
+  @override
+  String get profileVerificationPhone => 'ተሌፎን';
+
+  @override
+  String get profileVerificationKyc => 'KYC';
+
+  @override
+  String get profileStatsListings => 'ንብረታት';
+
+  @override
+  String get profileStatsMessages => 'መልእኽታት';
+
+  @override
+  String get profileStatsFavorites => 'ዝተመርፁ';
+
+  @override
+  String get profileKycStatusVerified => 'ተረጋጊጹ';
+
+  @override
+  String get profileKycStatusPending => 'ኣብ መስርሕ';
+
+  @override
+  String get profileKycStatusRequired => 'የድሊ';
+
+  @override
+  String get searchFilters => 'መጻረዪታት';
+
+  @override
+  String get searchPropertyType => 'ዓይነት ንብረት';
+
+  @override
+  String get searchListingStatus => 'ኵነታት መሸጣ/ክራይ';
+
+  @override
+  String get searchPriceRange => 'ናይ ዋጋ ክልል';
+
+  @override
+  String get searchSortBy => 'ደረጃ ኣሰያይማ';
+
+  @override
+  String get searchApplyFilters => 'መጻረዪታት ተጠቐም';
+
+  @override
+  String get searchReset => 'ኣሐድስ';
+
+  @override
+  String get searchPlaceholder => 'ብቦታ ደለይ...';
+
+  @override
+  String get searchClearAll => 'ኹሉ ኣጥፍእ';
+
+  @override
+  String get searchFindProperty => 'ዝበለጸ ንብረትኩም ረኸቡ';
+
+  @override
+  String get searchWelcomeSubtitle => 'ንብረታት ብቦታ፣ ብዓይነትን ብኵነታትን ደለዩ';
+
+  @override
+  String get searchPopular => 'ተፈተውቲ ዳህሳሳት';
+
+  @override
+  String get searchUnder5M => '💰 ትሕቲ 5 ሚልዮን';
+
+  @override
+  String get search5M10M => '💎 5-10 ሚልዮን';
+
+  @override
+  String get search10M50M => '🏆 10-50 ሚልዮን';
+
+  @override
+  String get search50M100M => '👑 50-100 ሚልዮን';
+
+  @override
+  String get search100MPlus => '✨ ልዕሊ 100 ሚልዮን';
+
+  @override
+  String get searchNoResultsTitle => 'ዝተረኽበ ንብረት የለን';
+
+  @override
+  String get searchNoResultsSubtitle => 'በጃኹም ዳህሳስኩም ወይ መጻረዪኹም ቀይርኩም ፈትኑ';
+
+  @override
+  String searchFoundCount(Object count) {
+    return '$count ንብረታት ተረኺቦም';
+  }
+
+  @override
+  String get searchSortNewest => '🆕 ሓድሽ';
+
+  @override
+  String get searchSortOldest => '📅 ዝጸንሐ';
+
+  @override
+  String get searchSortPriceLow => '💰 ትሑት ዋጋ';
+
+  @override
+  String get searchSortPriceHigh => '💎 ልዑል ዋጋ';
+
+  @override
+  String get searchFilterAll => 'ኹሉ';
+
+  @override
+  String get searchFilterAny => 'ዝኾነ';
+
+  @override
+  String get listingNew => 'ሓድሽ';
+
+  @override
+  String get listingFeatured => 'ፍሉይ';
+
+  @override
+  String get listingHouse => '🏠 ገዛ';
+
+  @override
+  String get listingLand => '🌄 መሬት';
+
+  @override
+  String get listingHouses => '🏠 ገዛውቲ';
+
+  @override
+  String get listingLands => '🌄 መሬታት';
+
+  @override
+  String get listingPriceOnRequest => 'ዋጋ ብሕቶ';
+
+  @override
+  String get listingUnknownLocation => 'ዘይፍለጥ ቦታ';
+
+  @override
+  String get listingToday => 'ሎሚ';
+
+  @override
+  String get listingYesterday => 'ትማሊ';
+
+  @override
+  String listingDaysAgo(Object count) {
+    return 'ቅድሚ $count መዓልቲ';
+  }
+
+  @override
+  String listingWeeksAgo(Object count) {
+    return 'ቅድሚ $count ሰሙን';
+  }
+
+  @override
+  String listingMonthsAgo(Object count) {
+    return 'ቅድሚ $count ወርሒ';
+  }
+
+  @override
+  String get listingSale => '💰 መሸጣ';
+
+  @override
+  String get listingRent => '🔑 ክራይ';
+
+  @override
+  String get listingForSale => '💰 ንመሸጣ';
+
+  @override
+  String get listingForRent => '🔑 ንክራይ';
+
+  @override
+  String listingUnitM2(Object count) {
+    return '$count ሜትር ካሬ';
+  }
+
+  @override
+  String get listingsTitle => 'ንብረታት';
+
+  @override
+  String get listingsCreate => 'ንብረት ኣእቱ';
+
+  @override
+  String get listingsFeatured => 'ፍሉያት ንብረታት';
+
+  @override
+  String get listingsNoResults => 'ዝተረኽበ ንብረት የለን';
+
+  @override
+  String get listingsDetails => 'ዝርዝር ንብረት';
+
+  @override
+  String get listingsKeyFeatures => 'ቀንዲ መገለጺታት';
+
+  @override
+  String get listingsDescription => 'መግለጺ';
+
+  @override
+  String get favoritesTitle => 'ዝተመርፁ';
+
+  @override
+  String get favoritesEmpty => 'ዝተመርጸ ንብረት የለን';
+
+  @override
+  String get favoritesEmptySubtitle => 'ዝመረጽኩምዎም ንብረታት ኣብዚ ክትረኽብዎም ኢኹም';
+
+  @override
+  String get favoritesRemove => 'ካብ ዝተመርፁ ኣውጽእ';
+
+  @override
+  String get favoritesAdded => 'ናብ ዝተመርፁ ተወሲኹ';
+
+  @override
+  String get favoritesRemoved => 'ካብ ዝተመርፁ ወጺኡ';
+
+  @override
+  String get messagesTitle => 'መልእኽታት';
+
+  @override
+  String get messagesEmpty => 'መልእኽቲ የለን';
+
+  @override
+  String get messagesTypeMessage => 'መልእኽቲ ጽሓፉ...';
+
+  @override
+  String get messagesSend => 'ስደድ';
+
+  @override
+  String get settingsTitle => 'ቅጥዒታት';
+
+  @override
+  String get settingsSectionAccount => 'ናይ መለያ ሓበሬታ';
+
+  @override
+  String get settingsSectionSupport => 'ሓገዝ';
+
+  @override
+  String get settingsSectionAuth => 'መለያ';
+
+  @override
+  String get settingsMyListingsSubtitle => 'ንብረትኩም ኣመሓድሩ';
+
+  @override
+  String get settingsSubscriptionsSubtitle => 'ትልምታትኩም ርኣዩ';
+
+  @override
+  String get settingsPaymentsSubtitle => 'ታሪኽ ክፍሊት';
+
+  @override
+  String get settingsKycVerified => 'ተረጋጊጹ';
+
+  @override
+  String get settingsKycRequired => 'የድሊ';
+
+  @override
+  String get settingsHelpSubtitle => 'ሕቶታትን መምርሒታትን';
+
+  @override
+  String get settingsContactSupport => 'ሓገዝ ረኸቡ';
+
+  @override
+  String get settingsContactSupportSubtitle => 'ተወከሱና';
+
+  @override
+  String get settingsPrivacyPolicy => 'ፖሊሲ ምስጢራውነት';
+
+  @override
+  String get settingsTermsOfService => 'ውዕል ኣገልግሎት';
+
+  @override
+  String settingsWebOpenError(Object title) {
+    return '$title ክኽፈት ኣይከኣለን';
+  }
 
   @override
   String get settingsPreferences => 'ምርጫታት';
@@ -72,121 +392,94 @@ class AppLocalizationsTi extends AppLocalizations {
   String get settingsLanguage => 'ቋንቋ';
 
   @override
-  String get settingsLanguageSubtitle => 'ቋንቋ መተግበሪይ ቀይር';
+  String get settingsLanguageSubtitle => 'ናይ መተግበሪ ቋንቋ ቀይሩ';
 
   @override
-  String get settingsTheme => 'ጥበባዊ ሕመም';
+  String get settingsTheme => 'መልክዕ';
 
   @override
-  String get settingsThemeSubtitle => 'ጥበባዊ ሕመም መተግበሪይ ምርጫ';
+  String get settingsThemeSubtitle => 'ናይ መተግበሪ መልክዕ ይምረጡ';
 
   @override
-  String get settingsNotifications => 'ማሕተማታት';
+  String get settingsNotifications => 'መጠንቀቕታታት';
 
   @override
-  String get settingsNotificationsSubtitle => 'ማሕተማታት ኣስተዳድር';
+  String get settingsNotificationsSubtitle => 'መጠንቀቕታታት ኣመሓድሩ';
 
   @override
-  String get settingsPrivacy => 'ግሉእነት';
+  String get settingsPrivacy => 'ምስጢራውነት';
 
   @override
-  String get settingsPrivacySubtitle => 'ቅንብራት ግሉእነት';
+  String get settingsPrivacySubtitle => 'ቅጥዒታት ምስጢራውነት';
 
   @override
-  String get settingsAbout => 'ኣብ ዘለና';
+  String get settingsAbout => 'ብዛዕባ ዌቭማርት';
 
   @override
-  String get settingsAboutSubtitle => 'ኣብ ዌቭማርት';
+  String get settingsAboutSubtitle => 'ሓበሬታ ብዛዕባ መተግበሪ';
 
   @override
   String get settingsLogout => 'ውጻእ';
 
   @override
-  String get settingsLogoutSubtitle => 'ከኣካውንትኹም ውጻእ';
+  String get settingsLogoutSubtitle => 'ካብ መለያኹም ንምውጻእ';
 
   @override
-  String get languageTitle => 'ቋንቋ ምርጫ';
+  String get languageTitle => 'ቋንቋ ይምረጡ';
 
   @override
   String get languageEnglish => 'English (እንግሊዝኛ)';
 
   @override
-  String get languageAmharic => 'አማርኛ';
+  String get languageAmharic => 'አማርኛ (ኣምሓርኛ)';
 
   @override
   String get languageTigrinya => 'ትግርኛ';
 
   @override
-  String get languageChanged => 'ቋንቋ ብትሕቲኹ ተቐይሩ';
+  String get languageChanged => 'ቋንቋ ብዝግባእ ተቐይሩ';
 
   @override
-  String get authPhoneNumber => 'ቁጽሪ ስልኪ';
+  String get authPhoneNumber => 'ቁጽሪ ተሌፎን';
 
   @override
-  String get authEnterPhone => 'ቁጽሪ ስልኪኹም ኣስገቡ';
+  String get authEnterPhone => 'ቁጽሪ ተሌፎንኩም ኣእትዉ';
 
   @override
-  String get authSendOtp => 'OTP ኣፅኒዑ';
+  String get authSendOtp => 'ኮድ ስደድ';
 
   @override
-  String get authVerifyOtp => 'OTP ኣረጋግጹ';
+  String get authVerifyOtp => 'ኮድ ኣረጋግጽ';
 
   @override
-  String get authEnterOtp => '6-ቁጽሪ OTP ኣስገቡ';
+  String get authEnterOtp => 'ባለ 6 ኣሃዝ ኮድ ኣእትዉ';
 
   @override
-  String get authResendOtp => 'OTP ድሕሪኡ ኣፅኒዑ';
+  String get authResendOtp => 'ኮድ ደጊምካ ስደድ';
 
   @override
-  String get authLogin => 'ገብሩ';
+  String get authLogin => 'እቶ';
 
   @override
-  String get authRegister => 'ተመዝገቡ';
+  String get authRegister => 'ተመዝገብ';
 
   @override
   String get authLogout => 'ውጻእ';
 
   @override
-  String get authLogoutConfirm => 'ትዕርገትኹም ውጻእ ክትፈልጉ?';
+  String get authLogoutConfirm => 'ርግጸኛ ዲኹም ክትወጽኡ ትደልዩ?';
 
   @override
-  String get profileTitle => 'ፕሮፋይል';
+  String get subscriptionsTitle => 'ናይ ኣባልነት ትልምታት';
 
   @override
-  String get profileEdit => 'ፕሮፋይል ቕይሩ';
+  String get subscriptionsSubtitle => 'ንዓኹም ዝበቅዕ ትልሚ ይምረጡ';
 
   @override
-  String get profileMyListings => 'ምልካዋት ኣብ ኣካውንትኹም';
+  String get subscriptionsCurrentPlan => 'ናይ ሕጂ ትልሚ';
 
   @override
-  String get profileFavorites => 'ንጽቢታት';
-
-  @override
-  String get profileMessages => 'መልእኽታት';
-
-  @override
-  String get profilePayments => 'ታሪኽ ክፍያታት';
-
-  @override
-  String get profileKyc => 'KYC ኣረጋግጾ';
-
-  @override
-  String get profileSubscriptions => 'መመዝገቢ ፕላናት';
-
-  @override
-  String get profileHelp => 'ምሳዕል ቤት';
-
-  @override
-  String get subscriptionsTitle => 'መመዝገቢ ፕላናት';
-
-  @override
-  String get subscriptionsSubtitle => 'ፕላን ክትፈልጉ ምርጫ';
-
-  @override
-  String get subscriptionsCurrentPlan => 'ፕላን ኣብ ክልተ';
-
-  @override
-  String get subscriptionsFree => 'ነጻይ';
+  String get subscriptionsFree => 'ብናጻ';
 
   @override
   String get subscriptionsBasic => 'መሰረታዊ';
@@ -195,98 +488,8 @@ class AppLocalizationsTi extends AppLocalizations {
   String get subscriptionsPremium => 'ፕሪሚየም';
 
   @override
-  String get subscriptionsSubscribe => 'ኣብ ዘለና ተመዝገቡ';
+  String get subscriptionsSubscribe => 'ሕጂ ተመዝገብ';
 
   @override
-  String get subscriptionsSelectPlan => 'ፕላን ምርጫ';
-
-  @override
-  String get listingsTitle => 'ምልካዋት';
-
-  @override
-  String get listingsHouses => 'ቤታት';
-
-  @override
-  String get listingsLands => 'መሬታት';
-
-  @override
-  String get listingsForSale => 'ንሕጋዊ ግዜኡ';
-
-  @override
-  String get listingsForRent => 'ንኪራይ';
-
-  @override
-  String get listingsCreate => 'ምልካዋት ፍጠሩ';
-
-  @override
-  String get listingsFeatured => 'ተመለከቱ';
-
-  @override
-  String get listingsSimilar => 'ተመሳሳሊ ምልካዋት';
-
-  @override
-  String get listingsNoResults => 'ምልካዋት ክትገኡ ዘይኮነ';
-
-  @override
-  String get listingsDetails => 'ምልካዋት ዝርዝር';
-
-  @override
-  String get listingsKeyFeatures => 'ዋና ባህሪያት';
-
-  @override
-  String get listingsDescription => 'መግለጻ';
-
-  @override
-  String get searchFilters => 'ማጣሪያታት';
-
-  @override
-  String get searchPropertyType => 'ዓይነት ምልካዋት';
-
-  @override
-  String get searchListingStatus => 'ሁኔታ ምልካዋት';
-
-  @override
-  String get searchPriceRange => 'ብርሃን ወጋ';
-
-  @override
-  String get searchSortBy => 'ደረጃ ኣሰጋጥ';
-
-  @override
-  String get searchApplyFilters => 'ማጣሪያታት ተጥሩ';
-
-  @override
-  String get searchReset => 'ኣድስ';
-
-  @override
-  String get favoritesTitle => 'ንጽቢታት';
-
-  @override
-  String get favoritesEmpty => 'ኣብ ክልተ ንጽቢታት የለን';
-
-  @override
-  String get favoritesEmptySubtitle => 'ንብረታት ወደ ንጽቢታትኹም ኣጨምሩ';
-
-  @override
-  String get favoritesRemove => 'ከንጽቢታት ሓጥፍአ';
-
-  @override
-  String get favoritesAdded => 'ወደ ንጽቢታት ተጠሊኹ';
-
-  @override
-  String get favoritesRemoved => 'ከንጽቢታት ሓጥፍኹ';
-
-  @override
-  String get messagesTitle => 'መልእኽታት';
-
-  @override
-  String get messagesEmpty => 'ኣብ ክልተ መልእኽታት የለን';
-
-  @override
-  String get messagesTypeMessage => 'መልእኽታት ጽሓፉ...';
-
-  @override
-  String get messagesSend => 'ኣፅኒዑ';
-
-  @override
-  String get commonComingSoon => 'ብቕርቢ ዕለታት ክገድእ';
+  String get subscriptionsSelectPlan => 'ትልሚ ይምረጡ';
 }
