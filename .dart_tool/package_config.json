@@ -459,21 +459,21 @@
     },
     {
       "name": "image_cropper",
-      "rootUri": "file:///initrd/mnt/dev_save/dev/.pub-cache/hosted/pub.dev/image_cropper-5.0.1",
+      "rootUri": "file:///initrd/mnt/dev_save/dev/.pub-cache/hosted/pub.dev/image_cropper-12.2.1",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.3"
     },
     {
       "name": "image_cropper_for_web",
-      "rootUri": "file:///initrd/mnt/dev_save/dev/.pub-cache/hosted/pub.dev/image_cropper_for_web-3.0.0",
+      "rootUri": "file:///initrd/mnt/dev_save/dev/.pub-cache/hosted/pub.dev/image_cropper_for_web-7.0.0",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.3"
     },
     {
       "name": "image_cropper_platform_interface",
-      "rootUri": "file:///initrd/mnt/dev_save/dev/.pub-cache/hosted/pub.dev/image_cropper_platform_interface-5.0.0",
+      "rootUri": "file:///initrd/mnt/dev_save/dev/.pub-cache/hosted/pub.dev/image_cropper_platform_interface-8.0.0",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.3"
     },
     {
       "name": "image_picker",

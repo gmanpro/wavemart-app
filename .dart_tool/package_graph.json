@@ -123,6 +123,30 @@
       "dependencies": []
     },
     {
+      "name": "chewie",
+      "version": "1.13.1",
+      "dependencies": [
+        "cupertino_icons",
+        "flutter",
+        "provider",
+        "video_player",
+        "wakelock_plus"
+      ]
+    },
+    {
+      "name": "video_player",
+      "version": "2.11.1",
+      "dependencies": [
+        "collection",
+        "flutter",
+        "html",
+        "video_player_android",
+        "video_player_avfoundation",
+        "video_player_platform_interface",
+        "video_player_web"
+      ]
+    },
+    {
       "name": "flutter_native_splash",
       "version": "2.4.7",
       "dependencies": [
@@ -166,7 +190,7 @@
     },
     {
       "name": "image_cropper",
-      "version": "5.0.1",
+      "version": "12.2.1",
       "dependencies": [
         "flutter",
         "image_cropper_for_web",
@@ -798,6 +822,71 @@
       ]
     },
     {
+      "name": "wakelock_plus",
+      "version": "1.5.2",
+      "dependencies": [
+        "dbus",
+        "flutter",
+        "flutter_web_plugins",
+        "meta",
+        "package_info_plus",
+        "wakelock_plus_platform_interface",
+        "web",
+        "win32"
+      ]
+    },
+    {
+      "name": "provider",
+      "version": "6.1.5+1",
+      "dependencies": [
+        "collection",
+        "flutter",
+        "nested"
+      ]
+    },
+    {
+      "name": "video_player_web",
+      "version": "2.4.0",
+      "dependencies": [
+        "flutter",
+        "flutter_web_plugins",
+        "video_player_platform_interface",
+        "web"
+      ]
+    },
+    {
+      "name": "video_player_platform_interface",
+      "version": "6.6.0",
+      "dependencies": [
+        "flutter",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "video_player_avfoundation",
+      "version": "2.9.4",
+      "dependencies": [
+        "flutter",
+        "video_player_platform_interface"
+      ]
+    },
+    {
+      "name": "video_player_android",
+      "version": "2.9.5",
+      "dependencies": [
+        "flutter",
+        "video_player_platform_interface"
+      ]
+    },
+    {
+      "name": "html",
+      "version": "0.15.6",
+      "dependencies": [
+        "csslib",
+        "source_span"
+      ]
+    },
+    {
       "name": "ansicolor",
       "version": "2.0.3",
       "dependencies": []
@@ -827,14 +916,6 @@
         "archive",
         "meta",
         "xml"
-      ]
-    },
-    {
-      "name": "html",
-      "version": "0.15.6",
-      "dependencies": [
-        "csslib",
-        "source_span"
       ]
     },
     {
@@ -936,22 +1017,22 @@
       ]
     },
     {
-      "name": "image_cropper_for_web",
-      "version": "3.0.0",
-      "dependencies": [
-        "flutter",
-        "flutter_web_plugins",
-        "image_cropper_platform_interface",
-        "js"
-      ]
-    },
-    {
       "name": "image_cropper_platform_interface",
-      "version": "5.0.0",
+      "version": "8.0.0",
       "dependencies": [
         "flutter",
         "http",
         "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "image_cropper_for_web",
+      "version": "7.0.0",
+      "dependencies": [
+        "flutter",
+        "flutter_web_plugins",
+        "image_cropper_platform_interface",
+        "web"
       ]
     },
     {
@@ -1445,10 +1526,51 @@
       ]
     },
     {
-      "name": "petitparser",
-      "version": "7.0.2",
+      "name": "package_info_plus",
+      "version": "9.0.1",
       "dependencies": [
-        "collection",
+        "clock",
+        "ffi",
+        "flutter",
+        "flutter_web_plugins",
+        "http",
+        "meta",
+        "package_info_plus_platform_interface",
+        "path",
+        "web",
+        "win32"
+      ]
+    },
+    {
+      "name": "dbus",
+      "version": "0.7.12",
+      "dependencies": [
+        "args",
+        "ffi",
+        "meta",
+        "xml"
+      ]
+    },
+    {
+      "name": "wakelock_plus_platform_interface",
+      "version": "1.5.0",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "nested",
+      "version": "1.0.0",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "plugin_platform_interface",
+      "version": "2.1.8",
+      "dependencies": [
         "meta"
       ]
     },
@@ -1460,9 +1582,10 @@
       ]
     },
     {
-      "name": "plugin_platform_interface",
-      "version": "2.1.8",
+      "name": "petitparser",
+      "version": "7.0.2",
       "dependencies": [
+        "collection",
         "meta"
       ]
     },
@@ -1545,16 +1668,6 @@
       ]
     },
     {
-      "name": "dbus",
-      "version": "0.7.12",
-      "dependencies": [
-        "args",
-        "ffi",
-        "meta",
-        "xml"
-      ]
-    },
-    {
       "name": "posix",
       "version": "6.5.0",
       "dependencies": [
@@ -1597,6 +1710,15 @@
       "name": "vm_service",
       "version": "15.0.2",
       "dependencies": []
+    },
+    {
+      "name": "package_info_plus_platform_interface",
+      "version": "3.2.1",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "plugin_platform_interface"
+      ]
     },
     {
       "name": "native_toolchain_c",
@@ -1675,128 +1797,6 @@
       "name": "synchronized",
       "version": "3.4.0",
       "dependencies": []
-    },
-    {
-      "name": "video_player",
-      "version": "2.11.1",
-      "dependencies": [
-        "collection",
-        "flutter",
-        "html",
-        "video_player_android",
-        "video_player_avfoundation",
-        "video_player_platform_interface",
-        "video_player_web"
-      ]
-    },
-    {
-      "name": "video_player_platform_interface",
-      "version": "6.6.0",
-      "dependencies": [
-        "flutter",
-        "plugin_platform_interface"
-      ]
-    },
-    {
-      "name": "video_player_android",
-      "version": "2.9.5",
-      "dependencies": [
-        "flutter",
-        "video_player_platform_interface"
-      ]
-    },
-    {
-      "name": "video_player_avfoundation",
-      "version": "2.9.4",
-      "dependencies": [
-        "flutter",
-        "video_player_platform_interface"
-      ]
-    },
-    {
-      "name": "video_player_web",
-      "version": "2.4.0",
-      "dependencies": [
-        "flutter",
-        "flutter_web_plugins",
-        "video_player_platform_interface",
-        "web"
-      ]
-    },
-    {
-      "name": "chewie",
-      "version": "1.13.1",
-      "dependencies": [
-        "cupertino_icons",
-        "flutter",
-        "provider",
-        "video_player",
-        "wakelock_plus"
-      ]
-    },
-    {
-      "name": "provider",
-      "version": "6.1.5+1",
-      "dependencies": [
-        "collection",
-        "flutter",
-        "nested"
-      ]
-    },
-    {
-      "name": "nested",
-      "version": "1.0.0",
-      "dependencies": [
-        "flutter"
-      ]
-    },
-    {
-      "name": "wakelock_plus",
-      "version": "1.5.2",
-      "dependencies": [
-        "dbus",
-        "flutter",
-        "flutter_web_plugins",
-        "meta",
-        "package_info_plus",
-        "wakelock_plus_platform_interface",
-        "web",
-        "win32"
-      ]
-    },
-    {
-      "name": "wakelock_plus_platform_interface",
-      "version": "1.5.0",
-      "dependencies": [
-        "flutter",
-        "meta",
-        "plugin_platform_interface"
-      ]
-    },
-    {
-      "name": "package_info_plus",
-      "version": "9.0.1",
-      "dependencies": [
-        "clock",
-        "ffi",
-        "flutter",
-        "flutter_web_plugins",
-        "http",
-        "meta",
-        "package_info_plus_platform_interface",
-        "path",
-        "web",
-        "win32"
-      ]
-    },
-    {
-      "name": "package_info_plus_platform_interface",
-      "version": "3.2.1",
-      "dependencies": [
-        "flutter",
-        "meta",
-        "plugin_platform_interface"
-      ]
     }
   ],
   "configVersion": 1
