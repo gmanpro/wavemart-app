@@ -87,6 +87,7 @@ class WaveMartApp extends ConsumerWidget {
       supportedLocales: const [
         Locale('en'),
         Locale('am'),
+        Locale('ti'),
       ],
     );
   }

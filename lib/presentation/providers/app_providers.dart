@@ -817,7 +817,7 @@ class LocaleNotifier extends StateNotifier<LocaleState> {
     } else {
       // Use system locale or default to English
       final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
-      final supportedLocales = const ['en', 'am'];
+      final supportedLocales = const ['en', 'am', 'ti'];
 
       if (supportedLocales.contains(systemLocale.languageCode)) {
         state = LocaleState.loaded(locale: systemLocale);
