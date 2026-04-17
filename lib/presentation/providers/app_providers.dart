@@ -828,8 +828,6 @@ class LocaleNotifier extends StateNotifier<LocaleState> {
   }
 
   Future<void> setLocale(Locale locale) async {
-    state = state.copyWith(isLoading: true);
-
     final box = await Hive.openBox('app_preferences');
     await box.put('locale', locale.languageCode);
 

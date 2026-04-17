@@ -77,7 +77,7 @@ class WaveMartApp extends ConsumerWidget {
         }
         return child;
       },
-      locale: localeState.locale,
+      locale: localeState.locale ?? const Locale('en'),
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
