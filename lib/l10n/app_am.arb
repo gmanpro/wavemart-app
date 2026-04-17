@@ -81,7 +81,18 @@
   "listingsFeatured": "ተለይተዋል",
   "listingsSimilar": "ተመሳሳይ ልዩነቶች",
   "listingsNoResults": "ምንም ልዩነቶች አልተገኙም",
+  "listingsDetails": "ንብረት ዝርዝሮች",
+  "listingsKeyFeatures": "ዋና ባህሪያት",
+  "listingsDescription": "መግለጫ",
   
+  "searchFilters": "ማጣሪያዎች",
+  "searchPropertyType": "የንብረት አይነት",
+  "searchListingStatus": "የልዩነት ሁኔታ",
+  "searchPriceRange": "የዋጋ ክልል",
+  "searchSortBy": "ደረጃ አሰጣጥ",
+  "searchApplyFilters": "ማጣሪያዎች ይተግብሩ",
+  "searchReset": "አድስ",
+
   "favoritesTitle": "ተወዳጆች",
   "favoritesEmpty": "አሁን ተወዳጆች የሉም",
   "favoritesEmptySubtitle": "እባክዎ ንብረቶችን ወደ ተወዳጆችዎ መጨመር ይጀምሩ",

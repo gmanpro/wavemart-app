@@ -81,7 +81,18 @@
   "listingsFeatured": "Featured",
   "listingsSimilar": "Similar Listings",
   "listingsNoResults": "No listings found",
+  "listingsDetails": "Property Details",
+  "listingsKeyFeatures": "Key Features",
+  "listingsDescription": "Description",
   
+  "searchFilters": "Filters",
+  "searchPropertyType": "Property Type",
+  "searchListingStatus": "Listing Status",
+  "searchPriceRange": "Price Range",
+  "searchSortBy": "Sort By",
+  "searchApplyFilters": "Apply Filters",
+  "searchReset": "Reset",
+
   "favoritesTitle": "Favorites",
   "favoritesEmpty": "No favorites yet",
   "favoritesEmptySubtitle": "Start adding properties to your favorites",

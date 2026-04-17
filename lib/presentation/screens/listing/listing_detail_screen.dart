@@ -10,6 +10,7 @@ import '../../providers/listing_provider.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/otp_login_screen.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Listing Detail Screen with skeleton loaders
 class ListingDetailScreen extends ConsumerStatefulWidget {
@@ -246,7 +247,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
 
   Widget _buildErrorView(String message) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Property Details')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).listingsTitle)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -278,7 +279,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
                       .loadListing(widget.listingId);
                 },
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Try Again'),
+                label: Text(AppLocalizations.of(context).commonRetry),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.navy950,
                   foregroundColor: Colors.white,
@@ -298,7 +299,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
 
   Widget _buildNotFound() {
     return Scaffold(
-      appBar: AppBar(title: const Text('Property Details')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).listingsTitle)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -318,7 +319,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Go Back'),
+                child: Text(AppLocalizations.of(context).commonRetry),
               ),
             ],
           ),

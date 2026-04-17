@@ -9,6 +9,7 @@ import '../../providers/app_providers.dart';
 import '../../widgets/listing_card.dart';
 import '../../widgets/common/wave_common_widgets.dart';
 import '../listing/listing_detail_screen.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Modern Search & Filter Screen
 class SearchScreen extends ConsumerStatefulWidget {
@@ -41,7 +42,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Future<void> _loadSettings() async {
     try {
-      final response = await ApiClient().dio.get(ApiConstants.apiBase + '/settings');
+      final response =
+          await ApiClient().dio.get(ApiConstants.apiBase + '/settings');
       if (response.statusCode == 200 && response.data is Map) {
         final data = response.data['data'];
         if (data is Map) {
@@ -80,12 +82,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     _activeFilters = {};
     if (query.isNotEmpty) _activeFilters['location'] = query;
     if (_selectedType != null) _activeFilters['type'] = _selectedType;
-    if (_selectedListingType != null) _activeFilters['listing_type'] = _selectedListingType;
+    if (_selectedListingType != null)
+      _activeFilters['listing_type'] = _selectedListingType;
     _activeFilters['sort'] = _selectedSort;
 
     // Price range filter
-    if (_selectedPriceMin != null) _activeFilters['price_min'] = _selectedPriceMin!;
-    if (_selectedPriceMax != null) _activeFilters['price_max'] = _selectedPriceMax!;
+    if (_selectedPriceMin != null)
+      _activeFilters['price_min'] = _selectedPriceMin!;
+    if (_selectedPriceMax != null)
+      _activeFilters['price_max'] = _selectedPriceMax!;
 
     setState(() => _hasSearched = true);
     ref.read(listingsProvider.notifier).loadListings(filters: _activeFilters);
@@ -190,17 +195,20 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           children: [
                             const Padding(
                               padding: EdgeInsets.only(left: 12),
-                              child: Icon(Icons.search, size: 18, color: AppColors.zinc400),
+                              child: Icon(Icons.search,
+                                  size: 18, color: AppColors.zinc400),
                             ),
                             Expanded(
                               child: TextField(
                                 controller: _searchController,
                                 decoration: const InputDecoration(
                                   hintText: 'Search by location...',
-                                  hintStyle: TextStyle(fontSize: 14, color: AppColors.zinc400),
+                                  hintStyle: TextStyle(
+                                      fontSize: 14, color: AppColors.zinc400),
                                   border: InputBorder.none,
                                   filled: false,
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 0),
                                   isDense: true,
                                 ),
                                 style: const TextStyle(fontSize: 14),
@@ -220,7 +228,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           width: 42,
                           height: 42,
                           decoration: BoxDecoration(
-                            color: _hasActiveFilters ? AppColors.wave50 : Colors.transparent,
+                            color: _hasActiveFilters
+                                ? AppColors.wave50
+                                : Colors.transparent,
                             borderRadius: const BorderRadius.only(
                               topRight: Radius.circular(12),
                               bottomRight: Radius.circular(12),
@@ -229,7 +239,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           child: Icon(
                             Icons.tune,
                             size: 20,
-                            color: _hasActiveFilters ? AppColors.wave600 : AppColors.zinc500,
+                            color: _hasActiveFilters
+                                ? AppColors.wave600
+                                : AppColors.zinc500,
                           ),
                         ),
                       ),
@@ -248,7 +260,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               bottomRight: Radius.circular(12),
                             ),
                           ),
-                          child: const Icon(Icons.search, size: 20, color: Colors.white),
+                          child: const Icon(Icons.search,
+                              size: 20, color: Colors.white),
                         ),
                       ),
                     ],
@@ -273,21 +286,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             if (_selectedType != null)
               _filterChip(
                 _selectedType == 'house' ? '🏠 House' : '🌄 Land',
-                () => _removeFilterAndCheck(() => setState(() => _selectedType = null)),
+                () => _removeFilterAndCheck(
+                    () => setState(() => _selectedType = null)),
               ),
             if (_selectedListingType != null)
               _filterChip(
                 _selectedListingType == 'sale' ? '💰 For Sale' : '🔑 For Rent',
-                () => _removeFilterAndCheck(() => setState(() => _selectedListingType = null)),
+                () => _removeFilterAndCheck(
+                    () => setState(() => _selectedListingType = null)),
               ),
             if (_selectedPriceLabel != null)
               _filterChip(
                 '💵 $_selectedPriceLabel',
                 () => _removeFilterAndCheck(() => setState(() {
-                  _selectedPriceLabel = null;
-                  _selectedPriceMin = null;
-                  _selectedPriceMax = null;
-                })),
+                      _selectedPriceLabel = null;
+                      _selectedPriceMin = null;
+                      _selectedPriceMax = null;
+                    })),
               ),
             if (_searchController.text.isNotEmpty)
               _filterChip(
@@ -301,7 +316,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             GestureDetector(
               onTap: _clearAllFilters,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: AppColors.zinc100,
                   borderRadius: BorderRadius.circular(16),
@@ -313,7 +329,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     SizedBox(width: 4),
                     Text(
                       'Clear All',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.zinc600),
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.zinc600),
                     ),
                   ],
                 ),
@@ -340,12 +359,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           children: [
             Text(
               label,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.wave700),
+              style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.wave700),
             ),
             const SizedBox(width: 6),
             GestureDetector(
               onTap: onRemove,
-              child: const Icon(Icons.close, size: 14, color: AppColors.wave600),
+              child:
+                  const Icon(Icons.close, size: 14, color: AppColors.wave600),
             ),
           ],
         ),
@@ -381,7 +404,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           // Popular Searches
           const Text(
             'Popular Searches',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.navy800),
+            style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.navy800),
           ),
           const SizedBox(height: 16),
           Wrap(
@@ -465,7 +491,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         ),
         child: Text(
           label,
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.navy700),
+          style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.navy700),
         ),
       ),
     );
@@ -509,7 +538,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ListView.builder(
                 controller: _scrollController,
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
-                itemCount: state.listings.length + (state.isLoadingMore ? 1 : 0),
+                itemCount:
+                    state.listings.length + (state.isLoadingMore ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index >= state.listings.length) {
                     return const Padding(
@@ -528,7 +558,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       onFavorite: () => _toggleFavorite(listing.id),
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => ListingDetailScreen(listingId: listing.id),
+                          builder: (_) =>
+                              ListingDetailScreen(listingId: listing.id),
                         ),
                       ),
                     ),
@@ -566,7 +597,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(16)),
                   child: AspectRatio(
                     aspectRatio: 4 / 3,
                     child: Container(color: AppColors.zinc200),
@@ -577,16 +609,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(height: 20, width: 120, color: AppColors.zinc200),
+                      Container(
+                          height: 20, width: 120, color: AppColors.zinc200),
                       const SizedBox(height: 10),
-                      Container(height: 16, width: double.infinity, color: AppColors.zinc200),
+                      Container(
+                          height: 16,
+                          width: double.infinity,
+                          color: AppColors.zinc200),
                       const SizedBox(height: 8),
-                      Container(height: 14, width: 180, color: AppColors.zinc200),
+                      Container(
+                          height: 14, width: 180, color: AppColors.zinc200),
                       const SizedBox(height: 14),
                       Row(children: [
-                        Container(height: 20, width: 60, color: AppColors.zinc200),
+                        Container(
+                            height: 20, width: 60, color: AppColors.zinc200),
                         const SizedBox(width: 8),
-                        Container(height: 20, width: 45, color: AppColors.zinc200),
+                        Container(
+                            height: 20, width: 45, color: AppColors.zinc200),
                       ]),
                     ],
                   ),
@@ -634,7 +673,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Filters', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        Text(AppLocalizations.of(context).searchFilters,
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold)),
                         TextButton(
                           onPressed: () {
                             setModalState(() {
@@ -646,14 +687,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               _selectedPriceMax = null;
                             });
                           },
-                          child: const Text('Reset', style: TextStyle(color: AppColors.zinc500)),
+                          child: Text(AppLocalizations.of(context).searchReset,
+                              style: TextStyle(color: AppColors.zinc500)),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
 
                     // Property Type
-                    const Text('Property Type', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                    Text(AppLocalizations.of(context).searchPropertyType,
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 10),
                     _modalChipRow([
                       ('All', null, _selectedType == null),
@@ -667,12 +711,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
                     // Listing Status (only if rental enabled)
                     if (_rentalEnabled) ...[
-                      const Text('Listing Status', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                      Text(AppLocalizations.of(context).searchListingStatus,
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 10),
                       _modalChipRow([
                         ('All', null, _selectedListingType == null),
                         ('💰 For Sale', 'sale', _selectedListingType == 'sale'),
-                        ('🔑 For Rent', 'rental', _selectedListingType == 'rental'),
+                        (
+                          '🔑 For Rent',
+                          'rental',
+                          _selectedListingType == 'rental'
+                        ),
                       ], (v) {
                         setModalState(() => _selectedListingType = v);
                       }),
@@ -680,14 +730,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     ],
 
                     // Price Range
-                    const Text('Price Range', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                    Text(AppLocalizations.of(context).searchPriceRange,
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 10),
                     _modalChipRow([
                       ('Any', null, _selectedPriceLabel == null),
-                      ('💰 Under 5M', 'Under 5M', _selectedPriceLabel == 'Under 5M'),
+                      (
+                        '💰 Under 5M',
+                        'Under 5M',
+                        _selectedPriceLabel == 'Under 5M'
+                      ),
                       ('💎 5M-10M', '5M-10M', _selectedPriceLabel == '5M-10M'),
-                      ('🏆 10M-50M', '10M-50M', _selectedPriceLabel == '10M-50M'),
-                      ('👑 50M-100M', '50M-100M', _selectedPriceLabel == '50M-100M'),
+                      (
+                        '🏆 10M-50M',
+                        '10M-50M',
+                        _selectedPriceLabel == '10M-50M'
+                      ),
+                      (
+                        '👑 50M-100M',
+                        '50M-100M',
+                        _selectedPriceLabel == '50M-100M'
+                      ),
                       ('✨ 100M+', '100M+', _selectedPriceLabel == '100M+'),
                     ], (v) {
                       setModalState(() => _setPriceFilter(v as String?));
@@ -696,13 +760,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     const SizedBox(height: 16),
 
                     // Sort By (last)
-                    const Text('Sort By', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                    Text(AppLocalizations.of(context).searchSortBy,
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 10),
                     _modalChipRow([
                       ('🆕 Newest', 'newest', _selectedSort == 'newest'),
                       ('📅 Oldest', 'oldest', _selectedSort == 'oldest'),
                       ('💰 Price ↑', 'price_low', _selectedSort == 'price_low'),
-                      ('💎 Price ↓', 'price_high', _selectedSort == 'price_high'),
+                      (
+                        '💎 Price ↓',
+                        'price_high',
+                        _selectedSort == 'price_high'
+                      ),
                     ], (v) {
                       setModalState(() => _selectedSort = v as String);
                     }),
@@ -720,9 +790,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.wave500,
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: const Text('Apply Filters', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        child: Text(
+                            AppLocalizations.of(context).searchApplyFilters,
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w600)),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -765,7 +839,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
-  Widget _modalChipRow(List<(String, dynamic, bool)> chips, void Function(dynamic) onSelected) {
+  Widget _modalChipRow(
+      List<(String, dynamic, bool)> chips, void Function(dynamic) onSelected) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,

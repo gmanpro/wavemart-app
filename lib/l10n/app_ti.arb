@@ -81,7 +81,18 @@
   "listingsFeatured": "ተመለከቱ",
   "listingsSimilar": "ተመሳሳሊ ምልካዋት",
   "listingsNoResults": "ምልካዋት ክትገኡ ዘይኮነ",
+  "listingsDetails": "ምልካዋት ዝርዝር",
+  "listingsKeyFeatures": "ዋና ባህሪያት",
+  "listingsDescription": "መግለጻ",
   
+  "searchFilters": "ማጣሪያታት",
+  "searchPropertyType": "ዓይነት ምልካዋት",
+  "searchListingStatus": "ሁኔታ ምልካዋት",
+  "searchPriceRange": "ብርሃን ወጋ",
+  "searchSortBy": "ደረጃ ኣሰጋጥ",
+  "searchApplyFilters": "ማጣሪያታት ተጥሩ",
+  "searchReset": "ኣድስ",
+
   "favoritesTitle": "ንጽቢታት",
   "favoritesEmpty": "ኣብ ክልተ ንጽቢታት የለን",
   "favoritesEmptySubtitle": "ንብረታት ወደ ንጽቢታትኹም ኣጨምሩ",
