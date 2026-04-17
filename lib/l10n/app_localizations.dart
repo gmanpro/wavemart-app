@@ -538,6 +538,66 @@ abstract class AppLocalizations {
   /// **'No listings found'**
   String get listingsNoResults;
 
+  /// No description provided for @listingsDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Property Details'**
+  String get listingsDetails;
+
+  /// No description provided for @listingsKeyFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Key Features'**
+  String get listingsKeyFeatures;
+
+  /// No description provided for @listingsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get listingsDescription;
+
+  /// No description provided for @searchFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get searchFilters;
+
+  /// No description provided for @searchPropertyType.
+  ///
+  /// In en, this message translates to:
+  /// **'Property Type'**
+  String get searchPropertyType;
+
+  /// No description provided for @searchListingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Listing Status'**
+  String get searchListingStatus;
+
+  /// No description provided for @searchPriceRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Price Range'**
+  String get searchPriceRange;
+
+  /// No description provided for @searchSortBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort By'**
+  String get searchSortBy;
+
+  /// No description provided for @searchApplyFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Filters'**
+  String get searchApplyFilters;
+
+  /// No description provided for @searchReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get searchReset;
+
   /// No description provided for @favoritesTitle.
   ///
   /// In en, this message translates to:

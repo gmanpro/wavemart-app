@@ -228,6 +228,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listingsNoResults => 'No listings found';
 
   @override
+  String get listingsDetails => 'Property Details';
+
+  @override
+  String get listingsKeyFeatures => 'Key Features';
+
+  @override
+  String get listingsDescription => 'Description';
+
+  @override
+  String get searchFilters => 'Filters';
+
+  @override
+  String get searchPropertyType => 'Property Type';
+
+  @override
+  String get searchListingStatus => 'Listing Status';
+
+  @override
+  String get searchPriceRange => 'Price Range';
+
+  @override
+  String get searchSortBy => 'Sort By';
+
+  @override
+  String get searchApplyFilters => 'Apply Filters';
+
+  @override
+  String get searchReset => 'Reset';
+
+  @override
   String get favoritesTitle => 'Favorites';
 
   @override

@@ -228,6 +228,36 @@ class AppLocalizationsTi extends AppLocalizations {
   String get listingsNoResults => 'ምልካዋት ክትገኡ ዘይኮነ';
 
   @override
+  String get listingsDetails => 'ምልካዋት ዝርዝር';
+
+  @override
+  String get listingsKeyFeatures => 'ዋና ባህሪያት';
+
+  @override
+  String get listingsDescription => 'መግለጻ';
+
+  @override
+  String get searchFilters => 'ማጣሪያታት';
+
+  @override
+  String get searchPropertyType => 'ዓይነት ምልካዋት';
+
+  @override
+  String get searchListingStatus => 'ሁኔታ ምልካዋት';
+
+  @override
+  String get searchPriceRange => 'ብርሃን ወጋ';
+
+  @override
+  String get searchSortBy => 'ደረጃ ኣሰጋጥ';
+
+  @override
+  String get searchApplyFilters => 'ማጣሪያታት ተጥሩ';
+
+  @override
+  String get searchReset => 'ኣድስ';
+
+  @override
   String get favoritesTitle => 'ንጽቢታት';
 
   @override

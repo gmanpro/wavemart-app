@@ -228,6 +228,36 @@ class AppLocalizationsAm extends AppLocalizations {
   String get listingsNoResults => 'ምንም ልዩነቶች አልተገኙም';
 
   @override
+  String get listingsDetails => 'ንብረት ዝርዝሮች';
+
+  @override
+  String get listingsKeyFeatures => 'ዋና ባህሪያት';
+
+  @override
+  String get listingsDescription => 'መግለጫ';
+
+  @override
+  String get searchFilters => 'ማጣሪያዎች';
+
+  @override
+  String get searchPropertyType => 'የንብረት አይነት';
+
+  @override
+  String get searchListingStatus => 'የልዩነት ሁኔታ';
+
+  @override
+  String get searchPriceRange => 'የዋጋ ክልል';
+
+  @override
+  String get searchSortBy => 'ደረጃ አሰጣጥ';
+
+  @override
+  String get searchApplyFilters => 'ማጣሪያዎች ይተግብሩ';
+
+  @override
+  String get searchReset => 'አድስ';
+
+  @override
   String get favoritesTitle => 'ተወዳጆች';
 
   @override

@@ -10,6 +10,7 @@ import '../../providers/listing_provider.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/otp_login_screen.dart';
+import '../../widgets/video/video_player_widget.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Listing Detail Screen with skeleton loaders
@@ -700,15 +701,14 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
           debtAmount != null ? ' Yes (${debtAmount.toInt()} ETB)' : ' Yes';
       details.add({'label': 'Encumbrance', 'value': amount});
     }
-    if (listing.videoLink != null && listing.videoLink!.isNotEmpty) {
-      details.add({'label': 'Video Tour', 'value': 'Available'});
-    }
+    bool hasVideo = listing.videoLink != null && listing.videoLink!.isNotEmpty;
 
-    if (details.isEmpty) return const SizedBox.shrink();
+    if (details.isEmpty && !hasVideo) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (hasVideo) _buildVideoTourSection(listing.videoLink!),
         Text('Property Details', style: AppTextStyles.title),
         const SizedBox(height: 12),
         Container(
@@ -750,6 +750,38 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildVideoTourSection(String videoUrl) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.videocam,
+                size: 20,
+                color: AppColors.wave500,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Video Tour',
+                style: AppTextStyles.title,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          VideoPlayerWidget(
+            videoUrl: videoUrl,
+            autoPlay: false,
+            looping: false,
+            title: 'Video Tour',
+          ),
+        ],
+      ),
     );
   }
 
