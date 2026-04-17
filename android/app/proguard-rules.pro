@@ -36,6 +36,9 @@
 ## Flutter Secure Storage
 -keep class com.it_nomads.fluttersecurestorage.** { *; }
 
+## AV Player
+-keep class com.flutterplaza.av_player.** { *; }
+
 ## WaveMart App - Keep models and core classes
 -keep class et.wavemart.app.** { *; }
 -keep class **.*_** { *; }
