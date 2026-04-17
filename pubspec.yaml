@@ -49,9 +49,7 @@ dependencies:
   permission_handler: ^11.0.0
   flutter_native_splash: ^2.4.0
 
-  # Video Player
-  video_player: ^2.8.2
-  chewie: ^1.7.4
+  # Video Player (url_launcher - external player)
 
   # Icons
   cupertino_icons: ^1.0.6
