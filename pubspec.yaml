@@ -50,7 +50,8 @@ dependencies:
   flutter_native_splash: ^2.4.0
 
   # Video Player
-  av_player: ^0.3.0
+  video_player: ^2.8.2
+  chewie: ^1.7.4
 
   # Icons
   cupertino_icons: ^1.0.6
