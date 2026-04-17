@@ -26,9 +26,11 @@ class SettingsScreen extends ConsumerWidget {
       ref.read(profileProvider.notifier).loadProfile();
     }
 
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).settingsTitle),
+        title: Text(l10n.settingsTitle),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -38,12 +40,12 @@ class SettingsScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           children: [
             _buildMenuSection(
-              title: 'My Account',
+              title: l10n.settingsSectionAccount,
               items: [
                 _MenuItemData(
                   icon: Icons.list_alt_outlined,
-                  title: 'My Listings',
-                  subtitle: 'Manage your properties',
+                  title: l10n.profileMyListings,
+                  subtitle: l10n.settingsMyListingsSubtitle,
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -54,8 +56,8 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 _MenuItemData(
                   icon: Icons.payment_outlined,
-                  title: 'Subscriptions',
-                  subtitle: 'View your plans',
+                  title: l10n.profileSubscriptions,
+                  subtitle: l10n.settingsSubscriptionsSubtitle,
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -66,8 +68,8 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 _MenuItemData(
                   icon: Icons.receipt_long_outlined,
-                  title: 'Payment History',
-                  subtitle: 'Transaction history',
+                  title: l10n.profilePayments,
+                  subtitle: l10n.settingsPaymentsSubtitle,
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -78,13 +80,13 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 _MenuItemData(
                   icon: Icons.verified_user_outlined,
-                  title: 'KYC Verification',
+                  title: l10n.profileKyc,
                   subtitle: profileState.user?.isKycVerified == true
-                      ? 'Verified'
-                      : 'Required',
+                      ? l10n.settingsKycVerified
+                      : l10n.settingsKycRequired,
                   badge: profileState.user?.isKycVerified == true
                       ? null
-                      : 'Required',
+                      : l10n.settingsKycRequired,
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -97,12 +99,12 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             _buildMenuSection(
-              title: 'Support',
+              title: l10n.settingsSectionSupport,
               items: [
                 _MenuItemData(
                   icon: Icons.help_outline,
-                  title: 'Help Center',
-                  subtitle: 'FAQs and guides',
+                  title: l10n.profileHelp,
+                  subtitle: l10n.settingsHelpSubtitle,
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -113,8 +115,8 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 _MenuItemData(
                   icon: Icons.support_agent,
-                  title: 'Contact Support',
-                  subtitle: 'Get in touch',
+                  title: l10n.settingsContactSupport,
+                  subtitle: l10n.settingsContactSupportSubtitle,
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -127,36 +129,36 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             _buildMenuSection(
-              title: AppLocalizations.of(context).settingsPreferences,
+              title: l10n.settingsPreferences,
               items: [
                 _MenuItemData(
                   icon: Icons.language,
-                  title: AppLocalizations.of(context).settingsLanguage,
-                  subtitle: _getCurrentLanguageName(localeCode),
+                  title: l10n.settingsLanguage,
+                  subtitle: _getCurrentLanguageName(context, localeCode),
                   onTap: () => _showLanguageSelectionDialog(context, ref),
                 ),
                 _MenuItemData(
                   icon: Icons.privacy_tip_outlined,
-                  title: 'Privacy Policy',
+                  title: l10n.settingsPrivacyPolicy,
                   onTap: () => _openWebPage(
-                      context, 'https://wavemart.et/privacy', 'Privacy Policy'),
+                      context, 'https://wavemart.et/privacy', l10n.settingsPrivacyPolicy),
                 ),
                 _MenuItemData(
                   icon: Icons.description_outlined,
-                  title: 'Terms of Service',
+                  title: l10n.settingsTermsOfService,
                   onTap: () => _openWebPage(
-                      context, 'https://wavemart.et/terms', 'Terms of Service'),
+                      context, 'https://wavemart.et/terms', l10n.settingsTermsOfService),
                 ),
               ],
             ),
             const SizedBox(height: 24),
             _buildMenuSection(
-              title: 'Account',
+              title: l10n.settingsSectionAuth,
               items: [
                 _MenuItemData(
                   icon: Icons.logout,
-                  title: 'Logout',
-                  subtitle: 'Sign out of your account',
+                  title: l10n.settingsLogout,
+                  subtitle: l10n.settingsLogoutSubtitle,
                   textColor: AppColors.error,
                   onTap: () => _showLogoutConfirmation(context, ref),
                 ),
@@ -171,15 +173,16 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _showLogoutConfirmation(
       BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text(l10n.settingsLogout),
+        content: Text(l10n.authLogoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           TextButton(
             onPressed: () async {
@@ -193,7 +196,7 @@ class SettingsScreen extends ConsumerWidget {
               }
             },
             child:
-                const Text('Logout', style: TextStyle(color: AppColors.error)),
+                Text(l10n.settingsLogout, style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -203,12 +206,13 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _openWebPage(
       BuildContext context, String url, String title) async {
     final uri = Uri.parse(url);
+    final l10n = AppLocalizations.of(context);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open $title')),
+          SnackBar(content: Text(l10n.settingsWebOpenError(title))),
         );
       }
     }
@@ -311,14 +315,15 @@ class SettingsScreen extends ConsumerWidget {
 }
 
 /// Get current language display name
-String _getCurrentLanguageName(String? languageCode) {
+String _getCurrentLanguageName(BuildContext context, String? languageCode) {
+  final l10n = AppLocalizations.of(context);
   switch (languageCode) {
     case 'am':
-      return 'አማርኛ (Amharic)';
+      return l10n.languageAmharic;
     case 'ti':
-      return 'ትግርኛ (Tigrinya)';
+      return l10n.languageTigrinya;
     default:
-      return 'English';
+      return l10n.languageEnglish;
   }
 }
 
