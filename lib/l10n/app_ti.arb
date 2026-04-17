@@ -96,6 +96,8 @@
   "listingForRent": "🔑 ንክራይ",
   "listingUnitM2": "{count} ሜትር ካሬ",
   "listingsTitle": "ንብረታት",
+  "listingsCreate": "ንብረት ኣእቱ",
+  "listingsFeatured": "ፍሉያት ንብረታት",
   "listingsNoResults": "ዝተረኽበ ንብረት የለን",
   "listingsDetails": "ዝርዝር ንብረት",
   "listingsKeyFeatures": "ቀንዲ መገለጺታት",

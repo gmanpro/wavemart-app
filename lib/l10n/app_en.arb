@@ -96,6 +96,8 @@
   "listingForRent": "🔑 For Rent",
   "listingUnitM2": "{count} m²",
   "listingsTitle": "Listings",
+  "listingsCreate": "Create Listing",
+  "listingsFeatured": "Featured",
   "listingsNoResults": "No listings found",
   "listingsDetails": "Property Details",
   "listingsKeyFeatures": "Key Features",

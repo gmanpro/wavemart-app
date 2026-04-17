@@ -96,6 +96,8 @@
   "listingForRent": "🔑 ለኪራይ",
   "listingUnitM2": "{count} ካሬ",
   "listingsTitle": "ንብረቶች",
+  "listingsCreate": "ንብረት ያስገቡ",
+  "listingsFeatured": "ተለይተው የወጡ",
   "listingsNoResults": "ምንም ንብረቶች አልተገኙም",
   "listingsDetails": "የንብረት ዝርዝር",
   "listingsKeyFeatures": "ዋና መገለጫዎች",
