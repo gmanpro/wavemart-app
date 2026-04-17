@@ -17,6 +17,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileState = ref.watch(profileProvider);
+    final l10n = AppLocalizations.of(context);
     ref.watch(authStateProvider);
 
     if (profileState.isLoading && profileState.user == null) {
@@ -25,7 +26,7 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).profileTitle),
+        title: Text(l10n.profileTitle),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -39,22 +40,23 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // Stats
-            _buildStatsRow(profileState),
+            _buildStatsRow(context, profileState),
             const SizedBox(height: 24),
 
             // Account Actions
             _buildMenuSection(
-              title: 'Account',
+              context,
+              title: l10n.settingsSectionAuth,
               items: [
                 _MenuItemData(
                   icon: Icons.verified_user_outlined,
-                  title: AppLocalizations.of(context).profileKyc,
+                  title: l10n.profileKyc,
                   subtitle: profileState.user?.isKycVerified == true
-                      ? 'Verified'
-                      : 'Required',
+                      ? l10n.profileKycStatusVerified
+                      : l10n.profileKycStatusRequired,
                   badge: profileState.user?.isKycVerified == true
                       ? null
-                      : 'Required',
+                      : l10n.profileKycStatusRequired,
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -65,8 +67,8 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 _MenuItemData(
                   icon: Icons.edit_outlined,
-                  title: AppLocalizations.of(context).profileEdit,
-                  subtitle: 'Update your information',
+                  title: l10n.profileEdit,
+                  subtitle: l10n.profileEditSubtitle,
                   onTap: () async {
                     final result = await Navigator.of(context).push(
                       MaterialPageRoute(
@@ -88,7 +90,7 @@ class ProfileScreen extends ConsumerWidget {
               child: OutlinedButton.icon(
                 onPressed: () => _showLogoutDialog(context, ref),
                 icon: const Icon(Icons.logout, size: 20),
-                label: Text(AppLocalizations.of(context).authLogout),
+                label: Text(l10n.authLogout),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.error,
                   side: const BorderSide(color: AppColors.error),
@@ -108,6 +110,7 @@ class ProfileScreen extends ConsumerWidget {
 
   Widget _buildProfileHeader(
       BuildContext context, WidgetRef ref, ProfileState state) {
+    final l10n = AppLocalizations.of(context);
     if (state.isLoading) {
       return const SizedBox(
         height: 72,
@@ -126,10 +129,10 @@ class ProfileScreen extends ConsumerWidget {
 
     final user = state.user;
     if (user == null) {
-      return const WaveEmptyState(
+      return WaveEmptyState(
         icon: Icons.person_outline,
-        title: 'Not Logged In',
-        subtitle: 'Please log in to view your profile',
+        title: l10n.profileNotLoggedIn,
+        subtitle: l10n.profileLoginPrompt,
       );
     }
 
@@ -181,14 +184,16 @@ class ProfileScreen extends ConsumerWidget {
               Row(
                 children: [
                   _buildVerificationBadge(
+                    context,
                     icon: Icons.phone,
-                    label: 'Phone',
+                    label: l10n.profileVerificationPhone,
                     isVerified: user.isPhoneVerified,
                   ),
                   const SizedBox(width: 8),
                   _buildVerificationBadge(
+                    context,
                     icon: Icons.verified_user,
-                    label: 'KYC',
+                    label: l10n.profileVerificationKyc,
                     isVerified: user.isKycVerified,
                   ),
                 ],
@@ -213,7 +218,8 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildVerificationBadge({
+  Widget _buildVerificationBadge(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required bool isVerified,
@@ -250,24 +256,25 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatsRow(ProfileState state) {
+  Widget _buildStatsRow(BuildContext context, ProfileState state) {
     final stats = state.stats;
+    final l10n = AppLocalizations.of(context);
 
     return Row(
       children: [
         _buildStatItem(
           value: stats?.totalListings.toString() ?? '-',
-          label: 'Listings',
+          label: l10n.profileStatsListings,
         ),
         const SizedBox(width: 16),
         _buildStatItem(
           value: stats?.unreadMessages.toString() ?? '-',
-          label: 'Messages',
+          label: l10n.profileStatsMessages,
         ),
         const SizedBox(width: 16),
         _buildStatItem(
           value: stats?.totalFavorites.toString() ?? '-',
-          label: 'Favorites',
+          label: l10n.profileStatsFavorites,
         ),
       ],
     );
@@ -302,7 +309,8 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMenuSection({
+  Widget _buildMenuSection(
+    BuildContext context, {
     required String title,
     required List<_MenuItemData> items,
   }) {
@@ -397,15 +405,16 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text(l10n.authLogout),
+        content: Text(l10n.authLogoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           TextButton(
             onPressed: () async {
@@ -419,7 +428,7 @@ class ProfileScreen extends ConsumerWidget {
               }
             },
             child:
-                const Text('Logout', style: TextStyle(color: AppColors.error)),
+                Text(l10n.authLogout, style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),

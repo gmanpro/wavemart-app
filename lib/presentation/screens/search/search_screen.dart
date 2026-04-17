@@ -155,6 +155,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildSearchHeader() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -201,13 +202,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             Expanded(
                               child: TextField(
                                 controller: _searchController,
-                                decoration: const InputDecoration(
-                                  hintText: 'Search by location...',
-                                  hintStyle: TextStyle(
+                                decoration: InputDecoration(
+                                  hintText: l10n.searchPlaceholder,
+                                  hintStyle: const TextStyle(
                                       fontSize: 14, color: AppColors.zinc400),
                                   border: InputBorder.none,
                                   filled: false,
-                                  contentPadding: EdgeInsets.symmetric(
+                                  contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 8, vertical: 0),
                                   isDense: true,
                                 ),
@@ -276,6 +277,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildActiveFilterChips() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       color: Colors.white,
@@ -285,19 +287,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           children: [
             if (_selectedType != null)
               _filterChip(
-                _selectedType == 'house' ? '🏠 House' : '🌄 Land',
+                _selectedType == 'house' ? l10n.listingHouse : l10n.listingLand,
                 () => _removeFilterAndCheck(
                     () => setState(() => _selectedType = null)),
               ),
             if (_selectedListingType != null)
               _filterChip(
-                _selectedListingType == 'sale' ? '💰 For Sale' : '🔑 For Rent',
+                _selectedListingType == 'sale' ? l10n.listingForSale : l10n.listingForRent,
                 () => _removeFilterAndCheck(
                     () => setState(() => _selectedListingType = null)),
               ),
             if (_selectedPriceLabel != null)
               _filterChip(
-                '💵 $_selectedPriceLabel',
+                _getLocalizedPriceLabel(_selectedPriceLabel!),
                 () => _removeFilterAndCheck(() => setState(() {
                       _selectedPriceLabel = null;
                       _selectedPriceMin = null;
@@ -323,13 +325,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.zinc300),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.close, size: 14, color: AppColors.zinc600),
-                    SizedBox(width: 4),
+                    const Icon(Icons.close, size: 14, color: AppColors.zinc600),
+                    const SizedBox(width: 4),
                     Text(
-                      'Clear All',
-                      style: TextStyle(
+                      l10n.searchClearAll,
+                      style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppColors.zinc600),
@@ -342,6 +344,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         ),
       ),
     );
+  }
+
+  String _getLocalizedPriceLabel(String label) {
+    final l10n = AppLocalizations.of(context);
+    switch (label) {
+      case 'Under 5M': return l10n.searchUnder5M;
+      case '5M-10M': return l10n.search5M10M;
+      case '10M-50M': return l10n.search10M50M;
+      case '50M-100M': return l10n.search50M100M;
+      case '100M+': return l10n.search100MPlus;
+      default: return label;
+    }
   }
 
   Widget _filterChip(String label, VoidCallback onRemove) {
@@ -377,6 +391,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildWelcomeState() {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -384,7 +399,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           Icon(Icons.search_rounded, size: 80, color: AppColors.navy200),
           const SizedBox(height: 24),
           Text(
-            'Find Your Perfect Property',
+            l10n.searchFindProperty,
             style: AppTextStyles.title.copyWith(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -395,16 +410,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
-              'Search by location, filter by type and status to discover amazing properties',
+              l10n.searchWelcomeSubtitle,
               style: AppTextStyles.bodyLarge.copyWith(color: AppColors.zinc500),
               textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: 32),
           // Popular Searches
-          const Text(
-            'Popular Searches',
-            style: TextStyle(
+          Text(
+            l10n.searchPopular,
+            style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: AppColors.navy800),
@@ -415,24 +430,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             runSpacing: 12,
             alignment: WrapAlignment.center,
             children: [
-              _popularSearchChip('🏠 Houses', () {
+              _popularSearchChip(l10n.listingHouses, () {
                 setState(() => _selectedType = 'house');
                 _performSearch();
               }),
-              _popularSearchChip('🌄 Lands', () {
+              _popularSearchChip(l10n.listingLands, () {
                 setState(() => _selectedType = 'land');
                 _performSearch();
               }),
-              _popularSearchChip('💰 For Sale', () {
+              _popularSearchChip(l10n.listingForSale, () {
                 setState(() => _selectedListingType = 'sale');
                 _performSearch();
               }),
               if (_rentalEnabled)
-                _popularSearchChip('🔑 For Rent', () {
+                _popularSearchChip(l10n.listingForRent, () {
                   setState(() => _selectedListingType = 'rental');
                   _performSearch();
                 }),
-              _popularSearchChip('💰 Under 5M', () {
+              _popularSearchChip(l10n.searchUnder5M, () {
                 setState(() {
                   _selectedPriceLabel = 'Under 5M';
                   _selectedPriceMin = 0;
@@ -440,31 +455,31 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 });
                 _performSearch();
               }),
-              _popularSearchChip('💎 5M - 10M', () {
+              _popularSearchChip(l10n.search5M10M, () {
                 setState(() {
-                  _selectedPriceLabel = '5M - 10M';
+                  _selectedPriceLabel = '5M-10M';
                   _selectedPriceMin = 5000000;
                   _selectedPriceMax = 10000000;
                 });
                 _performSearch();
               }),
-              _popularSearchChip('🏆 10M - 50M', () {
+              _popularSearchChip(l10n.search10M50M, () {
                 setState(() {
-                  _selectedPriceLabel = '10M - 50M';
+                  _selectedPriceLabel = '10M-50M';
                   _selectedPriceMin = 10000000;
                   _selectedPriceMax = 50000000;
                 });
                 _performSearch();
               }),
-              _popularSearchChip('👑 50M - 100M', () {
+              _popularSearchChip(l10n.search50M100M, () {
                 setState(() {
-                  _selectedPriceLabel = '50M - 100M';
+                  _selectedPriceLabel = '50M-100M';
                   _selectedPriceMin = 50000000;
                   _selectedPriceMax = 100000000;
                 });
                 _performSearch();
               }),
-              _popularSearchChip('✨ 100M+', () {
+              _popularSearchChip(l10n.search100MPlus, () {
                 setState(() {
                   _selectedPriceLabel = '100M+';
                   _selectedPriceMin = 100000000;
@@ -501,6 +516,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildResults(ListingsState state) {
+    final l10n = AppLocalizations.of(context);
     if (state.isLoading && state.listings.isEmpty) {
       return _buildSkeletonList(5);
     }
@@ -515,9 +531,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     if (state.listings.isEmpty) {
       return WaveEmptyState(
         icon: Icons.search_off_rounded,
-        title: 'No Properties Found',
-        subtitle: 'Try adjusting your search or filters to find more results',
-        actionLabel: 'Clear Filters',
+        title: l10n.searchNoResultsTitle,
+        subtitle: l10n.searchNoResultsSubtitle,
+        actionLabel: l10n.searchClearAll,
         onAction: _clearAllFilters,
       );
     }
@@ -527,7 +543,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
-            '${state.total} properties found',
+            l10n.searchFoundCount(state.total),
             style: AppTextStyles.bodySmall.copyWith(color: AppColors.zinc500),
           ),
         ),
@@ -639,17 +655,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   String _getSortLabel(String sort) {
+    final l10n = AppLocalizations.of(context);
     switch (sort) {
       case 'price_low':
-        return 'Price ↑';
+        return l10n.searchSortPriceLow;
       case 'price_high':
-        return 'Price ↓';
+        return l10n.searchSortPriceHigh;
       case 'newest':
-        return 'Newest';
+        return l10n.searchSortNewest;
       case 'oldest':
-        return 'Oldest';
+        return l10n.searchSortOldest;
       default:
-        return 'Sort';
+        return l10n.searchSortBy;
     }
   }
 
@@ -663,6 +680,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
+            final l10n = AppLocalizations.of(context);
             return Container(
               padding: const EdgeInsets.all(20),
               child: SingleChildScrollView(
@@ -673,8 +691,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(AppLocalizations.of(context).searchFilters,
-                            style: TextStyle(
+                        Text(l10n.searchFilters,
+                            style: const TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold)),
                         TextButton(
                           onPressed: () {
@@ -687,22 +705,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               _selectedPriceMax = null;
                             });
                           },
-                          child: Text(AppLocalizations.of(context).searchReset,
-                              style: TextStyle(color: AppColors.zinc500)),
+                          child: Text(l10n.searchReset,
+                              style: const TextStyle(color: AppColors.zinc500)),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
 
                     // Property Type
-                    Text(AppLocalizations.of(context).searchPropertyType,
-                        style: TextStyle(
+                    Text(l10n.searchPropertyType,
+                        style: const TextStyle(
                             fontSize: 15, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 10),
                     _modalChipRow([
-                      ('All', null, _selectedType == null),
-                      ('🏠 House', 'house', _selectedType == 'house'),
-                      ('🌄 Land', 'land', _selectedType == 'land'),
+                      (l10n.searchFilterAll, null, _selectedType == null),
+                      (l10n.listingHouse, 'house', _selectedType == 'house'),
+                      (l10n.listingLand, 'land', _selectedType == 'land'),
                     ], (v) {
                       setModalState(() => _selectedType = v);
                     }),
@@ -711,15 +729,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
                     // Listing Status (only if rental enabled)
                     if (_rentalEnabled) ...[
-                      Text(AppLocalizations.of(context).searchListingStatus,
-                          style: TextStyle(
+                      Text(l10n.searchListingStatus,
+                          style: const TextStyle(
                               fontSize: 15, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 10),
                       _modalChipRow([
-                        ('All', null, _selectedListingType == null),
-                        ('💰 For Sale', 'sale', _selectedListingType == 'sale'),
+                        (l10n.searchFilterAll, null, _selectedListingType == null),
+                        (l10n.listingForSale, 'sale', _selectedListingType == 'sale'),
                         (
-                          '🔑 For Rent',
+                          l10n.listingForRent,
                           'rental',
                           _selectedListingType == 'rental'
                         ),
@@ -730,29 +748,29 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     ],
 
                     // Price Range
-                    Text(AppLocalizations.of(context).searchPriceRange,
-                        style: TextStyle(
+                    Text(l10n.searchPriceRange,
+                        style: const TextStyle(
                             fontSize: 15, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 10),
                     _modalChipRow([
-                      ('Any', null, _selectedPriceLabel == null),
+                      (l10n.searchFilterAny, null, _selectedPriceLabel == null),
                       (
-                        '💰 Under 5M',
+                        l10n.searchUnder5M,
                         'Under 5M',
                         _selectedPriceLabel == 'Under 5M'
                       ),
-                      ('💎 5M-10M', '5M-10M', _selectedPriceLabel == '5M-10M'),
+                      (l10n.search5M10M, '5M-10M', _selectedPriceLabel == '5M-10M'),
                       (
-                        '🏆 10M-50M',
+                        l10n.search10M50M,
                         '10M-50M',
                         _selectedPriceLabel == '10M-50M'
                       ),
                       (
-                        '👑 50M-100M',
+                        l10n.search50M100M,
                         '50M-100M',
                         _selectedPriceLabel == '50M-100M'
                       ),
-                      ('✨ 100M+', '100M+', _selectedPriceLabel == '100M+'),
+                      (l10n.search100MPlus, '100M+', _selectedPriceLabel == '100M+'),
                     ], (v) {
                       setModalState(() => _setPriceFilter(v as String?));
                     }),
@@ -760,16 +778,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     const SizedBox(height: 16),
 
                     // Sort By (last)
-                    Text(AppLocalizations.of(context).searchSortBy,
-                        style: TextStyle(
+                    Text(l10n.searchSortBy,
+                        style: const TextStyle(
                             fontSize: 15, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 10),
                     _modalChipRow([
-                      ('🆕 Newest', 'newest', _selectedSort == 'newest'),
-                      ('📅 Oldest', 'oldest', _selectedSort == 'oldest'),
-                      ('💰 Price ↑', 'price_low', _selectedSort == 'price_low'),
+                      (l10n.searchSortNewest, 'newest', _selectedSort == 'newest'),
+                      (l10n.searchSortOldest, 'oldest', _selectedSort == 'oldest'),
+                      (l10n.searchSortPriceLow, 'price_low', _selectedSort == 'price_low'),
                       (
-                        '💎 Price ↓',
+                        l10n.searchSortPriceHigh,
                         'price_high',
                         _selectedSort == 'price_high'
                       ),
@@ -794,8 +812,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               borderRadius: BorderRadius.circular(12)),
                         ),
                         child: Text(
-                            AppLocalizations.of(context).searchApplyFilters,
-                            style: TextStyle(
+                            l10n.searchApplyFilters,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w600)),
                       ),
                     ),

@@ -158,7 +158,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
               ),
             const SizedBox(height: 4),
             Text(
-              AppLocalizations.of(context).navProfile,
+              AppLocalizations.of(context).navMessages,
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,

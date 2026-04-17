@@ -101,6 +101,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final featuredState = ref.watch(featuredListingsProvider);
     final listingsState = ref.watch(listingsProvider);
     final unreadCountAsync = ref.watch(unreadCountProvider);
+    final l10n = AppLocalizations.of(context);
     ref.watch(favoritesProvider);
 
     return Scaffold(
@@ -139,10 +140,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   child: Column(
                     children: [
                       _buildSectionHeader(context,
-                          AppLocalizations.of(context).listingsFeatured),
+                          l10n.listingsFeatured),
                       _buildFeaturedListings(featuredState),
                       _buildSectionHeader(
-                          context, AppLocalizations.of(context).listingsTitle),
+                          context, l10n.listingsTitle),
                     ],
                   ),
                 ),
@@ -160,6 +161,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final user = authState.user;
     final profileState = ref.read(profileProvider);
     final stats = profileState.stats;
+    final l10n = AppLocalizations.of(context);
     final initials = user?.initials.isNotEmpty == true
         ? user!.initials
         : (user?.firstName?.substring(0, 1).toUpperCase() ?? '?');
@@ -268,7 +270,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       children: [
                         _buildModalStatItem(
                           value: stats?.totalListings.toString() ?? '0',
-                          label: 'Listings',
+                          label: l10n.profileStatsListings,
                           onTap: () {
                             Navigator.pop(ctx);
                             _navigateToMyListings();
@@ -277,7 +279,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 12),
                         _buildModalStatItem(
                           value: stats?.totalFavorites.toString() ?? '0',
-                          label: 'Favorites',
+                          label: l10n.profileStatsFavorites,
                           onTap: () {
                             Navigator.pop(ctx);
                             _navigateToFavorites();
@@ -286,9 +288,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(width: 12),
                         _buildModalStatItem(
                           value: user?.isKycVerified == true
-                              ? 'Verified'
-                              : 'Pending',
-                          label: 'KYC Status',
+                              ? l10n.profileKycStatusVerified
+                              : l10n.profileKycStatusPending,
+                          label: l10n.profileVerificationKyc,
                           valueColor: user?.isKycVerified == true
                               ? AppColors.emerald600
                               : AppColors.warning,
@@ -302,7 +304,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     // Action buttons
                     _buildModalAction(
                       icon: Icons.edit_outlined,
-                      title: 'Edit Profile',
+                      title: l10n.profileEdit,
                       onTap: () async {
                         Navigator.pop(ctx);
                         final result = await Navigator.of(context).push(
@@ -318,7 +320,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     const Divider(height: 1),
                     _buildModalAction(
                       icon: Icons.logout,
-                      title: 'Logout',
+                      title: l10n.authLogout,
                       textColor: AppColors.error,
                       iconColor: AppColors.error,
                       onTap: () async {
@@ -432,6 +434,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _buildSectionHeader(BuildContext context, String title) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
       child: Row(
@@ -452,9 +455,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
               const SizedBox(height: 4),
               Text(
-                title == AppLocalizations.of(context).listingsFeatured
-                    ? 'Premium properties'
-                    : 'Recently added',
+                title == l10n.listingsFeatured
+                    ? l10n.homeFeaturedPremium
+                    : l10n.homeLatestRecently,
                 style: TextStyle(
                   fontSize: 13,
                   color: AppColors.navy400,
@@ -471,7 +474,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               border: Border.all(color: AppColors.wave200),
             ),
             child: Text(
-              'View All',
+              l10n.homeViewAll,
               style: TextStyle(
                 fontSize: 12,
                 color: AppColors.wave700,
@@ -617,6 +620,7 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
     final userFirstName = user?.firstName ?? 'WaveMart';
     final userInitials = _getInitials(user?.firstName, user?.lastName);
     final isScrolled = overlapsContent ?? false;
+    final l10n = AppLocalizations.of(context);
 
     return ClipRect(
       child: BackdropFilter(
@@ -672,7 +676,7 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Hi, $userFirstName',
+                                  l10n.homeGreeting(userFirstName),
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w700,
@@ -682,7 +686,7 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
                                   ),
                                 ),
                                 Text(
-                                  'Discover your perfect property',
+                                  l10n.homeDiscover,
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.white.withOpacity(0.65),

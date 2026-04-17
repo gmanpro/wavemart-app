@@ -4,6 +4,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/text_styles.dart';
 import '../../../data/models/listing.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Property Listing Card Widget
 class PropertyListingCard extends StatelessWidget {
@@ -29,6 +30,7 @@ class PropertyListingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) return _buildSkeleton();
+    final l10n = AppLocalizations.of(context);
 
     return GestureDetector(
       onTap: onTap,
@@ -44,16 +46,16 @@ class PropertyListingCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image Section
-            _buildImageSection(),
+            _buildImageSection(context),
 
-// Content Section
+            // Content Section
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Price
-                  _buildPrice(),
+                  _buildPrice(context),
                   const SizedBox(height: 8),
 
                   // Description
@@ -61,15 +63,15 @@ class PropertyListingCard extends StatelessWidget {
                   const SizedBox(height: 8),
 
                   // Location
-                  _buildLocation(),
+                  _buildLocation(context),
                   const SizedBox(height: 6),
 
                   // Date Posted
-                  _buildDatePosted(),
+                  _buildDatePosted(context),
                   const SizedBox(height: 12),
 
                   // Features Row
-                  _buildFeatures(),
+                  _buildFeatures(context),
                 ],
               ),
             ),
@@ -204,7 +206,8 @@ class PropertyListingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImageSection() {
+  Widget _buildImageSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Stack(
       children: [
         // Main Image
@@ -248,9 +251,12 @@ class PropertyListingCard extends StatelessWidget {
           child: Row(
             children: [
               if (listing?.isNew ?? false)
-                _buildBadge('NEW', AppColors.emerald500),
+                _buildBadge(l10n.listingNew, AppColors.emerald500),
               if (listing?.isFeatured ?? false)
-                _buildBadge('FEATURED', AppColors.wave500),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: _buildBadge(l10n.listingFeatured, AppColors.wave500),
+                ),
             ],
           ),
         ),
@@ -339,8 +345,8 @@ class PropertyListingCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   listing?.propertyType == PropertyType.house
-                      ? 'House'
-                      : 'Land',
+                      ? l10n.listingHouse
+                      : l10n.listingLand,
                   style: AppTextStyles.badge.copyWith(
                     color: Colors.white,
                   ),
@@ -369,17 +375,19 @@ class PropertyListingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPrice() {
-    final price = listing?.displayPrice ?? 'Price on Request';
+  Widget _buildPrice(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final price = listing?.displayPrice ?? l10n.listingPriceOnRequest;
     return Text(
       price,
       style: AppTextStyles.priceMedium,
     );
   }
 
-  Widget _buildTitle() {
+  Widget _buildTitle(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Text(
-      listing?.title ?? 'Property Listing',
+      listing?.title ?? l10n.listingsDetails,
       style: AppTextStyles.titleSmall,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
@@ -399,10 +407,11 @@ class PropertyListingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLocation() {
+  Widget _buildLocation(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final location = listing?.address?.shortAddress ??
         listing?.address?.region ??
-        'Unknown Location';
+        l10n.listingUnknownLocation;
     return Row(
       children: [
         const Icon(
@@ -423,21 +432,22 @@ class PropertyListingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDatePosted() {
+  Widget _buildDatePosted(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final date = listing?.createdAt;
     if (date == null) return const SizedBox.shrink();
     final daysOld = DateTime.now().difference(date).inDays;
     String dateText;
     if (daysOld == 0) {
-      dateText = 'Today';
+      dateText = l10n.listingToday;
     } else if (daysOld == 1) {
-      dateText = 'Yesterday';
+      dateText = l10n.listingYesterday;
     } else if (daysOld < 7) {
-      dateText = '$daysOld days ago';
+      dateText = l10n.listingDaysAgo(daysOld);
     } else if (daysOld < 30) {
-      dateText = '${(daysOld / 7).floor()} weeks ago';
+      dateText = l10n.listingWeeksAgo((daysOld / 7).floor());
     } else {
-      dateText = '${(daysOld / 30).floor()} months ago';
+      dateText = l10n.listingMonthsAgo((daysOld / 30).floor());
     }
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -452,7 +462,8 @@ class PropertyListingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFeatures() {
+  Widget _buildFeatures(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isHouse = listing?.propertyType == PropertyType.house;
     return Row(
       children: [
@@ -468,13 +479,13 @@ class PropertyListingCard extends StatelessWidget {
           // For land: square meters
           _buildFeatureChip(
             Icons.square_foot_outlined,
-            '${listing?.totalSquareMeters?.toInt() ?? 0} m²',
+            l10n.listingUnitM2(listing?.totalSquareMeters?.toInt() ?? 0),
           ),
         ],
         const SizedBox(width: 8),
         _buildFeatureChip(
           Icons.sell_outlined,
-          listing?.listingType == ListingType.sale ? 'Sale' : 'Rent',
+          listing?.listingType == ListingType.sale ? l10n.listingSale : l10n.listingRent,
         ),
         const Spacer(),
         Icon(
@@ -531,6 +542,7 @@ class FeaturedListingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading || listing == null) return _buildSkeleton();
+    final l10n = AppLocalizations.of(context);
 
     return GestureDetector(
       onTap: onTap,
@@ -556,11 +568,11 @@ class FeaturedListingCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Badges Row
-                    _buildBadgesRow(),
+                    _buildBadgesRow(context),
                     const SizedBox(height: 8),
 
                     // Price
-                    _buildPrice(),
+                    _buildPrice(context),
                     const SizedBox(height: 4),
 
                     // Description
@@ -568,15 +580,15 @@ class FeaturedListingCard extends StatelessWidget {
                     const SizedBox(height: 4),
 
                     // Location
-                    _buildLocation(),
+                    _buildLocation(context),
                     const SizedBox(height: 4),
 
                     // Date Posted
-                    _buildDatePosted(),
+                    _buildDatePosted(context),
                     const Spacer(),
 
                     // Features Row
-                    _buildFeatures(),
+                    _buildFeatures(context),
                   ],
                 ),
               ),
@@ -661,7 +673,8 @@ class FeaturedListingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildBadgesRow() {
+  Widget _buildBadgesRow(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       children: [
         // Property Type Badge
@@ -683,7 +696,7 @@ class FeaturedListingCard extends StatelessWidget {
               ),
               const SizedBox(width: 3),
               Text(
-                listing?.propertyType == PropertyType.house ? 'House' : 'Land',
+                listing?.propertyType == PropertyType.house ? l10n.listingHouse : l10n.listingLand,
                 style: AppTextStyles.labelSmall.copyWith(
                   color: Colors.white,
                   fontSize: 9,
@@ -693,11 +706,11 @@ class FeaturedListingCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        if (listing?.isNew == true) _buildBadge('NEW', AppColors.emerald500),
+        if (listing?.isNew == true) _buildBadge(l10n.listingNew, AppColors.emerald500),
         if (listing?.isNew == true && listing?.isFeatured == true)
           const SizedBox(width: 4),
         if (listing?.isFeatured == true)
-          _buildBadge('FEATURED', AppColors.wave500),
+          _buildBadge(l10n.listingFeatured, AppColors.wave500),
       ],
     );
   }
@@ -719,9 +732,10 @@ class FeaturedListingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPrice() {
+  Widget _buildPrice(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Text(
-      listing?.displayPrice ?? 'Price on Request',
+      listing?.displayPrice ?? l10n.listingPriceOnRequest,
       style: AppTextStyles.priceMedium.copyWith(
         fontSize: 17,
         fontWeight: FontWeight.w700,
@@ -731,9 +745,10 @@ class FeaturedListingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTitle() {
+  Widget _buildTitle(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Text(
-      listing?.title ?? 'Property Listing',
+      listing?.title ?? l10n.listingsDetails,
       style: AppTextStyles.titleSmall.copyWith(
         fontSize: 14,
         fontWeight: FontWeight.w600,
@@ -759,21 +774,22 @@ class FeaturedListingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDatePosted() {
+  Widget _buildDatePosted(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final date = listing?.createdAt;
     if (date == null) return const SizedBox.shrink();
     final daysOld = DateTime.now().difference(date).inDays;
     String dateText;
     if (daysOld == 0) {
-      dateText = 'Today';
+      dateText = l10n.listingToday;
     } else if (daysOld == 1) {
-      dateText = 'Yesterday';
+      dateText = l10n.listingYesterday;
     } else if (daysOld < 7) {
-      dateText = '$daysOld days ago';
+      dateText = l10n.listingDaysAgo(daysOld);
     } else if (daysOld < 30) {
-      dateText = '${(daysOld / 7).floor()} weeks ago';
+      dateText = l10n.listingWeeksAgo((daysOld / 7).floor());
     } else {
-      dateText = '${(daysOld / 30).floor()} months ago';
+      dateText = l10n.listingMonthsAgo((daysOld / 30).floor());
     }
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -791,7 +807,8 @@ class FeaturedListingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLocation() {
+  Widget _buildLocation(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       children: [
         const Icon(
@@ -804,7 +821,7 @@ class FeaturedListingCard extends StatelessWidget {
           child: Text(
             listing?.address?.shortAddress ??
                 listing?.address?.region ??
-                'Unknown Location',
+                l10n.listingUnknownLocation,
             style: AppTextStyles.bodySmall.copyWith(
               fontSize: 11,
             ),
@@ -816,7 +833,8 @@ class FeaturedListingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFeatures() {
+  Widget _buildFeatures(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isHouse = listing?.propertyType == PropertyType.house;
     return Row(
       children: [
@@ -828,13 +846,13 @@ class FeaturedListingCard extends StatelessWidget {
         ] else ...[
           _buildFeatureChip(
             Icons.square_foot_outlined,
-            '${listing?.totalSquareMeters?.toInt() ?? 0} m²',
+            l10n.listingUnitM2(listing?.totalSquareMeters?.toInt() ?? 0),
           ),
         ],
         const SizedBox(width: 4),
         _buildFeatureChip(
           Icons.sell_outlined,
-          listing?.listingType == ListingType.sale ? 'Sale' : 'Rent',
+          listing?.listingType == ListingType.sale ? l10n.listingSale : l10n.listingRent,
         ),
       ],
     );
@@ -854,133 +872,6 @@ class FeaturedListingCard extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSkeleton() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.zinc200),
-        boxShadow: AppColors.shadowMd,
-      ),
-      child: Shimmer.fromColors(
-        baseColor: Colors.grey[200]!,
-        highlightColor: Colors.grey[100]!,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image skeleton (left, fixed width)
-            ClipRRect(
-              borderRadius:
-                  const BorderRadius.horizontal(left: Radius.circular(16)),
-              child: Container(
-                width: 130,
-                height: 140,
-                color: Colors.grey[300],
-              ),
-            ),
-            // Content skeleton (right)
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Badges
-                    Row(
-                      children: [
-                        Container(
-                          width: 50,
-                          height: 18,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Container(
-                          width: 60,
-                          height: 18,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    // Price
-                    Container(
-                      height: 18,
-                      width: 100,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Description line
-                    Container(
-                      height: 12,
-                      width: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Location
-                    Container(
-                      height: 12,
-                      width: 100,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Date posted
-                    Container(
-                      height: 10,
-                      width: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    const Spacer(),
-                    // Features (2 chips)
-                    Row(
-                      children: [
-                        Container(
-                          width: 45,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Container(
-                          width: 40,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
