@@ -179,7 +179,9 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(_currentStep == 3 ? l10n.listingSubmit : l10n.listingNext),
+                  : Text(_currentStep == 3
+                      ? l10n.listingSubmit
+                      : l10n.listingNext),
             ),
           ],
         ),
@@ -244,7 +246,9 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                         height: 20,
                         child: CircularProgressIndicator(
                             strokeWidth: 2, color: Colors.white))
-                    : Text(_currentStep == 3 ? l10n.listingSubmitListing : l10n.listingContinue),
+                    : Text(_currentStep == 3
+                        ? l10n.listingSubmitListing
+                        : l10n.listingContinue),
               ),
             ),
           ],
@@ -303,8 +307,7 @@ class _StepIndicator extends StatelessWidget {
                       ),
                       child: Center(
                         child: isCompleted
-                            ? Icon(Icons.check,
-                                size: 16, color: Colors.white)
+                            ? Icon(Icons.check, size: 16, color: Colors.white)
                             : Text(
                                 '${i + 1}',
                                 style: TextStyle(
@@ -627,10 +630,14 @@ class _Step1BasicsState extends State<_Step1Basics> {
             value: widget.formData.holdingType.isEmpty
                 ? null
                 : widget.formData.holdingType,
-            items: [l10n.listingFreeHold, l10n.listingLeaseHold, l10n.listingCooperative],
+            items: [
+              l10n.listingFreeHold,
+              l10n.listingLeaseHold,
+              l10n.listingCooperative
+            ],
             label: l10n.listingSelectHolding,
-            onChanged: (v) => widget.onUpdate(
-                widget.formData.copyWith(holdingType: v ?? l10n.listingFreeHold)),
+            onChanged: (v) => widget.onUpdate(widget.formData
+                .copyWith(holdingType: v ?? l10n.listingFreeHold)),
           ),
           SizedBox(height: 16),
 
@@ -649,10 +656,15 @@ class _Step1BasicsState extends State<_Step1Basics> {
             value: widget.formData.useType.isEmpty
                 ? null
                 : widget.formData.useType,
-            items: [l10n.listingResidential, l10n.listingCommercial, l10n.listingMixed, l10n.listingInvestment],
+            items: [
+              l10n.listingResidential,
+              l10n.listingCommercial,
+              l10n.listingMixed,
+              l10n.listingInvestment
+            ],
             label: l10n.listingSelectUse,
-            onChanged: (v) => widget.onUpdate(
-                widget.formData.copyWith(useType: v ?? l10n.listingResidential)),
+            onChanged: (v) => widget.onUpdate(widget.formData
+                .copyWith(useType: v ?? l10n.listingResidential)),
           ),
           SizedBox(height: 20),
 
@@ -760,7 +772,13 @@ class _Step1BasicsState extends State<_Step1Basics> {
           SizedBox(height: 8),
           _dropdownField(
             value: widget.formData.acquisitionClarification,
-            items: [l10n.listingPurchased, l10n.listingInherited, l10n.listingGift, l10n.listingAssignment, l10n.listingOther],
+            items: [
+              l10n.listingPurchased,
+              l10n.listingInherited,
+              l10n.listingGift,
+              l10n.listingAssignment,
+              l10n.listingOther
+            ],
             label: l10n.listingAcquisition,
             onChanged: (v) => widget.onUpdate(
                 widget.formData.copyWith(acquisitionClarification: v)),
@@ -1168,6 +1186,14 @@ class _Step2DetailsState extends State<_Step2Details> {
     super.dispose();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           if (widget.formData.type == 'house') ...[
             _sectionTitle(l10n.listingRoomConfig),
             SizedBox(height: 8),
@@ -1244,7 +1270,13 @@ class _Step2DetailsState extends State<_Step2Details> {
               value: widget.formData.houseType?.isEmpty ?? true
                   ? null
                   : widget.formData.houseType,
-              items: [l10n.listingVilla, l10n.listingApartment, l10n.listingCondominium, l10n.listingTownhouse, l10n.listingBungalow],
+              items: [
+                l10n.listingVilla,
+                l10n.listingApartment,
+                l10n.listingCondominium,
+                l10n.listingTownhouse,
+                l10n.listingBungalow
+              ],
               label: l10n.listingSelectHouseType,
               onChanged: (v) =>
                   widget.onUpdate(widget.formData.copyWith(houseType: v)),
@@ -1322,7 +1354,16 @@ class _Step2DetailsState extends State<_Step2Details> {
             value: widget.formData.facingDirection?.isEmpty ?? true
                 ? null
                 : widget.formData.facingDirection,
-            items: [l10n.listingNorth, l10n.listingSouth, l10n.listingEast, l10n.listingWest, l10n.listingNorthEast, l10n.listingNorthWest, l10n.listingSouthEast, l10n.listingSouthWest],
+            items: [
+              l10n.listingNorth,
+              l10n.listingSouth,
+              l10n.listingEast,
+              l10n.listingWest,
+              l10n.listingNorthEast,
+              l10n.listingNorthWest,
+              l10n.listingSouthEast,
+              l10n.listingSouthWest
+            ],
             label: l10n.listingSelectDirection,
             onChanged: (v) =>
                 widget.onUpdate(widget.formData.copyWith(facingDirection: v)),
@@ -1520,6 +1561,7 @@ class _Step3MediaState extends State<_Step3Media> {
   }
 
   Widget _buildImageGrid(List<XFile> files, String type) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: [
         GestureDetector(
