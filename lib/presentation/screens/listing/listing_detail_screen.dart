@@ -818,9 +818,10 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
   }
 
   Future<void> _shareListing(Listing listing) async {
+    final l10n = AppLocalizations.of(context);
     final shareText = '''
-${listing.title}
-${listing.displayPrice}
+${listing.getLocalizedTitle(context)}
+${listing.getLocalizedPrice(context)}
 ${listing.description?.isNotEmpty == true ? '\n${listing.description}' : ''}
 
 Shared from WaveMart - Ethiopia's Premier Real Estate Marketplace
@@ -828,7 +829,7 @@ Shared from WaveMart - Ethiopia's Premier Real Estate Marketplace
 
     await Share.share(
       shareText,
-      subject: 'Check out this property on WaveMart: ${listing.title}',
+      subject: 'Check out this property on WaveMart: ${listing.getLocalizedTitle(context)}',
     );
   }
 }

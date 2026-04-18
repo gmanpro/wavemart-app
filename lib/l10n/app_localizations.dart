@@ -1168,6 +1168,12 @@ abstract class AppLocalizations {
   /// **'NEW'**
   String get listingNew;
 
+  /// No description provided for @listingNew.
+  ///
+  /// In en, this message translates to:
+  /// **'NEW'**
+  String get listingNew;
+
   /// No description provided for @listingFeatured.
   ///
   /// In en, this message translates to:

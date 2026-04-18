@@ -145,6 +145,7 @@
   "listingBrowseFile": "ፋይል ፈልግ",
   "listingChangeFile": "ቀይር: {name}",
   "listingSummary": "ማጠቃለያ",
+  "listingNew": "አዲስ",
   "listingAcceptTerms": "በአገልግሎት ውሎች እና ደንቦች እስማማለሁ",
   "listingTermsSubtitle": "ንብረቱን በማስገባትዎ በውሎቻችን እና በግላዊነት ፖሊሲያችን ይስማማሉ",
   "listingSuccess": "ንብረቱ በተሳካ ሁኔታ ገብቷል! ይሁንታ በመጠባበቅ ላይ።",

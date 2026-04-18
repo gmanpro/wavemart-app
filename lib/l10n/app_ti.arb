@@ -144,6 +144,7 @@
   "listingBrowseFile": "ፋይል ድለ",
   "listingChangeFile": "ቀይር: {name}",
   "listingSummary": "ጽማረ",
+  "listingNew": "ሓድሽ",
   "listingAcceptTerms": "ብውዕላትን ደንብታትን እሰማማዕ",
   "listingTermsSubtitle": "ንብረትኩም ብምእታውኩም ብውዕልናን ፖሊሲ ምስጢራውነትናን ትሰማምዑ ኣለኹም",
   "listingSuccess": "ንብረትኩም ብዝግባእ ተመዝጊቡ ኣሎ! ይጽበ ኣሎ።",
