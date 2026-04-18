@@ -247,8 +247,9 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
   }
 
   Widget _buildErrorView(String message) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).listingsTitle)),
+      appBar: AppBar(title: Text(l10n.listingsTitle)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -262,7 +263,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Could not load property',
+                l10n.listingsLoadError,
                 style: AppTextStyles.title,
               ),
               const SizedBox(height: 8),
@@ -280,7 +281,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
                       .loadListing(widget.listingId);
                 },
                 icon: const Icon(Icons.refresh, size: 18),
-                label: Text(AppLocalizations.of(context).commonRetry),
+                label: Text(l10n.commonRetry),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.navy950,
                   foregroundColor: Colors.white,
@@ -299,8 +300,9 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
   }
 
   Widget _buildNotFound() {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).listingsTitle)),
+      appBar: AppBar(title: Text(l10n.listingsTitle)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -309,10 +311,10 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
             children: [
               Icon(Icons.home_outlined, size: 64, color: AppColors.navy300),
               const SizedBox(height: 16),
-              Text('Listing Not Found', style: AppTextStyles.title),
+              Text(l10n.listingsNotFound, style: AppTextStyles.title),
               const SizedBox(height: 8),
               Text(
-                'This property may have been removed',
+                l10n.listingsNotFoundSubtitle,
                 style:
                     AppTextStyles.bodyMedium.copyWith(color: AppColors.navy500),
                 textAlign: TextAlign.center,
@@ -320,7 +322,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(AppLocalizations.of(context).commonRetry),
+                child: Text(l10n.commonOk),
               ),
             ],
           ),
@@ -451,14 +453,14 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          listing.displayPrice,
+          listing.getLocalizedPrice(context),
           style: AppTextStyles.headline2.copyWith(
             color: AppColors.emerald600,
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          listing.title,
+          listing.getLocalizedTitle(context),
           style: AppTextStyles.headline4,
         ),
       ],
@@ -466,20 +468,25 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
   }
 
   Widget _buildBadges(Listing listing) {
+    final l10n = AppLocalizations.of(context);
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
         _buildBadge(
-          listing.propertyType.name.toUpperCase(),
+          listing.propertyType == PropertyType.house
+              ? l10n.listingHouse.toUpperCase()
+              : l10n.listingLand.toUpperCase(),
           AppColors.navy900,
         ),
         if (listing.listingType == ListingType.sale)
-          _buildBadge('FOR SALE', AppColors.emerald600)
+          _buildBadge(l10n.listingForSale.toUpperCase(), AppColors.emerald600)
         else
-          _buildBadge('FOR RENT', AppColors.wave600),
-        if (listing.isFeatured) _buildBadge('FEATURED', AppColors.wave500),
-        if (listing.isNew) _buildBadge('NEW', Colors.amber[700]!),
+          _buildBadge(l10n.listingForRent.toUpperCase(), AppColors.wave600),
+        if (listing.isFeatured)
+          _buildBadge(l10n.listingFeatured.toUpperCase(), AppColors.wave500),
+        if (listing.isNew)
+          _buildBadge(l10n.listingNew.toUpperCase(), Colors.amber[700]!),
       ],
     );
   }
@@ -505,6 +512,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
   }
 
   Widget _buildLocation(Listing listing) {
+    final l10n = AppLocalizations.of(context);
     final parts = [
       listing.address?.zone,
       listing.address?.woreda,
@@ -517,7 +525,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
         const SizedBox(width: 4),
         Expanded(
           child: Text(
-            parts.isNotEmpty ? parts : 'Location not specified',
+            parts.isNotEmpty ? parts : l10n.listingUnknownLocation,
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.navy600,
             ),
@@ -528,6 +536,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
   }
 
   Widget _buildKeyFeatures(Listing listing) {
+    final l10n = AppLocalizations.of(context);
     final features = <Widget>[];
 
     // For houses: show rooms
@@ -535,19 +544,19 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
       if ((listing.bedrooms ?? 0) > 0) {
         features.add(_buildFeatureChip(
           icon: Icons.bed,
-          label: '${listing.bedrooms} Bedrooms',
+          label: l10n.listingsBedrooms(listing.bedrooms!),
         ));
       }
       if ((listing.bathrooms ?? 0) > 0) {
         features.add(_buildFeatureChip(
           icon: Icons.bathtub,
-          label: '${listing.bathrooms} Bathrooms',
+          label: l10n.listingsBathrooms(listing.bathrooms!),
         ));
       }
       if ((listing.salons ?? 0) > 0) {
         features.add(_buildFeatureChip(
           icon: Icons.weekend,
-          label: '${listing.salons} Salons',
+          label: l10n.listingsSalons(listing.salons!),
         ));
       }
     }
@@ -556,7 +565,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
     if (listing.totalSquareMeters != null && listing.totalSquareMeters! > 0) {
       features.add(_buildFeatureChip(
         icon: Icons.square_foot,
-        label: '${listing.totalSquareMeters!.toInt()} m²',
+        label: l10n.listingUnitM2(listing.totalSquareMeters!.toInt()),
       ));
     }
 
@@ -576,27 +585,19 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
       ));
     }
 
-    // Image count
-    if ((listing.imageCount ?? 0) > 1) {
-      features.add(_buildFeatureChip(
-        icon: Icons.photo_library,
-        label: '${listing.imageCount} Photos',
-      ));
-    }
-
     // Date posted
     final daysOld = DateTime.now().difference(listing.createdAt).inDays;
     String dateText;
     if (daysOld == 0) {
-      dateText = 'Today';
+      dateText = l10n.listingToday;
     } else if (daysOld == 1) {
-      dateText = 'Yesterday';
+      dateText = l10n.listingYesterday;
     } else if (daysOld < 7) {
-      dateText = '$daysOld days ago';
+      dateText = l10n.listingDaysAgo(daysOld);
     } else if (daysOld < 30) {
-      dateText = '${(daysOld / 7).floor()} weeks ago';
+      dateText = l10n.listingWeeksAgo((daysOld / 7).floor());
     } else {
-      dateText = '${(daysOld / 30).floor()} months ago';
+      dateText = l10n.listingMonthsAgo((daysOld / 30).floor());
     }
     features.add(_buildFeatureChip(
       icon: Icons.access_time,
@@ -606,7 +607,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Key Features', style: AppTextStyles.title),
+        Text(l10n.listingsKeyFeatures, style: AppTextStyles.title),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -614,7 +615,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
           children: features.isNotEmpty
               ? features
               : [
-                  Text('No key features specified',
+                  Text(l10n.listingsNoFeatures,
                       style: AppTextStyles.caption)
                 ],
         ),
@@ -646,15 +647,16 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
   }
 
   Widget _buildDescription(Listing listing) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Description', style: AppTextStyles.title),
+        Text(l10n.listingsDescription, style: AppTextStyles.title),
         const SizedBox(height: 8),
         Text(
           listing.description?.isNotEmpty == true
               ? listing.description!
-              : 'No description provided.',
+              : l10n.listingsNoDescription,
           style: AppTextStyles.bodyMedium.copyWith(
             color: AppColors.navy700,
             height: 1.6,
@@ -665,41 +667,43 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
   }
 
   Widget _buildPropertyDetails(Listing listing) {
+    final l10n = AppLocalizations.of(context);
     final details = <Map<String, String>>[];
 
     if (listing.propertyType == PropertyType.land) {
       // For land: front area and side area
       if ((listing.frontAreaSqm ?? 0) > 0) {
         details.add({
-          'label': 'Front Area',
-          'value': '${listing.frontAreaSqm!.toInt()} m²'
+          'label': l10n.listingsFrontArea,
+          'value': l10n.listingUnitM2(listing.frontAreaSqm!.toInt())
         });
       }
       if ((listing.sideAreaSqm ?? 0) > 0) {
         details.add({
-          'label': 'Side Area',
-          'value': '${listing.sideAreaSqm!.toInt()} m²'
+          'label': l10n.listingsSideArea,
+          'value': l10n.listingUnitM2(listing.sideAreaSqm!.toInt())
         });
       }
     }
 
     if (listing.useType != null) {
-      details.add({'label': 'Use Type', 'value': listing.useType!});
+      details.add({'label': l10n.listingsUseType, 'value': listing.useType!});
     }
     if (listing.holdingType != null) {
-      details.add({'label': 'Holding Type', 'value': listing.holdingType!});
+      details.add({'label': l10n.listingsHoldingType, 'value': listing.holdingType!});
     }
     if (listing.facingDirection != null) {
-      details.add({'label': 'Facing', 'value': listing.facingDirection!});
+      details.add({'label': l10n.listingsFacing, 'value': listing.facingDirection!});
     }
     if (listing.priceRevisionPossible) {
-      details.add({'label': 'Price', 'value': 'Negotiable'});
+      details.add({'label': l10n.searchPriceRange, 'value': l10n.listingsNegotiable});
     }
     if (listing.hasDebtOrEncumbrance) {
       final debtAmount = listing.debtAmount;
-      final amount =
-          debtAmount != null ? ' Yes (${debtAmount.toInt()} ETB)' : ' Yes';
-      details.add({'label': 'Encumbrance', 'value': amount});
+      final amount = debtAmount != null
+          ? l10n.listingsEncumbranceYes(debtAmount.toInt())
+          : l10n.listingsYes;
+      details.add({'label': l10n.listingsEncumbrance, 'value': amount});
     }
     bool hasVideo = listing.videoUrl != null && listing.videoUrl!.isNotEmpty;
 
@@ -709,7 +713,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (hasVideo) _buildVideoTourSection(listing.videoUrl!),
-        Text('Property Details', style: AppTextStyles.title),
+        Text(l10n.listingsPropertyDetails, style: AppTextStyles.title),
         const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
@@ -754,6 +758,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
   }
 
   Widget _buildVideoTourSection(String videoUrl) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
@@ -768,7 +773,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                'Video Tour',
+                l10n.listingsVideoTour,
                 style: AppTextStyles.title,
               ),
             ],
@@ -778,7 +783,7 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
             videoUrl: videoUrl,
             autoPlay: false,
             looping: false,
-            title: 'Video Tour',
+            title: l10n.listingsVideoTour,
           ),
         ],
       ),
@@ -800,10 +805,11 @@ class _ListingDetailScreenState extends ConsumerState<ListingDetailScreen> {
         await ref.read(favoritesProvider.notifier).toggleFavorite(listingId);
 
     if (mounted) {
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isFavorited ? 'Removed from favorites' : 'Added to favorites',
+            isFavorited ? l10n.favoritesRemoved : l10n.favoritesAdded,
           ),
           backgroundColor: success ? AppColors.wave500 : AppColors.error,
         ),

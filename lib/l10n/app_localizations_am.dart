@@ -12,6 +12,18 @@ class AppLocalizationsAm extends AppLocalizations {
   String get appTitle => 'ዌቭማርት';
 
   @override
+  String get commonUser => 'ተጠቃሚ';
+
+  @override
+  String get commonNA => 'የለም';
+
+  @override
+  String get commonAppInitials => 'ዌማ';
+
+  @override
+  String get commonUnknown => 'ያልታወቀ';
+
+  @override
   String get commonOk => 'እሺ';
 
   @override
@@ -96,6 +108,9 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get profileMyListings => 'የእኔ ንብረቶች';
+
+  @override
+  String get myListingsEmptySubtitle => 'ለመጀመር የመጀመሪያዎን ንብረት ይጨምሩ';
 
   @override
   String get profileFavorites => 'ተወዳጆች';
@@ -307,6 +322,89 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get listingsDescription => 'መግለጫ';
+
+  @override
+  String get listingsPropertyDetails => 'የንብረት ዝርዝር';
+
+  @override
+  String listingsBedrooms(Object count) {
+    return '$count መኝታ ቤቶች';
+  }
+
+  @override
+  String listingsBathrooms(Object count) {
+    return '$count መታጠቢያ ቤቶች';
+  }
+
+  @override
+  String listingsSalons(Object count) {
+    return '$count ሳሎኖች';
+  }
+
+  @override
+  String get listingsFrontArea => 'የፊት ስፋት';
+
+  @override
+  String get listingsSideArea => 'የጎን ስፋት';
+
+  @override
+  String get listingsUseType => 'የአጠቃቀም ሁኔታ';
+
+  @override
+  String get listingsHoldingType => 'የባለቤትነት ሁኔታ';
+
+  @override
+  String get listingsFacing => 'አቅጣጫ';
+
+  @override
+  String get listingsNegotiable => 'ድርድር ይቻላል';
+
+  @override
+  String get listingsEncumbrance => 'ዕዳ/እገዳ';
+
+  @override
+  String listingsEncumbranceYes(Object amount) {
+    return 'አዎ ($amount ብር)';
+  }
+
+  @override
+  String get listingsVideoTour => 'የቪዲዮ ጉብኝት';
+
+  @override
+  String get listingsNoDescription => 'ምንም መግለጫ አልተሰጠም';
+
+  @override
+  String get listingsNoFeatures => 'ምንም ዋና መገለጫዎች አልተጠቀሱም';
+
+  @override
+  String get listingsNotFound => 'ንብረቱ አልተገኘም';
+
+  @override
+  String get listingsNotFoundSubtitle => 'ይህ ንብረት ተሰርዞ ሊሆን ይችላል';
+
+  @override
+  String get listingsLoadError => 'ንብረቱን መጫን አልተቻለም';
+
+  @override
+  String listingsTitleTemplate(Object type, Object action, Object location) {
+    return '$type $action በ$location';
+  }
+
+  @override
+  String listingsPriceFixed(Object price) {
+    return '$price ብር';
+  }
+
+  @override
+  String listingsPriceRange(Object min, Object max) {
+    return '$min - $max ብር';
+  }
+
+  @override
+  String get listingsYes => 'አዎ';
+
+  @override
+  String get listingsNo => 'የለም';
 
   @override
   String get favoritesTitle => 'ተወዳጆች';

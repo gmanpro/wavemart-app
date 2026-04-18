@@ -122,11 +122,12 @@ class _MyListingsScreenState extends ConsumerState<MyListingsScreen> {
     }
 
     if (_myListings.isEmpty) {
+      final l10n = AppLocalizations.of(context);
       return WaveEmptyState(
         icon: Icons.home_outlined,
-        title: AppLocalizations.of(context).listingsNoResults,
-        subtitle: 'Create your first listing to get started',
-        actionLabel: AppLocalizations.of(context).listingsCreate,
+        title: l10n.listingsNoResults,
+        subtitle: l10n.myListingsEmptySubtitle,
+        actionLabel: l10n.listingsCreate,
         onAction: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const CreateListingScreen()),

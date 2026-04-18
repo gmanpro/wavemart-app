@@ -164,12 +164,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final l10n = AppLocalizations.of(context);
     final initials = user?.initials.isNotEmpty == true
         ? user!.initials
-        : (user?.firstName?.substring(0, 1).toUpperCase() ?? '?');
+        : (user?.firstName?.substring(0, 1).toUpperCase() ?? l10n.commonAppInitials);
     final fullName =
-        user?.fullName.isNotEmpty == true ? user!.fullName : 'User';
+        user?.fullName.isNotEmpty == true ? user!.fullName : l10n.commonUser;
     final phone = user?.phoneNumber.isNotEmpty == true
         ? user!.phoneNumber
-        : (user?.email ?? 'N/A');
+        : (user?.email ?? l10n.commonNA);
 
     showModalBottomSheet(
       context: context,
@@ -618,7 +618,7 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     final user = authState.user;
     final userFirstName = user?.firstName ?? 'WaveMart';
-    final userInitials = _getInitials(user?.firstName, user?.lastName);
+    final userInitials = _getInitials(context, user?.firstName, user?.lastName);
     final isScrolled = overlapsContent ?? false;
     final l10n = AppLocalizations.of(context);
 
@@ -864,11 +864,12 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  String _getInitials(String? firstName, String? lastName) {
-    if (firstName == null && lastName == null) return 'WM';
+  String _getInitials(BuildContext context, String? firstName, String? lastName) {
+    final l10n = AppLocalizations.of(context);
+    if (firstName == null && lastName == null) return l10n.commonAppInitials;
     final first = firstName?.substring(0, 1).toUpperCase() ?? '';
     final last = lastName?.substring(0, 1).toUpperCase() ?? '';
-    return (first + last).isEmpty ? 'WM' : first + last;
+    return (first + last).isEmpty ? l10n.commonAppInitials : first + last;
   }
 
   @override

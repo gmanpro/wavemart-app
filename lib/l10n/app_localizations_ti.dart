@@ -12,6 +12,18 @@ class AppLocalizationsTi extends AppLocalizations {
   String get appTitle => 'ዌቭማርት';
 
   @override
+  String get commonUser => 'ተጠቃሚ';
+
+  @override
+  String get commonNA => 'የለን';
+
+  @override
+  String get commonAppInitials => 'ዌማ';
+
+  @override
+  String get commonUnknown => 'ዘይፍለጥ';
+
+  @override
   String get commonOk => 'እሺ';
 
   @override
@@ -309,6 +321,89 @@ class AppLocalizationsTi extends AppLocalizations {
   String get listingsDescription => 'መግለጺ';
 
   @override
+  String get listingsPropertyDetails => 'ዝርዝር ንብረት';
+
+  @override
+  String listingsBedrooms(Object count) {
+    return '$count መኝታ ክፍል';
+  }
+
+  @override
+  String listingsBathrooms(Object count) {
+    return '$count ሽቓቕ';
+  }
+
+  @override
+  String listingsSalons(Object count) {
+    return '$count ሳሎን';
+  }
+
+  @override
+  String get listingsFrontArea => 'ናይ ቅድሚት ስፍሓት';
+
+  @override
+  String get listingsSideArea => 'ናይ ጎኒ ስፍሓት';
+
+  @override
+  String get listingsUseType => 'ዓይነት ኣገልግሎት';
+
+  @override
+  String get listingsHoldingType => 'ዓይነት ዋናነት';
+
+  @override
+  String get listingsFacing => 'ኣንፈት';
+
+  @override
+  String get listingsNegotiable => 'ብድርድር';
+
+  @override
+  String get listingsEncumbrance => 'ዕዳ/እገዳ';
+
+  @override
+  String listingsEncumbranceYes(Object amount) {
+    return 'እወ ($amount ቅርሺ)';
+  }
+
+  @override
+  String get listingsVideoTour => 'ናይ ቪዲዮ ዑደት';
+
+  @override
+  String get listingsNoDescription => 'መግለጺ ኣይተዋህበን';
+
+  @override
+  String get listingsNoFeatures => 'ቀንዲ መገለጺታት ኣይተጠቐሱን';
+
+  @override
+  String get listingsNotFound => 'ንብረቱ ኣይተረኽበን';
+
+  @override
+  String get listingsNotFoundSubtitle => 'እዚ ንብረት ተሰሪዙ ክኸውን ይኽእል እዩ';
+
+  @override
+  String get listingsLoadError => 'ንብረቱ ክጽዕን ኣይከኣለን';
+
+  @override
+  String listingsTitleTemplate(Object type, Object action, Object location) {
+    return '$type $action ኣብ $location';
+  }
+
+  @override
+  String listingsPriceFixed(Object price) {
+    return '$price ቅርሺ';
+  }
+
+  @override
+  String listingsPriceRange(Object min, Object max) {
+    return '$min - $max ቅርሺ';
+  }
+
+  @override
+  String get listingsYes => 'እወ';
+
+  @override
+  String get listingsNo => 'የለን';
+
+  @override
   String get favoritesTitle => 'ዝተመርፁ';
 
   @override
@@ -492,4 +587,10 @@ class AppLocalizationsTi extends AppLocalizations {
 
   @override
   String get subscriptionsSelectPlan => 'ትልሚ ይምረጡ';
+
+  @override
+  String get profileMyListings => 'ናይ ባዕለይ ንብረታት';
+
+  @override
+  String get myListingsEmptySubtitle => 'ንምጅማር ናይ መጀመሪያ ንብረትኩም ወስኹ';
 }

@@ -256,22 +256,31 @@ class Listing extends ChangeNotifier {
     };
   }
 
-  String get title {
-    final type = propertyType == PropertyType.house ? 'House' : 'Land';
-    final action = listingType == ListingType.sale ? 'for Sale' : 'for Rent';
-    final location = address?.region ?? 'Unknown Location';
-    return '$type $action in $location';
+  String getLocalizedTitle(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final type = propertyType == PropertyType.house ? l10n.listingHouse : l10n.listingLand;
+    final action = listingType == ListingType.sale ? l10n.listingForSale : l10n.listingForRent;
+    final location = address?.region ?? l10n.listingUnknownLocation;
+    
+    return l10n.listingsTitleTemplate(type, action, location);
   }
 
-  String get displayPrice {
+  String getLocalizedPrice(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final formatter = NumberFormat('#,###');
+    
     if (priceFixed != null) {
-      return '${formatter.format(priceFixed!.toInt())} ETB';
+      return l10n.listingsPriceFixed(formatter.format(priceFixed!.toInt()));
     }
+    
     if (priceMin != null && priceMax != null) {
-      return '${formatter.format(priceMin!.toInt())} - ${formatter.format(priceMax!.toInt())} ETB';
+      return l10n.listingsPriceRange(
+        formatter.format(priceMin!.toInt()),
+        formatter.format(priceMax!.toInt()),
+      );
     }
-    return 'Price on Request';
+    
+    return l10n.listingPriceOnRequest;
   }
 
   String get mainImageUrl {

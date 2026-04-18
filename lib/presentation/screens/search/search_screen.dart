@@ -308,7 +308,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             if (_searchController.text.isNotEmpty)
               _filterChip(
-                '📍 ${_searchController.text}',
+                '${l10n.searchPlaceholder.split('...').first}: ${_searchController.text}',
                 () {
                   _searchController.clear();
                   _removeFilterAndCheck(() {});

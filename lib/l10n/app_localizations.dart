@@ -106,6 +106,30 @@ abstract class AppLocalizations {
   /// **'WaveMart'**
   String get appTitle;
 
+  /// No description provided for @commonUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get commonUser;
+
+  /// No description provided for @commonNA.
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get commonNA;
+
+  /// No description provided for @commonAppInitials.
+  ///
+  /// In en, this message translates to:
+  /// **'WM'**
+  String get commonAppInitials;
+
+  /// No description provided for @commonUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get commonUnknown;
+
   /// No description provided for @commonOk.
   ///
   /// In en, this message translates to:
@@ -273,6 +297,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'My Listings'**
   String get profileMyListings;
+
+  /// No description provided for @myListingsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first listing to get started'**
+  String get myListingsEmptySubtitle;
 
   /// No description provided for @profileFavorites.
   ///
@@ -675,6 +705,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Description'**
   String get listingsDescription;
+
+  /// No description provided for @listingsPropertyDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Property Details'**
+  String get listingsPropertyDetails;
+
+  /// No description provided for @listingsBedrooms.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Bedrooms'**
+  String listingsBedrooms(Object count);
+
+  /// No description provided for @listingsBathrooms.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Bathrooms'**
+  String listingsBathrooms(Object count);
+
+  /// No description provided for @listingsSalons.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Salons'**
+  String listingsSalons(Object count);
+
+  /// No description provided for @listingsFrontArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Front Area'**
+  String get listingsFrontArea;
+
+  /// No description provided for @listingsSideArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Side Area'**
+  String get listingsSideArea;
+
+  /// No description provided for @listingsUseType.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Type'**
+  String get listingsUseType;
+
+  /// No description provided for @listingsHoldingType.
+  ///
+  /// In en, this message translates to:
+  /// **'Holding Type'**
+  String get listingsHoldingType;
+
+  /// No description provided for @listingsFacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Facing'**
+  String get listingsFacing;
+
+  /// No description provided for @listingsNegotiable.
+  ///
+  /// In en, this message translates to:
+  /// **'Negotiable'**
+  String get listingsNegotiable;
+
+  /// No description provided for @listingsEncumbrance.
+  ///
+  /// In en, this message translates to:
+  /// **'Encumbrance'**
+  String get listingsEncumbrance;
+
+  /// No description provided for @listingsEncumbranceYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes ({amount} ETB)'**
+  String listingsEncumbranceYes(Object amount);
+
+  /// No description provided for @listingsVideoTour.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Tour'**
+  String get listingsVideoTour;
+
+  /// No description provided for @listingsNoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No description provided.'**
+  String get listingsNoDescription;
+
+  /// No description provided for @listingsNoFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'No key features specified'**
+  String get listingsNoFeatures;
+
+  /// No description provided for @listingsNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Listing Not Found'**
+  String get listingsNotFound;
+
+  /// No description provided for @listingsNotFoundSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This property may have been removed'**
+  String get listingsNotFoundSubtitle;
+
+  /// No description provided for @listingsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load property'**
+  String get listingsLoadError;
+
+  /// No description provided for @listingsTitleTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'{type} {action} in {location}'**
+  String listingsTitleTemplate(Object type, Object action, Object location);
+
+  /// No description provided for @listingsPriceFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} ETB'**
+  String listingsPriceFixed(Object price);
+
+  /// No description provided for @listingsPriceRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{min} - {max} ETB'**
+  String listingsPriceRange(Object min, Object max);
+
+  /// No description provided for @listingsYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get listingsYes;
+
+  /// No description provided for @listingsNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get listingsNo;
 
   /// No description provided for @favoritesTitle.
   ///

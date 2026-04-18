@@ -12,6 +12,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'WaveMart';
 
   @override
+  String get commonUser => 'User';
+
+  @override
+  String get commonNA => 'N/A';
+
+  @override
+  String get commonAppInitials => 'WM';
+
+  @override
+  String get commonUnknown => 'Unknown';
+
+  @override
   String get commonOk => 'OK';
 
   @override
@@ -96,6 +108,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileMyListings => 'My Listings';
+
+  @override
+  String get myListingsEmptySubtitle => 'Create your first listing to get started';
 
   @override
   String get profileFavorites => 'Favorites';
@@ -309,6 +324,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get listingsDescription => 'Description';
+
+  @override
+  String get listingsPropertyDetails => 'Property Details';
+
+  @override
+  String listingsBedrooms(Object count) {
+    return '$count Bedrooms';
+  }
+
+  @override
+  String listingsBathrooms(Object count) {
+    return '$count Bathrooms';
+  }
+
+  @override
+  String listingsSalons(Object count) {
+    return '$count Salons';
+  }
+
+  @override
+  String get listingsFrontArea => 'Front Area';
+
+  @override
+  String get listingsSideArea => 'Side Area';
+
+  @override
+  String get listingsUseType => 'Use Type';
+
+  @override
+  String get listingsHoldingType => 'Holding Type';
+
+  @override
+  String get listingsFacing => 'Facing';
+
+  @override
+  String get listingsNegotiable => 'Negotiable';
+
+  @override
+  String get listingsEncumbrance => 'Encumbrance';
+
+  @override
+  String listingsEncumbranceYes(Object amount) {
+    return 'Yes ($amount ETB)';
+  }
+
+  @override
+  String get listingsVideoTour => 'Video Tour';
+
+  @override
+  String get listingsNoDescription => 'No description provided.';
+
+  @override
+  String get listingsNoFeatures => 'No key features specified';
+
+  @override
+  String get listingsNotFound => 'Listing Not Found';
+
+  @override
+  String get listingsNotFoundSubtitle => 'This property may have been removed';
+
+  @override
+  String get listingsLoadError => 'Could not load property';
+
+  @override
+  String listingsTitleTemplate(Object type, Object action, Object location) {
+    return '$type $action in $location';
+  }
+
+  @override
+  String listingsPriceFixed(Object price) {
+    return '$price ETB';
+  }
+
+  @override
+  String listingsPriceRange(Object min, Object max) {
+    return '$min - $max ETB';
+  }
+
+  @override
+  String get listingsYes => 'Yes';
+
+  @override
+  String get listingsNo => 'No';
 
   @override
   String get favoritesTitle => 'Favorites';

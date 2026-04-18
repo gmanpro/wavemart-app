@@ -376,18 +376,17 @@ class PropertyListingCard extends StatelessWidget {
   }
 
   Widget _buildPrice(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final price = listing?.displayPrice ?? l10n.listingPriceOnRequest;
     return Text(
-      price,
+      listing?.getLocalizedPrice(context) ??
+          AppLocalizations.of(context).listingPriceOnRequest,
       style: AppTextStyles.priceMedium,
     );
   }
 
   Widget _buildTitle(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     return Text(
-      listing?.title ?? l10n.listingsDetails,
+      listing?.getLocalizedTitle(context) ??
+          AppLocalizations.of(context).listingsDetails,
       style: AppTextStyles.titleSmall,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
@@ -733,9 +732,9 @@ class FeaturedListingCard extends StatelessWidget {
   }
 
   Widget _buildPrice(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     return Text(
-      listing?.displayPrice ?? l10n.listingPriceOnRequest,
+      listing?.getLocalizedPrice(context) ??
+          AppLocalizations.of(context).listingPriceOnRequest,
       style: AppTextStyles.priceMedium.copyWith(
         fontSize: 17,
         fontWeight: FontWeight.w700,
@@ -746,9 +745,9 @@ class FeaturedListingCard extends StatelessWidget {
   }
 
   Widget _buildTitle(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     return Text(
-      listing?.title ?? l10n.listingsDetails,
+      listing?.getLocalizedTitle(context) ??
+          AppLocalizations.of(context).listingsDetails,
       style: AppTextStyles.titleSmall.copyWith(
         fontSize: 14,
         fontWeight: FontWeight.w600,
