@@ -297,7 +297,7 @@
   "subscriptionsBasic": "መሰረታዊ",
   "subscriptionsPremium": "ፕሪሚየም",
   "subscriptionsSubscribe": "ሕጂ ተመዝገብ",
-  \"subscriptionsSelectPlan\": \"ትልሚ ይምረጡ\",
-  \"profileMyListings\": \"ናይ ባዕለይ ንብረታት\",
-  \"myListingsEmptySubtitle\": \"ንምጅማር ናይ መጀመሪያ ንብረትኩም ወስኹ\"
-  }
+  "subscriptionsSelectPlan": "ትልሚ ይምረጡ",
+  "profileMyListings": "ናይ ባዕለይ ንብረታት",
+  "myListingsEmptySubtitle": "ንምጅማር ናይ መጀመሪያ ንብረትኩም ወስኹ"
+}
