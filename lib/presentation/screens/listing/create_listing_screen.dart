@@ -162,6 +162,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, _) {
@@ -169,7 +170,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context).listingsCreate),
+          title: Text(l10n.listingsCreate),
           actions: [
             TextButton(
               onPressed: _isSubmitting ? null : _nextStep,
@@ -178,7 +179,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(_currentStep == 3 ? 'Submit' : 'Next'),
+                  : Text(_currentStep == 3 ? l10n.listingSubmit : l10n.listingNext),
             ),
           ],
         ),
@@ -209,6 +210,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
   }
 
   Widget _buildBottomBar() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(color: Colors.white, boxShadow: [
@@ -224,7 +226,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: _prevStep,
-                  child: const Text('Back'),
+                  child: Text(l10n.listingBack),
                 ),
               ),
             if (_currentStep > 0) const SizedBox(width: 12),
@@ -242,7 +244,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                         height: 20,
                         child: CircularProgressIndicator(
                             strokeWidth: 2, color: Colors.white))
-                    : Text(_currentStep == 3 ? 'Submit Listing' : 'Continue'),
+                    : Text(_currentStep == 3 ? l10n.listingSubmitListing : l10n.listingContinue),
               ),
             ),
           ],
@@ -260,7 +262,13 @@ class _StepIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const steps = ['Basics', 'Details', 'Media', 'Review'];
+    final l10n = AppLocalizations.of(context);
+    final steps = [
+      l10n.listingStepBasics,
+      l10n.listingStepDetails,
+      l10n.listingStepMedia,
+      l10n.listingStepReview
+    ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
@@ -596,70 +604,71 @@ class _Step1BasicsState extends State<_Step1Basics> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionTitle('Property Type'),
+          _sectionTitle(l10n.listingPropertyType),
           const SizedBox(height: 8),
           Row(
             children: [
-              _radioCard('House', Icons.home_rounded, 'house'),
+              _radioCard(l10n.listingHouse, Icons.home_rounded, 'house'),
               const SizedBox(width: 12),
-              _radioCard('Land', Icons.landscape_rounded, 'land'),
+              _radioCard(l10n.listingLand, Icons.landscape_rounded, 'land'),
             ],
           ),
           const SizedBox(height: 20),
 
-          _sectionTitle('Holding Type'),
+          _sectionTitle(l10n.listingHoldingType),
           const SizedBox(height: 8),
           _dropdownField(
             value: widget.formData.holdingType.isEmpty
                 ? null
                 : widget.formData.holdingType,
-            items: const ['Free Hold', 'Lease Hold', 'Cooperative'],
-            label: 'Select holding type',
+            items: [l10n.listingFreeHold, l10n.listingLeaseHold, l10n.listingCooperative],
+            label: l10n.listingSelectHolding,
             onChanged: (v) => widget.onUpdate(
-                widget.formData.copyWith(holdingType: v ?? 'Free Hold')),
+                widget.formData.copyWith(holdingType: v ?? l10n.listingFreeHold)),
           ),
           const SizedBox(height: 16),
 
           // Conditional Holding Details
-          if (widget.formData.holdingType == 'Free Hold')
+          if (widget.formData.holdingType == l10n.listingFreeHold)
             _buildFreeHoldFields(),
-          if (widget.formData.holdingType == 'Lease Hold')
+          if (widget.formData.holdingType == l10n.listingLeaseHold)
             _buildLeaseHoldFields(),
-          if (widget.formData.holdingType == 'Cooperative')
+          if (widget.formData.holdingType == l10n.listingCooperative)
             _buildCooperativeFields(),
 
           const SizedBox(height: 20),
-          _sectionTitle('Use Type'),
+          _sectionTitle(l10n.listingUseType),
           const SizedBox(height: 8),
           _dropdownField(
             value: widget.formData.useType.isEmpty
                 ? null
                 : widget.formData.useType,
-            items: const ['Residential', 'Commercial', 'Mixed', 'Investment'],
-            label: 'Select use type',
+            items: [l10n.listingResidential, l10n.listingCommercial, l10n.listingMixed, l10n.listingInvestment],
+            label: l10n.listingSelectUse,
             onChanged: (v) => widget.onUpdate(
-                widget.formData.copyWith(useType: v ?? 'Residential')),
+                widget.formData.copyWith(useType: v ?? l10n.listingResidential)),
           ),
           const SizedBox(height: 20),
 
-          _sectionTitle('Location'),
+          _sectionTitle(l10n.listingLocation),
           const SizedBox(height: 8),
           _buildAddressDropdowns(),
           const SizedBox(height: 20),
 
-          _sectionTitle('Price (ETB)'),
+          _sectionTitle(l10n.listingPriceEtb),
           const SizedBox(height: 8),
           _buildPriceField(),
           const SizedBox(height: 20),
 
           // Debt section
           CheckboxListTile(
-            title: const Text('Has Debt or Encumbrance'),
+            title: Text(l10n.listingHasDebt),
             value: widget.formData.hasDebtOrEncumbrance,
             onChanged: (v) => widget.onUpdate(
                 widget.formData.copyWith(hasDebtOrEncumbrance: v ?? false)),
@@ -669,7 +678,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
           if (widget.formData.hasDebtOrEncumbrance) ...[
             const SizedBox(height: 8),
             _buildFormattedField(
-              label: 'Debt Amount',
+              label: l10n.listingDebtAmount,
               controller: _debtAmountController,
               onSubmitted: (v) {
                 final cleaned = v.replaceAll(',', '');
@@ -724,6 +733,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
   }
 
   Widget _buildFreeHoldFields() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -733,12 +743,12 @@ class _Step1BasicsState extends State<_Step1Basics> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Free Hold Details',
+          Text(l10n.listingFreeHoldDetails,
               style: AppTextStyles.labelMedium.copyWith(
                   color: AppColors.navy700, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           _buildPersistedField(
-            label: 'Tax Paid Until Year',
+            label: l10n.listingTaxPaidYear,
             controller: _taxPaidUntilController,
             keyboardType: TextInputType.number,
             onSubmitted: (v) {
@@ -750,14 +760,8 @@ class _Step1BasicsState extends State<_Step1Basics> {
           const SizedBox(height: 8),
           _dropdownField(
             value: widget.formData.acquisitionClarification,
-            items: const [
-              'Purchased',
-              'Inherited',
-              'Gift',
-              'Assignment',
-              'Other'
-            ],
-            label: 'Acquisition Clarification',
+            items: [l10n.listingPurchased, l10n.listingInherited, l10n.listingGift, l10n.listingAssignment, l10n.listingOther],
+            label: l10n.listingAcquisition,
             onChanged: (v) => widget.onUpdate(
                 widget.formData.copyWith(acquisitionClarification: v)),
           ),
@@ -767,6 +771,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
   }
 
   Widget _buildLeaseHoldFields() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -776,12 +781,12 @@ class _Step1BasicsState extends State<_Step1Basics> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Lease Hold Details',
+          Text(l10n.listingLeaseHoldDetails,
               style: AppTextStyles.labelMedium.copyWith(
                   color: Colors.purple.shade700, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           _buildPersistedField(
-            label: 'Leased Year',
+            label: l10n.listingLeasedYear,
             controller: _leasedYearController,
             keyboardType: TextInputType.number,
             onSubmitted: (v) {
@@ -792,7 +797,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
           ),
           const SizedBox(height: 8),
           _buildPersistedField(
-            label: 'Lease Price per m²',
+            label: l10n.listingLeasePrice,
             controller: _leasePriceController,
             keyboardType: TextInputType.number,
             onSubmitted: (v) {
@@ -804,7 +809,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
           ),
           const SizedBox(height: 8),
           _buildPersistedField(
-            label: 'Build Type',
+            label: l10n.listingBuildType,
             controller: _buildTypeController,
             keyboardType: TextInputType.text,
             onSubmitted: (v) =>
@@ -812,7 +817,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
           ),
           const SizedBox(height: 8),
           _buildPersistedField(
-            label: 'Annual Payment',
+            label: l10n.listingAnnualPayment,
             controller: _annualPaymentController,
             keyboardType: TextInputType.number,
             onSubmitted: (v) {
@@ -828,6 +833,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
   }
 
   Widget _buildCooperativeFields() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -837,12 +843,12 @@ class _Step1BasicsState extends State<_Step1Basics> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Cooperative Details',
+          Text(l10n.listingCooperativeDetails,
               style: AppTextStyles.labelMedium.copyWith(
                   color: AppColors.wave700, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           _buildPersistedField(
-            label: 'Cooperative Name',
+            label: l10n.listingCooperativeName,
             controller: _cooperativeNameController,
             keyboardType: TextInputType.text,
             onSubmitted: (v) =>
@@ -850,7 +856,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
           ),
           const SizedBox(height: 8),
           _buildPersistedField(
-            label: 'Cooperative Code',
+            label: l10n.listingCooperativeCode,
             controller: _cooperativeCodeController,
             keyboardType: TextInputType.text,
             onSubmitted: (v) =>
@@ -861,8 +867,8 @@ class _Step1BasicsState extends State<_Step1Basics> {
             value: widget.formData.buildingStatus?.isEmpty ?? true
                 ? null
                 : widget.formData.buildingStatus,
-            items: const ['Finished', 'Unfinished'],
-            label: 'Building Status',
+            items: [l10n.listingFinished, l10n.listingUnfinished],
+            label: l10n.listingBuildingStatus,
             onChanged: (v) =>
                 widget.onUpdate(widget.formData.copyWith(buildingStatus: v)),
           ),
@@ -901,6 +907,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
   }
 
   Widget _buildAddressDropdowns() {
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: [
         Row(
@@ -909,7 +916,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
                 child: _dropdownField(
                     value: _selectedRegion,
                     items: _regions,
-                    label: 'Region',
+                    label: l10n.listingRegion,
                     onChanged: _onRegionSelected,
                     isLoading: false)),
             const SizedBox(width: 8),
@@ -917,7 +924,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
                 child: _dropdownField(
                     value: _selectedZone,
                     items: _zones,
-                    label: 'Zone',
+                    label: l10n.listingZone,
                     onChanged: _onZoneSelected,
                     isLoading: _loadingZones)),
           ],
@@ -929,7 +936,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
                 child: _dropdownField(
                     value: _selectedWoreda,
                     items: _woredas,
-                    label: 'Woreda',
+                    label: l10n.listingWoreda,
                     onChanged: _onWoredaSelected,
                     isLoading: _loadingWoredas)),
             const SizedBox(width: 8),
@@ -937,14 +944,14 @@ class _Step1BasicsState extends State<_Step1Basics> {
                 child: _dropdownField(
                     value: _selectedKebele,
                     items: _kebeles,
-                    label: 'Kebele',
+                    label: l10n.listingKebele,
                     onChanged: _onKebeleSelected,
                     isLoading: _loadingKebeles)),
           ],
         ),
         const SizedBox(height: 8),
         _buildTextField(
-          label: 'Specific Location (optional)',
+          label: l10n.listingSpecificLocation,
           controller: _specificLocationController,
           onSubmitted: (v) =>
               widget.onUpdate(widget.formData.copyWith(specificLocation: v)),
@@ -1161,18 +1168,11 @@ class _Step2DetailsState extends State<_Step2Details> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
           if (widget.formData.type == 'house') ...[
-            _sectionTitle('Room Configuration'),
+            _sectionTitle(l10n.listingRoomConfig),
             const SizedBox(height: 8),
             _buildPersistedField(
-              label: 'Total Rooms',
+              label: l10n.listingTotalRooms,
               controller: _totalRoomsController,
               keyboardType: TextInputType.number,
               onSubmitted: (v) {
@@ -1186,7 +1186,7 @@ class _Step2DetailsState extends State<_Step2Details> {
               children: [
                 Expanded(
                     child: _buildPersistedField(
-                  label: 'Bedrooms',
+                  label: l10n.listingBedrooms,
                   controller: _bedroomsController,
                   keyboardType: TextInputType.number,
                   onSubmitted: (v) {
@@ -1198,7 +1198,7 @@ class _Step2DetailsState extends State<_Step2Details> {
                 const SizedBox(width: 8),
                 Expanded(
                     child: _buildPersistedField(
-                  label: 'Bathrooms',
+                  label: l10n.listingBathrooms,
                   controller: _bathroomsController,
                   keyboardType: TextInputType.number,
                   onSubmitted: (v) {
@@ -1214,7 +1214,7 @@ class _Step2DetailsState extends State<_Step2Details> {
               children: [
                 Expanded(
                     child: _buildPersistedField(
-                  label: 'Kitchens',
+                  label: l10n.listingKitchens,
                   controller: _kitchensController,
                   keyboardType: TextInputType.number,
                   onSubmitted: (v) {
@@ -1226,7 +1226,7 @@ class _Step2DetailsState extends State<_Step2Details> {
                 const SizedBox(width: 8),
                 Expanded(
                     child: _buildPersistedField(
-                  label: 'Salons',
+                  label: l10n.listingSalons,
                   controller: _salonsController,
                   keyboardType: TextInputType.number,
                   onSubmitted: (v) {
@@ -1238,39 +1238,33 @@ class _Step2DetailsState extends State<_Step2Details> {
               ],
             ),
             const SizedBox(height: 16),
-            _sectionTitle('House Type'),
+            _sectionTitle(l10n.listingHouseType),
             const SizedBox(height: 8),
             _dropdownField(
               value: widget.formData.houseType?.isEmpty ?? true
                   ? null
                   : widget.formData.houseType,
-              items: const [
-                'Villa',
-                'Apartment',
-                'Condominium',
-                'Townhouse',
-                'Bungalow'
-              ],
-              label: 'Select house type',
+              items: [l10n.listingVilla, l10n.listingApartment, l10n.listingCondominium, l10n.listingTownhouse, l10n.listingBungalow],
+              label: l10n.listingSelectHouseType,
               onChanged: (v) =>
                   widget.onUpdate(widget.formData.copyWith(houseType: v)),
             ),
             const SizedBox(height: 16),
-            _sectionTitle('Amenities'),
+            _sectionTitle(l10n.listingAmenities),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
                 _amenityChip(
-                    'Electricity',
+                    l10n.listingElectricity,
                     widget.formData.electricity,
                     (v) => widget
                         .onUpdate(widget.formData.copyWith(electricity: v))),
-                _amenityChip('Water', widget.formData.water,
+                _amenityChip(l10n.listingWater, widget.formData.water,
                     (v) => widget.onUpdate(widget.formData.copyWith(water: v))),
                 _amenityChip(
-                    'Parking',
+                    l10n.listingParking,
                     widget.formData.parkingAvailable,
                     (v) => widget.onUpdate(
                         widget.formData.copyWith(parkingAvailable: v))),
@@ -1278,10 +1272,10 @@ class _Step2DetailsState extends State<_Step2Details> {
             ),
             const SizedBox(height: 16),
           ],
-          _sectionTitle('Area Dimensions'),
+          _sectionTitle(l10n.listingAreaDimensions),
           const SizedBox(height: 8),
           _buildPersistedField(
-            label: 'Total Area (m²)',
+            label: l10n.listingTotalArea,
             controller: _totalAreaController,
             keyboardType: TextInputType.number,
             onSubmitted: (v) {
@@ -1296,7 +1290,7 @@ class _Step2DetailsState extends State<_Step2Details> {
             children: [
               Expanded(
                   child: _buildPersistedField(
-                label: 'Front Area (m²)',
+                label: l10n.listingFrontArea,
                 controller: _frontAreaController,
                 keyboardType: TextInputType.number,
                 onSubmitted: (v) {
@@ -1309,7 +1303,7 @@ class _Step2DetailsState extends State<_Step2Details> {
               const SizedBox(width: 8),
               Expanded(
                   child: _buildPersistedField(
-                label: 'Side Area (m²)',
+                label: l10n.listingSideArea,
                 controller: _sideAreaController,
                 keyboardType: TextInputType.number,
                 onSubmitted: (v) {
@@ -1322,28 +1316,19 @@ class _Step2DetailsState extends State<_Step2Details> {
             ],
           ),
           const SizedBox(height: 16),
-          _sectionTitle('Facing Direction'),
+          _sectionTitle(l10n.listingFacingDirection),
           const SizedBox(height: 8),
           _dropdownField(
             value: widget.formData.facingDirection?.isEmpty ?? true
                 ? null
                 : widget.formData.facingDirection,
-            items: const [
-              'North',
-              'South',
-              'East',
-              'West',
-              'North East',
-              'North West',
-              'South East',
-              'South West'
-            ],
-            label: 'Select direction',
+            items: [l10n.listingNorth, l10n.listingSouth, l10n.listingEast, l10n.listingWest, l10n.listingNorthEast, l10n.listingNorthWest, l10n.listingSouthEast, l10n.listingSouthWest],
+            label: l10n.listingSelectDirection,
             onChanged: (v) =>
                 widget.onUpdate(widget.formData.copyWith(facingDirection: v)),
           ),
           const SizedBox(height: 16),
-          _sectionTitle('Description'),
+          _sectionTitle(l10n.listingDescriptionLabel),
           const SizedBox(height: 8),
           Focus(
             onFocusChange: (hasFocus) {
@@ -1356,7 +1341,7 @@ class _Step2DetailsState extends State<_Step2Details> {
               initialValue: widget.formData.description,
               maxLines: 4,
               decoration: InputDecoration(
-                labelText: 'Describe your property',
+                labelText: l10n.listingDescribeProperty,
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               ),
@@ -1495,28 +1480,29 @@ class _Step3MediaState extends State<_Step3Media> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionTitle('Property Images (Required)'),
+          _sectionTitle(l10n.listingImages),
           const SizedBox(height: 8),
           _buildImageGrid(widget.formData.images, 'images'),
           const SizedBox(height: 16),
-          _sectionTitle('Site Plans (Required)'),
+          _sectionTitle(l10n.listingSitePlans),
           const SizedBox(height: 8),
           _buildFileList(widget.formData.sitePlans.map((f) => f.path).toList(),
               isSitePlan: true),
           const SizedBox(height: 16),
-          if (widget.formData.holdingType == 'Cooperative') ...[
-            _sectionTitle('Ownership Proof'),
+          if (widget.formData.holdingType == l10n.listingCooperative) ...[
+            _sectionTitle(l10n.listingOwnershipProof),
             const SizedBox(height: 8),
             _buildSingleFilePicker('ownership', widget.formData.ownershipProof),
             const SizedBox(height: 16),
           ],
-          if (widget.formData.holdingType == 'Lease Hold') ...[
-            _sectionTitle('Lease Contract'),
+          if (widget.formData.holdingType == l10n.listingLeaseHold) ...[
+            _sectionTitle(l10n.listingLeaseContract),
             const SizedBox(height: 8),
             _buildSingleFilePicker('lease', widget.formData.leaseContract),
             const SizedBox(height: 16),
@@ -1552,7 +1538,7 @@ class _Step3MediaState extends State<_Step3Media> {
                   Icon(Icons.add_photo_alternate,
                       size: 32, color: AppColors.navy400),
                   SizedBox(height: 8),
-                  Text('Tap to add images',
+                  Text(l10n.listingTapToAdd,
                       style: TextStyle(color: AppColors.navy400)),
                 ])),
           ),
@@ -1597,7 +1583,7 @@ class _Step3MediaState extends State<_Step3Media> {
               ),
             ),
           ),
-          Text('${files.length} image(s) selected',
+          Text(l10n.listingImagesSelected(files.length),
               style: AppTextStyles.caption.copyWith(color: AppColors.zinc500)),
         ],
       ],
@@ -1605,12 +1591,13 @@ class _Step3MediaState extends State<_Step3Media> {
   }
 
   Widget _buildFileList(List<String> files, {bool isSitePlan = false}) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: [
         ElevatedButton.icon(
           onPressed: () => _pickImages(isSitePlan),
           icon: const Icon(Icons.upload_file),
-          label: const Text('Browse Files'),
+          label: Text(l10n.listingBrowseFiles),
           style: ElevatedButton.styleFrom(backgroundColor: AppColors.navy950),
         ),
         if (files.isNotEmpty) ...[
@@ -1624,12 +1611,13 @@ class _Step3MediaState extends State<_Step3Media> {
   }
 
   Widget _buildSingleFilePicker(String type, XFile? file) {
+    final l10n = AppLocalizations.of(context);
     return ElevatedButton.icon(
       onPressed: () => _pickSingleFile(type),
       icon: const Icon(Icons.upload_file),
       label: Text(file != null
-          ? 'Change: ${file.name.split('/').last}'
-          : 'Browse File'),
+          ? l10n.listingChangeFile(file.name.split('/').last)
+          : l10n.listingBrowseFile),
       style: ElevatedButton.styleFrom(backgroundColor: AppColors.navy950),
     );
   }
@@ -1644,12 +1632,13 @@ class _Step4Review extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionTitle('Summary'),
+          _sectionTitle(l10n.listingSummary),
           const SizedBox(height: 8),
           GridView.count(
             shrinkWrap: true,
@@ -1659,19 +1648,19 @@ class _Step4Review extends StatelessWidget {
             mainAxisSpacing: 8,
             crossAxisSpacing: 8,
             children: [
-              _summaryCard('Property',
-                  '${formData.type == 'house' ? '🏠 House' : '🌄 Land'}\n${formData.houseType ?? ''}'),
-              _summaryCard('Location',
+              _summaryCard(l10n.listingSummaryProperty,
+                  '${formData.type == 'house' ? '🏠 ${l10n.listingHouse}' : '🌄 ${l10n.listingLand}'}\n${formData.houseType ?? ''}'),
+              _summaryCard(l10n.listingLocation,
                   '${formData.addressRegion ?? ''}\n${formData.addressZone ?? ''}'),
-              _summaryCard('Financial',
-                  '${formData.priceFixed != null ? "${_formatPrice(formData.priceFixed!)} ETB" : "Price on request"}\n${formData.holdingType}'),
-              _summaryCard('Media',
-                  '${formData.images.length} images\n${formData.sitePlans.length} site plans'),
+              _summaryCard(l10n.listingFinancial,
+                  '${formData.priceFixed != null ? "${_formatPrice(formData.priceFixed!)} ETB" : l10n.listingPriceOnRequest}\n${formData.holdingType}'),
+              _summaryCard(l10n.listingStepMedia,
+                  '${formData.images.length} ${l10n.listingImagesSelected(formData.images.length)}\n${formData.sitePlans.length} ${l10n.listingSitePlans}'),
             ],
           ),
           const SizedBox(height: 16),
           if (formData.description != null) ...[
-            _sectionTitle('Description'),
+            _sectionTitle(l10n.listingDescriptionLabel),
             const SizedBox(height: 4),
             Text(formData.description!,
                 style: AppTextStyles.bodyMedium,
@@ -1680,9 +1669,8 @@ class _Step4Review extends StatelessWidget {
             const SizedBox(height: 16),
           ],
           CheckboxListTile(
-            title: const Text('I accept the Terms & Conditions'),
-            subtitle: const Text(
-                'By submitting, you agree to our terms and privacy policy'),
+            title: Text(l10n.listingAcceptTerms),
+            subtitle: Text(l10n.listingTermsSubtitle),
             value: formData.termsAccepted,
             onChanged: (v) =>
                 onUpdate(formData.copyWith(termsAccepted: v ?? false)),
