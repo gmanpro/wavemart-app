@@ -175,7 +175,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
             TextButton(
               onPressed: _isSubmitting ? null : _nextStep,
               child: _isSubmitting
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2))
@@ -229,7 +229,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                   child: Text(l10n.listingBack),
                 ),
               ),
-            if (_currentStep > 0) const SizedBox(width: 12),
+            if (_currentStep > 0) SizedBox(width: 12),
             Expanded(
               flex: _currentStep == 0 ? 1 : 2,
               child: ElevatedButton(
@@ -239,7 +239,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: _isSubmitting
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
@@ -281,7 +281,7 @@ class _StepIndicator extends StatelessWidget {
             minHeight: 4,
             borderRadius: BorderRadius.circular(2),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           // Step circles
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -303,7 +303,7 @@ class _StepIndicator extends StatelessWidget {
                       ),
                       child: Center(
                         child: isCompleted
-                            ? const Icon(Icons.check,
+                            ? Icon(Icons.check,
                                 size: 16, color: Colors.white)
                             : Text(
                                 '${i + 1}',
@@ -317,7 +317,7 @@ class _StepIndicator extends StatelessWidget {
                               ),
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         steps[i],
@@ -611,18 +611,18 @@ class _Step1BasicsState extends State<_Step1Basics> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _sectionTitle(l10n.listingPropertyType),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Row(
             children: [
               _radioCard(l10n.listingHouse, Icons.home_rounded, 'house'),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               _radioCard(l10n.listingLand, Icons.landscape_rounded, 'land'),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
 
           _sectionTitle(l10n.listingHoldingType),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _dropdownField(
             value: widget.formData.holdingType.isEmpty
                 ? null
@@ -632,7 +632,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
             onChanged: (v) => widget.onUpdate(
                 widget.formData.copyWith(holdingType: v ?? l10n.listingFreeHold)),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
 
           // Conditional Holding Details
           if (widget.formData.holdingType == l10n.listingFreeHold)
@@ -642,9 +642,9 @@ class _Step1BasicsState extends State<_Step1Basics> {
           if (widget.formData.holdingType == l10n.listingCooperative)
             _buildCooperativeFields(),
 
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           _sectionTitle(l10n.listingUseType),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _dropdownField(
             value: widget.formData.useType.isEmpty
                 ? null
@@ -654,17 +654,17 @@ class _Step1BasicsState extends State<_Step1Basics> {
             onChanged: (v) => widget.onUpdate(
                 widget.formData.copyWith(useType: v ?? l10n.listingResidential)),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
 
           _sectionTitle(l10n.listingLocation),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildAddressDropdowns(),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
 
           _sectionTitle(l10n.listingPriceEtb),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildPriceField(),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
 
           // Debt section
           CheckboxListTile(
@@ -676,7 +676,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
             contentPadding: EdgeInsets.zero,
           ),
           if (widget.formData.hasDebtOrEncumbrance) ...[
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             _buildFormattedField(
               label: l10n.listingDebtAmount,
               controller: _debtAmountController,
@@ -687,7 +687,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
               },
             ),
           ],
-          const SizedBox(height: 32),
+          SizedBox(height: 32),
         ],
       ),
     );
@@ -719,7 +719,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
               Icon(icon,
                   color: isSelected ? Colors.white : AppColors.navy600,
                   size: 20),
-              const SizedBox(width: 6),
+              SizedBox(width: 6),
               Text(label,
                   style: TextStyle(
                       fontSize: 13,
@@ -746,7 +746,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
           Text(l10n.listingFreeHoldDetails,
               style: AppTextStyles.labelMedium.copyWith(
                   color: AppColors.navy700, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildPersistedField(
             label: l10n.listingTaxPaidYear,
             controller: _taxPaidUntilController,
@@ -757,7 +757,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
                 widget.onUpdate(widget.formData.copyWith(taxPaidUntilYear: n));
             },
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _dropdownField(
             value: widget.formData.acquisitionClarification,
             items: [l10n.listingPurchased, l10n.listingInherited, l10n.listingGift, l10n.listingAssignment, l10n.listingOther],
@@ -784,7 +784,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
           Text(l10n.listingLeaseHoldDetails,
               style: AppTextStyles.labelMedium.copyWith(
                   color: Colors.purple.shade700, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildPersistedField(
             label: l10n.listingLeasedYear,
             controller: _leasedYearController,
@@ -795,7 +795,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
                 widget.onUpdate(widget.formData.copyWith(leasedYear: n));
             },
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildPersistedField(
             label: l10n.listingLeasePrice,
             controller: _leasePriceController,
@@ -807,7 +807,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
                 widget.onUpdate(widget.formData.copyWith(leasePricePerSqm: n));
             },
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildPersistedField(
             label: l10n.listingBuildType,
             controller: _buildTypeController,
@@ -815,7 +815,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
             onSubmitted: (v) =>
                 widget.onUpdate(widget.formData.copyWith(buildType: v)),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildPersistedField(
             label: l10n.listingAnnualPayment,
             controller: _annualPaymentController,
@@ -846,7 +846,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
           Text(l10n.listingCooperativeDetails,
               style: AppTextStyles.labelMedium.copyWith(
                   color: AppColors.wave700, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildPersistedField(
             label: l10n.listingCooperativeName,
             controller: _cooperativeNameController,
@@ -854,7 +854,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
             onSubmitted: (v) =>
                 widget.onUpdate(widget.formData.copyWith(cooperativeName: v)),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildPersistedField(
             label: l10n.listingCooperativeCode,
             controller: _cooperativeCodeController,
@@ -862,7 +862,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
             onSubmitted: (v) =>
                 widget.onUpdate(widget.formData.copyWith(cooperativeCode: v)),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _dropdownField(
             value: widget.formData.buildingStatus?.isEmpty ?? true
                 ? null
@@ -919,7 +919,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
                     label: l10n.listingRegion,
                     onChanged: _onRegionSelected,
                     isLoading: false)),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Expanded(
                 child: _dropdownField(
                     value: _selectedZone,
@@ -929,7 +929,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
                     isLoading: _loadingZones)),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Row(
           children: [
             Expanded(
@@ -939,7 +939,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
                     label: l10n.listingWoreda,
                     onChanged: _onWoredaSelected,
                     isLoading: _loadingWoredas)),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Expanded(
                 child: _dropdownField(
                     value: _selectedKebele,
@@ -949,7 +949,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
                     isLoading: _loadingKebeles)),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         _buildTextField(
           label: l10n.listingSpecificLocation,
           controller: _specificLocationController,
@@ -985,7 +985,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
         controller: _priceController,
         decoration: InputDecoration(
           labelText: 'Price',
-          prefixIcon: const Icon(Icons.attach_money, size: 20),
+          prefixIcon: Icon(Icons.attach_money, size: 20),
           border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(color: borderColor)),
@@ -1053,7 +1053,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         suffixIcon: isLoading
-            ? const SizedBox(
+            ? SizedBox(
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(strokeWidth: 2))
@@ -1072,7 +1072,7 @@ class _Step1BasicsState extends State<_Step1Basics> {
               .map((e) => DropdownMenuItem(
                     value: e,
                     child: Text(e,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontWeight: FontWeight.normal, fontSize: 14)),
                   ))
               .toList(),
@@ -1170,7 +1170,7 @@ class _Step2DetailsState extends State<_Step2Details> {
 
           if (widget.formData.type == 'house') ...[
             _sectionTitle(l10n.listingRoomConfig),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             _buildPersistedField(
               label: l10n.listingTotalRooms,
               controller: _totalRoomsController,
@@ -1181,7 +1181,7 @@ class _Step2DetailsState extends State<_Step2Details> {
                   widget.onUpdate(widget.formData.copyWith(totalRooms: n));
               },
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
@@ -1195,7 +1195,7 @@ class _Step2DetailsState extends State<_Step2Details> {
                       widget.onUpdate(widget.formData.copyWith(bedrooms: n));
                   },
                 )),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                     child: _buildPersistedField(
                   label: l10n.listingBathrooms,
@@ -1209,7 +1209,7 @@ class _Step2DetailsState extends State<_Step2Details> {
                 )),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
@@ -1223,7 +1223,7 @@ class _Step2DetailsState extends State<_Step2Details> {
                       widget.onUpdate(widget.formData.copyWith(kitchens: n));
                   },
                 )),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                     child: _buildPersistedField(
                   label: l10n.listingSalons,
@@ -1237,9 +1237,9 @@ class _Step2DetailsState extends State<_Step2Details> {
                 )),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             _sectionTitle(l10n.listingHouseType),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             _dropdownField(
               value: widget.formData.houseType?.isEmpty ?? true
                   ? null
@@ -1249,9 +1249,9 @@ class _Step2DetailsState extends State<_Step2Details> {
               onChanged: (v) =>
                   widget.onUpdate(widget.formData.copyWith(houseType: v)),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             _sectionTitle(l10n.listingAmenities),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -1270,10 +1270,10 @@ class _Step2DetailsState extends State<_Step2Details> {
                         widget.formData.copyWith(parkingAvailable: v))),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
           ],
           _sectionTitle(l10n.listingAreaDimensions),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildPersistedField(
             label: l10n.listingTotalArea,
             controller: _totalAreaController,
@@ -1285,7 +1285,7 @@ class _Step2DetailsState extends State<_Step2Details> {
                     widget.formData.copyWith(totalSquareMeters: n.toDouble()));
             },
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Row(
             children: [
               Expanded(
@@ -1300,7 +1300,7 @@ class _Step2DetailsState extends State<_Step2Details> {
                         widget.formData.copyWith(frontAreaSqm: n.toDouble()));
                 },
               )),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Expanded(
                   child: _buildPersistedField(
                 label: l10n.listingSideArea,
@@ -1315,9 +1315,9 @@ class _Step2DetailsState extends State<_Step2Details> {
               )),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _sectionTitle(l10n.listingFacingDirection),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _dropdownField(
             value: widget.formData.facingDirection?.isEmpty ?? true
                 ? null
@@ -1327,9 +1327,9 @@ class _Step2DetailsState extends State<_Step2Details> {
             onChanged: (v) =>
                 widget.onUpdate(widget.formData.copyWith(facingDirection: v)),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _sectionTitle(l10n.listingDescriptionLabel),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Focus(
             onFocusChange: (hasFocus) {
               if (!hasFocus) {
@@ -1349,7 +1349,7 @@ class _Step2DetailsState extends State<_Step2Details> {
                   widget.onUpdate(widget.formData.copyWith(description: v)),
             ),
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: 32),
         ],
       ),
     );
@@ -1415,7 +1415,7 @@ class _Step2DetailsState extends State<_Step2Details> {
               .map((e) => DropdownMenuItem(
                     value: e,
                     child: Text(e,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontWeight: FontWeight.normal, fontSize: 14)),
                   ))
               .toList(),
@@ -1487,27 +1487,27 @@ class _Step3MediaState extends State<_Step3Media> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _sectionTitle(l10n.listingImages),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildImageGrid(widget.formData.images, 'images'),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _sectionTitle(l10n.listingSitePlans),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _buildFileList(widget.formData.sitePlans.map((f) => f.path).toList(),
               isSitePlan: true),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           if (widget.formData.holdingType == l10n.listingCooperative) ...[
             _sectionTitle(l10n.listingOwnershipProof),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             _buildSingleFilePicker('ownership', widget.formData.ownershipProof),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
           ],
           if (widget.formData.holdingType == l10n.listingLeaseHold) ...[
             _sectionTitle(l10n.listingLeaseContract),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             _buildSingleFilePicker('lease', widget.formData.leaseContract),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
           ],
-          const SizedBox(height: 32),
+          SizedBox(height: 32),
         ],
       ),
     );
@@ -1531,7 +1531,7 @@ class _Step3MediaState extends State<_Step3Media> {
                   color: AppColors.zinc300, width: 2, style: BorderStyle.solid),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Center(
+            child: Center(
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -1544,7 +1544,7 @@ class _Step3MediaState extends State<_Step3Media> {
           ),
         ),
         if (files.isNotEmpty) ...[
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           SizedBox(
             height: 80,
             child: ListView.builder(
@@ -1575,7 +1575,7 @@ class _Step3MediaState extends State<_Step3Media> {
                               padding: const EdgeInsets.all(2),
                               decoration: const BoxDecoration(
                                   color: Colors.red, shape: BoxShape.circle),
-                              child: const Icon(Icons.close,
+                              child: Icon(Icons.close,
                                   size: 12, color: Colors.white)),
                         )),
                   ],
@@ -1596,12 +1596,12 @@ class _Step3MediaState extends State<_Step3Media> {
       children: [
         ElevatedButton.icon(
           onPressed: () => _pickImages(isSitePlan),
-          icon: const Icon(Icons.upload_file),
+          icon: Icon(Icons.upload_file),
           label: Text(l10n.listingBrowseFiles),
           style: ElevatedButton.styleFrom(backgroundColor: AppColors.navy950),
         ),
         if (files.isNotEmpty) ...[
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           ...files.map((f) => Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(f.split('/').last, style: AppTextStyles.caption))),
@@ -1614,7 +1614,7 @@ class _Step3MediaState extends State<_Step3Media> {
     final l10n = AppLocalizations.of(context);
     return ElevatedButton.icon(
       onPressed: () => _pickSingleFile(type),
-      icon: const Icon(Icons.upload_file),
+      icon: Icon(Icons.upload_file),
       label: Text(file != null
           ? l10n.listingChangeFile(file.name.split('/').last)
           : l10n.listingBrowseFile),
@@ -1639,7 +1639,7 @@ class _Step4Review extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _sectionTitle(l10n.listingSummary),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -1658,15 +1658,15 @@ class _Step4Review extends StatelessWidget {
                   '${formData.images.length} ${l10n.listingImagesSelected(formData.images.length)}\n${formData.sitePlans.length} ${l10n.listingSitePlans}'),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           if (formData.description != null) ...[
             _sectionTitle(l10n.listingDescriptionLabel),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(formData.description!,
                 style: AppTextStyles.bodyMedium,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
           ],
           CheckboxListTile(
             title: Text(l10n.listingAcceptTerms),
@@ -1677,7 +1677,7 @@ class _Step4Review extends StatelessWidget {
             controlAffinity: ListTileControlAffinity.leading,
             contentPadding: EdgeInsets.zero,
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: 32),
         ],
       ),
     );
@@ -1702,7 +1702,7 @@ class _Step4Review extends StatelessWidget {
           Text(title,
               style:
                   AppTextStyles.labelSmall.copyWith(color: AppColors.navy500)),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Expanded(
               child: Text(content,
                   style: AppTextStyles.bodyMedium
