@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer' as dev;
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
@@ -12,6 +13,7 @@ import '../../../../data/models/address.dart';
 import '../../widgets/common/wave_button.dart';
 import '../../widgets/common/wave_common_widgets.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../providers/app_providers.dart';
 
 /// Create Listing Screen - 4-step wizard matching web version
 class CreateListingScreen extends StatefulWidget {
@@ -347,7 +349,7 @@ class _StepIndicator extends StatelessWidget {
 
 // ===================== STEP 1: BASICS =====================
 
-class _Step1Basics extends StatefulWidget {
+class _Step1Basics extends ConsumerStatefulWidget {
   final ListingFormData formData;
   final Function(ListingFormData) onUpdate;
   final AddressService addressService;
@@ -357,10 +359,10 @@ class _Step1Basics extends StatefulWidget {
       required this.addressService});
 
   @override
-  State<_Step1Basics> createState() => _Step1BasicsState();
+  ConsumerState<_Step1Basics> createState() => _Step1BasicsState();
 }
 
-class _Step1BasicsState extends State<_Step1Basics> {
+class _Step1BasicsState extends ConsumerState<_Step1Basics> {
   late TextEditingController _priceController;
   late TextEditingController _debtAmountController;
   late TextEditingController _taxPaidUntilController;
@@ -445,8 +447,9 @@ class _Step1BasicsState extends State<_Step1Basics> {
   }
 
   Future<void> _loadRegions() async {
+    final locale = ref.read(localeProvider).locale?.languageCode ?? 'en';
     try {
-      final response = await widget.addressService.getRegions();
+      final response = await widget.addressService.getRegions(locale: locale);
       if (response.success && mounted) {
         // API now returns simple string array: ["Tigray", "Amhara", ...]
         final regions = response.regions
@@ -485,9 +488,10 @@ class _Step1BasicsState extends State<_Step1Basics> {
   Future<void> _loadZones() async {
     if (_selectedRegion == null) return;
     setState(() => _loadingZones = true);
+    final locale = ref.read(localeProvider).locale?.languageCode ?? 'en';
     try {
-      final response =
-          await widget.addressService.getZones(region: _selectedRegion!);
+      final response = await widget.addressService
+          .getZones(region: _selectedRegion!, locale: locale);
       if (response.success && mounted) {
         // API returns simple string array: ["Centeral", "Eastern", ...]
         final zones = response.zones
@@ -520,9 +524,10 @@ class _Step1BasicsState extends State<_Step1Basics> {
   Future<void> _loadWoredas() async {
     if (_selectedRegion == null || _selectedZone == null) return;
     setState(() => _loadingWoredas = true);
+    final locale = ref.read(localeProvider).locale?.languageCode ?? 'en';
     try {
-      final response = await widget.addressService
-          .getWoredas(region: _selectedRegion!, zone: _selectedZone!);
+      final response = await widget.addressService.getWoredas(
+          region: _selectedRegion!, zone: _selectedZone!, locale: locale);
       if (response.success && mounted) {
         // API returns simple string array: ["01", "02", ...]
         final woredas = response.woredas
@@ -555,11 +560,13 @@ class _Step1BasicsState extends State<_Step1Basics> {
         _selectedZone == null ||
         _selectedWoreda == null) return;
     setState(() => _loadingKebeles = true);
+    final locale = ref.read(localeProvider).locale?.languageCode ?? 'en';
     try {
       final response = await widget.addressService.getKebeles(
         region: _selectedRegion!,
         zone: _selectedZone!,
         woreda: _selectedWoreda!,
+        locale: locale,
       );
       if (response.success && mounted) {
         // API returns array of {id, kebele}: [{id: 1, kebele: "Kebele 01"}, ...]

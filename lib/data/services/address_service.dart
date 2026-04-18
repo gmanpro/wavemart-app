@@ -4,6 +4,7 @@ import '../../core/network/error_handler.dart';
 import '../models/address.dart';
 
 /// Service for Ethiopian address hierarchy (cascading dropdowns)
+/// Supports locale-based address retrieval for Amharic/Tigrinya
 class AddressService {
   final ApiClient _apiClient;
 
@@ -12,17 +13,21 @@ class AddressService {
 
   /// Get all regions
   /// API returns simple string array: ["Tigray", "Amhara", ...]
-  Future<AddressResponse> getRegions() async {
+  /// [locale] - language code: 'en', 'am', 'ti'
+  Future<AddressResponse> getRegions({String locale = 'en'}) async {
     try {
-      final response = await _apiClient.dio.get(ApiConstants.regions);
+      final response = await _apiClient.dio.get(
+        ApiConstants.regions,
+        queryParameters: {'locale': locale},
+      );
 
       if (response.statusCode == 200) {
         final data = response.data;
-        final regionNames = (data is List) 
-            ? data.whereType<String>().toList() 
-            : <String>[];
-        
-        final regions = regionNames.map((name) => Address(region: name)).toList();
+        final regionNames =
+            (data is List) ? data.whereType<String>().toList() : <String>[];
+
+        final regions =
+            regionNames.map((name) => Address(region: name)).toList();
         return AddressResponse(success: true, regions: regions);
       }
 
@@ -40,20 +45,22 @@ class AddressService {
   }
 
   /// Get zones by region
-  /// API returns simple string array: ["Centeral", "Eastern", ...]
-  Future<AddressResponse> getZones({required String region}) async {
+  /// API returns simple string array: ["Central", "Eastern", ...]
+  Future<AddressResponse> getZones({
+    required String region,
+    String locale = 'en',
+  }) async {
     try {
       final response = await _apiClient.dio.get(
         ApiConstants.zones,
-        queryParameters: {'region': region},
+        queryParameters: {'region': region, 'locale': locale},
       );
 
       if (response.statusCode == 200) {
         final data = response.data;
-        final zoneNames = (data is List) 
-            ? data.whereType<String>().toList() 
-            : <String>[];
-        
+        final zoneNames =
+            (data is List) ? data.whereType<String>().toList() : <String>[];
+
         final zones = zoneNames.map((name) => Address(zone: name)).toList();
         return AddressResponse(success: true, zones: zones);
       }
@@ -76,6 +83,7 @@ class AddressService {
   Future<AddressResponse> getWoredas({
     required String region,
     required String zone,
+    String locale = 'en',
   }) async {
     try {
       final response = await _apiClient.dio.get(
@@ -83,16 +91,17 @@ class AddressService {
         queryParameters: {
           'region': region,
           'zone': zone,
+          'locale': locale,
         },
       );
 
       if (response.statusCode == 200) {
         final data = response.data;
-        final woredaNames = (data is List) 
-            ? data.whereType<String>().toList() 
-            : <String>[];
-        
-        final woredas = woredaNames.map((name) => Address(woreda: name)).toList();
+        final woredaNames =
+            (data is List) ? data.whereType<String>().toList() : <String>[];
+
+        final woredas =
+            woredaNames.map((name) => Address(woreda: name)).toList();
         return AddressResponse(success: true, woredas: woredas);
       }
 
@@ -115,6 +124,7 @@ class AddressService {
     required String region,
     required String zone,
     required String woreda,
+    String locale = 'en',
   }) async {
     try {
       final response = await _apiClient.dio.get(
@@ -123,6 +133,7 @@ class AddressService {
           'region': region,
           'zone': zone,
           'woreda': woreda,
+          'locale': locale,
         },
       );
 
@@ -138,7 +149,7 @@ class AddressService {
                 .where((a) => a.kebele != null && a.kebele!.isNotEmpty)
                 .toList()
             : <Address>[];
-        
+
         return AddressResponse(success: true, kebeles: kebeles);
       }
 
