@@ -1,5 +1,6 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../l10n/app_localizations.dart';
 import 'address.dart';
 import 'image.dart';
 
@@ -301,5 +302,5 @@ class Listing extends ChangeNotifier {
   }
 
   @override
-  String toString() => 'Listing(id: $id, title: $title, price: $displayPrice)';
+  String toString() => 'Listing(id: $id)';
 }
